@@ -11,30 +11,29 @@ Thank you for your interest in contributing to the Cross-Domain Predictive Analy
    - Windows: `venv\Scripts\activate`
    - Mac/Linux: `source venv/bin/activate`
 5. Install dependencies: `pip install -r requirements.txt`
-6. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
 
-## Team Responsibilities
+## Team Branches
 
-Please refer to the README.md and project documentation for specific team responsibilities.
+Each team member should work on their designated branch:
+
+- **Ade**: `ade-system-integration` branch for System Integration & Real-Time Analytics
+- **Rujeko**: `rujeko-frontend` branch for Frontend Development
+- **Emmanuel**: `emmanuel-visualization` branch for Data Visualization
+- **Julie**: `julie-api-integration` branch for API Integration & Data Processing
+- **Chao**: `chao-machine-learning` branch for Machine Learning & Predictive Modeling
 
 ## Development Workflow
 
-1. Make your changes in your feature branch
+1. Make sure you are on your assigned branch
 2. Write or update tests as needed
 3. Ensure your code follows the project's style guidelines
 4. Commit your changes with clear, descriptive messages
-5. Push to your fork: `git push origin feature/your-feature-name`
-6. Submit a Pull Request to the main repository
+5. Push to the repository: `git push origin YOUR-BRANCH-NAME`
+6. Submit a Pull Request to the main branch when your feature is complete
 
 ## Code Review Process
 
 Each PR requires at least one review from a team member before merging.
-
-## Branching Strategy
-
-- `main`: Production-ready code
-- `develop`: Integration branch for features
-- `feature/name`: Individual feature branches
 
 ## Communication
 
