@@ -1,0 +1,21 @@
+<!--
+Natural Language Query Input Component
+Author: Ademola Solanke
+Date: May 2025
+-->
+
+<div class="nlq-container">
+    <div class="nlq-input-wrapper">
+        <i class="bi bi-search nlq-icon"></i>
+        <input type="text" id="nlq-input" class="form-control" 
+               placeholder="Ask a question about your data..." 
+               aria-label="Natural language query">
+        <button class="btn btn-primary" id="nlq-submit">
+            <i class="bi bi-arrow-right"></i>
+        </button>
+    </div>
+    <div class="nlq-suggestions" id="nlq-suggestions">
+        <p>Try asking:</p>
+        <div class="nlq-suggestion-pills" id="nlq-suggestion-pills"></div>
+    </div>
+</div>
