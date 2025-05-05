@@ -1,0 +1,35 @@
+<!--
+Natural Language Query Results Component
+Author: Ademola Solanke
+Date: May 2025
+-->
+
+<div class="nlq-results" id="nlq-results">
+    <div class="nlq-results-header">
+        <h3 id="nlq-results-title">Query Results</h3>
+        <div class="nlq-results-actions">
+            <button class="btn btn-outline-secondary btn-sm" id="nlq-save">
+                <i class="bi bi-bookmark"></i> Save
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="nlq-export">
+                <i class="bi bi-download"></i> Export
+            </button>
+        </div>
+    </div>
+    
+    <div class="nlq-explanation" id="nlq-explanation"></div>
+    
+    <div class="nlq-visualizations" id="nlq-visualizations"></div>
+    
+    <div class="nlq-details" id="nlq-details">
+        <button class="btn btn-link" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#nlqDetailsCollapse" aria-expanded="false">
+            Show Details
+        </button>
+        <div class="collapse" id="nlqDetailsCollapse">
+            <div class="card card-body">
+                <div id="nlq-details-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
