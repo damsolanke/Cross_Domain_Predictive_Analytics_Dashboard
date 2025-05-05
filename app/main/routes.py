@@ -50,8 +50,8 @@ def dashboard():
 
 @main.route('/nlq')
 def natural_language_query():
-    """Natural Language Query page"""
-    return render_template('nlq.html', title='Natural Language Queries')
+    """Redirect to the dedicated NLQ module"""
+    return redirect(url_for('nlq_routes.index'))
 
 @main.route('/api/dashboard/data')
 def dashboard_data():
