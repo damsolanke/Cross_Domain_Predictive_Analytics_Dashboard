@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Cross-Domain Predictive Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .status-card {
+            transition: all 0.3s ease;
+        }
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .alert-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .alert-item.critical {
+            border-left-color: #dc3545;
+        }
+        .alert-item.warning {
+            border-left-color: #ffc107;
+        }
+        .alert-item.info {
+            border-left-color: #0dcaf0;
+        }
+        .real-time-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/system/system-status">System Status</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1>System Integration Status</h1>
+                    <span class="badge bg-success d-flex align-items-center real-time-badge">
+                        <span class="me-1">Live</span>
+                        <i class="bi bi-broadcast"></i>
+                    </span>
+                </div>
+                <p class="lead">Real-time monitoring of system components and data flow</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card status-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">API Integration</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-1" id="api-status-icon"><i class="bi bi-check-circle-fill text-success"></i></span>
+                            <div class="text-end">
+                                <h3 id="api-request-count">0</h3>
+                                <p class="text-muted">API Requests</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card status-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">ML Models</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-1" id="ml-status-icon"><i class="bi bi-check-circle-fill text-success"></i></span>
+                            <div class="text-end">
+                                <h3 id="prediction-count">0</h3>
+                                <p class="text-muted">Predictions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card status-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Visualization</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-1" id="vis-status-icon"><i class="bi bi-check-circle-fill text-success"></i></span>
+                            <div class="text-end">
+                                <h3 id="visualization-count">0</h3>
+                                <p class="text-muted">Updates</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card status-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">System Health</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Uptime</label>
+                            <div class="progress">
+                                <div id="uptime-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="uptime-text" class="text-muted">0 minutes</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Processing Rate</label>
+                            <div class="progress">
+                                <div id="processing-rate-bar" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="processing-rate-text" class="text-muted">0 items/sec</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Queue Status</label>
+                            <div class="progress">
+                                <div id="queue-status-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small id="queue-status-text" class="text-muted">0 items in queue</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card status-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Active Alerts</h5>
+                        <span id="alert-count" class="badge bg-danger">0</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="alerts-container" class="overflow-auto" style="max-height: 250px;">
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-emoji-smile fs-1"></i>
+                                <p>No active alerts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card status-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Data Pipeline Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="pipeline-diagram" class="text-center py-3">
+                            <div class="row g-4">
+                                <div class="col">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-cloud-arrow-down fs-1"></i>
+                                        <h5>API Data</h5>
+                                        <span id="api-latency" class="badge bg-light text-dark">0ms</span>
+                                    </div>
+                                </div>
+                                <div class="col d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-arrow-right fs-1"></i>
+                                </div>
+                                <div class="col">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-cpu fs-1"></i>
+                                        <h5>ML Processing</h5>
+                                        <span id="ml-latency" class="badge bg-light text-dark">0ms</span>
+                                    </div>
+                                </div>
+                                <div class="col d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-arrow-right fs-1"></i>
+                                </div>
+                                <div class="col">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-graph-up fs-1"></i>
+                                        <h5>Visualization</h5>
+                                        <span id="vis-latency" class="badge bg-light text-dark">0ms</span>
+                                    </div>
+                                </div>
+                                <div class="col d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-arrow-right fs-1"></i>
+                                </div>
+                                <div class="col">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-bell fs-1"></i>
+                                        <h5>Alert System</h5>
+                                        <span id="alerts-active" class="badge bg-light text-dark">0 active</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+    <script>
+        // Connect to WebSocket
+        const socket = io('/system-updates');
+        
+        // System status elements
+        const apiRequestCount = document.getElementById('api-request-count');
+        const predictionCount = document.getElementById('prediction-count');
+        const visualizationCount = document.getElementById('visualization-count');
+        const uptimeBar = document.getElementById('uptime-bar');
+        const uptimeText = document.getElementById('uptime-text');
+        const processingRateBar = document.getElementById('processing-rate-bar');
+        const processingRateText = document.getElementById('processing-rate-text');
+        const queueStatusBar = document.getElementById('queue-status-bar');
+        const queueStatusText = document.getElementById('queue-status-text');
+        const alertCount = document.getElementById('alert-count');
+        const alertsContainer = document.getElementById('alerts-container');
+        const apiLatency = document.getElementById('api-latency');
+        const mlLatency = document.getElementById('ml-latency');
+        const visLatency = document.getElementById('vis-latency');
+        const alertsActive = document.getElementById('alerts-active');
+        
+        // Status icons
+        const apiStatusIcon = document.getElementById('api-status-icon');
+        const mlStatusIcon = document.getElementById('ml-status-icon');
+        const visStatusIcon = document.getElementById('vis-status-icon');
+        
+        // Connection events
+        socket.on('connect', () => {
+            console.log('Connected to the WebSocket server');
+            // Subscribe to all update types
+            socket.emit('subscribe_to_updates', { update_type: 'all' });
+        });
+        
+        socket.on('connection_response', (data) => {
+            console.log('Connection response:', data);
+        });
+        
+        socket.on('subscription_response', (data) => {
+            console.log('Subscription response:', data);
+        });
+        
+        // Data update events
+        socket.on('data_update', (data) => {
+            console.log('Data update received:', data);
+            updateDashboard(data);
+        });
+        
+        // Alert notifications
+        socket.on('alert_notification', (data) => {
+            console.log('Alert notification received:', data);
+            updateAlerts(data);
+        });
+
+        // Update dashboard with new data
+        function updateDashboard(data) {
+            if (data.type === 'system_metrics') {
+                // Update request counts
+                apiRequestCount.textContent = data.data.metrics.api_requests || 0;
+                predictionCount.textContent = data.data.metrics.ml_predictions || 0;
+                visualizationCount.textContent = data.data.metrics.visualization_updates || 0;
+                
+                // Update health metrics
+                const uptimeMinutes = Math.floor((data.data.health.uptime_seconds || 0) / 60);
+                uptimeText.textContent = `${uptimeMinutes} minutes`;
+                uptimeBar.style.width = `${Math.min(100, uptimeMinutes / 10)}%`;
+                
+                const rate = data.data.health.processing_rate || 0;
+                processingRateText.textContent = `${rate.toFixed(2)} items/sec`;
+                processingRateBar.style.width = `${Math.min(100, rate * 20)}%`;
+                
+                const queueSize = (data.data.health.queue_sizes?.incoming_queue || 0) + 
+                                 (data.data.health.queue_sizes?.processed_queue || 0);
+                queueStatusText.textContent = `${queueSize} items in queue`;
+                queueStatusBar.style.width = `${Math.min(100, queueSize / 10)}%`;
+                
+                // Update component status
+                updateComponentStatus(data.data.health);
+                
+                // Update latency indicators
+                apiLatency.textContent = `${Math.random() * 100 | 0}ms`; // Simulated for now
+                mlLatency.textContent = `${Math.random() * 200 | 0}ms`;
+                visLatency.textContent = `${Math.random() * 50 | 0}ms`;
+            }
+        }
+        
+        // Update component status indicators
+        function updateComponentStatus(healthData) {
+            // These would be based on actual component health
+            // For now, we'll simulate some status changes
+            
+            const statuses = [
+                { element: apiStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' },
+                { element: mlStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' },
+                { element: visStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' }
+            ];
+            
+            statuses.forEach(item => {
+                if (item.status === 'ok') {
+                    item.element.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                } else if (item.status === 'warning') {
+                    item.element.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+                } else {
+                    item.element.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
+                }
+            });
+        }
+        
+        // Update alerts display
+        function updateAlerts(alertData) {
+            // First, check if we need to replace the "no alerts" message
+            if (alertsContainer.querySelector('.text-center')) {
+                alertsContainer.innerHTML = '';
+            }
+            
+            // Create alert element
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert-item p-2 mb-2 ${alertData.level} bg-light`;
+            alertElement.dataset.id = alertData.id;
+            
+            alertElement.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <strong>${alertData.type}</strong>
+                    <span class="badge ${getBadgeColor(alertData.level)}">${alertData.level}</span>
+                </div>
+                <p class="mb-1">${alertData.message}</p>
+                <small class="text-muted">${formatTimestamp(alertData.timestamp)}</small>
+            `;
+            
+            // Add the alert to the container
+            alertsContainer.prepend(alertElement);
+            
+            // Update alert count
+            updateAlertCount();
+        }
+        
+        // Update the alert count badge
+        function updateAlertCount() {
+            const count = alertsContainer.querySelectorAll('.alert-item').length;
+            alertCount.textContent = count;
+            alertsActive.textContent = `${count} active`;
+            
+            // Show/hide the "no alerts" message
+            if (count === 0 && !alertsContainer.querySelector('.text-center')) {
+                alertsContainer.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-emoji-smile fs-1"></i>
+                        <p>No active alerts</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper function to get badge color based on alert level
+        function getBadgeColor(level) {
+            switch (level) {
+                case 'critical': return 'bg-danger';
+                case 'warning': return 'bg-warning';
+                case 'info': return 'bg-info';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        // Helper function to format timestamp
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString();
+        }
+        
+        // Initial fetch of system status
+        async function fetchInitialData() {
+            try {
+                // Fetch system health
+                const healthResponse = await fetch('/api/system-health');
+                const healthData = await healthResponse.json();
+                
+                // Fetch current alerts
+                const alertsResponse = await fetch('/api/alerts/current');
+                const alertsData = await alertsResponse.json();
+                
+                // Update the dashboard with initial data
+                updateDashboard({
+                    type: 'system_metrics',
+                    data: {
+                        metrics: {
+                            api_requests: 0,
+                            ml_predictions: 0,
+                            visualization_updates: 0
+                        },
+                        health: {
+                            uptime_seconds: 0,
+                            processing_rate: 0,
+                            queue_sizes: {
+                                incoming_queue: 0,
+                                processed_queue: 0
+                            }
+                        }
+                    }
+                });
+                
+                // Display any existing alerts
+                if (alertsData && alertsData.length > 0) {
+                    alertsContainer.innerHTML = '';
+                    alertsData.forEach(alert => updateAlerts(alert));
+                }
+                
+            } catch (error) {
+                console.error('Error fetching initial data:', error);
+            }
+        }
+        
+        // Fetch initial data when page loads
+        document.addEventListener('DOMContentLoaded', fetchInitialData);
+        
+        // Simulate some updates for demonstration
+        function simulateUpdates() {
+            // Simulate system metrics updates
+            setInterval(() => {
+                const metricsUpdate = {
+                    type: 'system_metrics',
+                    data: {
+                        metrics: {
+                            api_requests: parseInt(apiRequestCount.textContent) + Math.floor(Math.random() * 3),
+                            ml_predictions: parseInt(predictionCount.textContent) + Math.floor(Math.random() * 2),
+                            visualization_updates: parseInt(visualizationCount.textContent) + Math.floor(Math.random() * 2)
+                        },
+                        health: {
+                            uptime_seconds: parseFloat(uptimeText.textContent) * 60 + 30,
+                            processing_rate: Math.random() * 5,
+                            queue_sizes: {
+                                incoming_queue: Math.floor(Math.random() * 5),
+                                processed_queue: Math.floor(Math.random() * 5)
+                            }
+                        }
+                    },
+                    timestamp: new Date().toISOString()
+                };
+                
+                updateDashboard(metricsUpdate);
+            }, 3000);
+            
+            // Simulate occasional alerts
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const levels = ['info', 'warning', 'critical'];
+                    const level = levels[Math.floor(Math.random() * levels.length)];
+                    
+                    const alertTypes = [
+                        'Data pipeline delay',
+                        'API connection issue',
+                        'Prediction confidence low',
+                        'Anomaly detected'
+                    ];
+                    
+                    const alertType = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+                    
+                    const alertUpdate = {
+                        id: Math.random().toString(36).substring(2),
+                        type: alertType,
+                        level: level,
+                        message: `${alertType} detected in the system.`,
+                        timestamp: new Date().toISOString(),
+                        data: {
+                            simulation: true
+                        }
+                    };
+                    
+                    updateAlerts(alertUpdate);
+                }
+            }, 10000);
+        }
+        
+        // Start simulation for demonstration
+        simulateUpdates();
+    </script>
+</body>
+</html>
