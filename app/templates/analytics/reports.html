@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .report-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics/models">Predictive Models</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analytics/reports">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system/system-status">System Status</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Analytics Reports</h1>
+                <p class="lead">Generate and view analytics reports across domains.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Report Generator -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Generate New Report</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportGeneratorForm">
+                            <div class="mb-3">
+                                <label for="reportType" class="form-label">Report Type</label>
+                                <select class="form-select" id="reportType" required>
+                                    <option value="correlation" selected>Correlation Analysis</option>
+                                    <option value="insights">Domain Insights</option>
+                                    <option value="prediction">Prediction Performance</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="domainFilterGroup">
+                                <label for="domainFilter" class="form-label">Domain Filter</label>
+                                <select class="form-select" id="domainFilter">
+                                    <option value="" selected>All Domains</option>
+                                    <option value="weather">Weather</option>
+                                    <option value="economic">Economic</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="social_media">Social Media</option>
+                                </select>
+                                <div class="form-text">Filter insights by domain (for Insight reports).</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="timeWindow" class="form-label">Time Window</label>
+                                <select class="form-select" id="timeWindow" required>
+                                    <option value="1">Last 24 Hours</option>
+                                    <option value="7" selected>Last 7 Days</option>
+                                    <option value="30">Last 30 Days</option>
+                                    <option value="90">Last 90 Days</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reportFormat" class="form-label">Format</label>
+                                <select class="form-select" id="reportFormat" required>
+                                    <option value="html" selected>HTML</option>
+                                    <option value="md">Markdown</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-file-earmark-bar-graph"></i> Generate Report
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports List -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Saved Reports</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshReportsBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="reportsList">
+                            <!-- Reports will be added here dynamically -->
+                            <div class="text-center my-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading reports...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Viewer Modal -->
+    <div class="modal fade" id="reportViewerModal" tabindex="-1" aria-labelledby="reportViewerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportViewerModalLabel">Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="reportFrame" style="width: 100%; height: 80vh; border: none;"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div class="loading-container" id="loadingIndicator" style="display: none;">
+        <div class="card p-4 shadow">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 id="loadingMessage">Generating report...</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/hide domain filter based on report type
+            document.getElementById('reportType').addEventListener('change', function() {
+                const domainFilterGroup = document.getElementById('domainFilterGroup');
+                domainFilterGroup.style.display = this.value === 'insights' ? 'block' : 'none';
+            });
+            
+            // Trigger initial state
+            document.getElementById('reportType').dispatchEvent(new Event('change'));
+            
+            // Form submission
+            document.getElementById('reportGeneratorForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const reportType = document.getElementById('reportType').value;
+                const timeWindow = document.getElementById('timeWindow').value;
+                const reportFormat = document.getElementById('reportFormat').value;
+                const domainFilter = document.getElementById('domainFilter').value;
+                
+                // Show loading indicator
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                loadingIndicator.style.display = 'flex';
+                document.getElementById('loadingMessage').textContent = 'Generating report...';
+                
+                // Build URL
+                let url = `/api/analytics/reports/${reportType}?format=${reportFormat}&days=${timeWindow}`;
+                if (reportType === 'insights' && domainFilter) {
+                    url += `&domain=${domainFilter}`;
+                }
+                
+                // Generate report
+                if (reportFormat === 'html') {
+                    // For HTML, open in modal iframe
+                    fetch(url)
+                        .then(response => response.text())
+                        .then(html => {
+                            // Hide loading indicator
+                            loadingIndicator.style.display = 'none';
+                            
+                            // Set iframe content
+                            const iframe = document.getElementById('reportFrame');
+                            iframe.srcdoc = html;
+                            
+                            // Set modal title
+                            document.getElementById('reportViewerModalLabel').textContent = getReportTitle(reportType, domainFilter);
+                            
+                            // Show modal
+                            new bootstrap.Modal(document.getElementById('reportViewerModal')).show();
+                            
+                            // Refresh report list
+                            loadReports();
+                        })
+                        .catch(error => {
+                            // Hide loading indicator
+                            loadingIndicator.style.display = 'none';
+                            
+                            console.error('Error generating report:', error);
+                            alert('Error generating report. Please try again.');
+                        });
+                } else {
+                    // For other formats, download file
+                    window.location.href = url;
+                    
+                    // Hide loading indicator after a delay
+                    setTimeout(() => {
+                        loadingIndicator.style.display = 'none';
+                        
+                        // Refresh report list
+                        loadReports();
+                    }, 2000);
+                }
+            });
+            
+            // Helper function to get report title
+            function getReportTitle(reportType, domain) {
+                let title = '';
+                
+                switch (reportType) {
+                    case 'correlation':
+                        title = 'Correlation Analysis Report';
+                        break;
+                    case 'insights':
+                        title = domain ? `${domain.charAt(0).toUpperCase() + domain.slice(1)} Insights Report` : 'Cross-Domain Insights Report';
+                        break;
+                    case 'prediction':
+                        title = 'Prediction Performance Report';
+                        break;
+                    default:
+                        title = 'Analytics Report';
+                }
+                
+                return title;
+            }
+            
+            // Load reports
+            function loadReports() {
+                const reportsContainer = document.getElementById('reportsList');
+                
+                // Show loading state
+                reportsContainer.innerHTML = `
+                    <div class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading reports...</p>
+                    </div>
+                `;
+                
+                // Fetch reports
+                fetch('/api/analytics/reports/list')
+                    .then(response => response.json())
+                    .then(reports => {
+                        if (reports.length === 0) {
+                            reportsContainer.innerHTML = `
+                                <div class="text-center my-5">
+                                    <i class="bi bi-file-earmark-x" style="font-size: 3rem;"></i>
+                                    <p class="mt-2">No reports found. Generate your first report!</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Clear container
+                        reportsContainer.innerHTML = '';
+                        
+                        // Group reports by date
+                        const groupedReports = {};
+                        reports.forEach(report => {
+                            const date = new Date(report.created).toLocaleDateString();
+                            if (!groupedReports[date]) {
+                                groupedReports[date] = [];
+                            }
+                            groupedReports[date].push(report);
+                        });
+                        
+                        // Add reports by date
+                        for (const date in groupedReports) {
+                            // Add date header
+                            const dateHeader = document.createElement('h6');
+                            dateHeader.className = 'mt-4 mb-3 border-bottom pb-2';
+                            dateHeader.textContent = date;
+                            reportsContainer.appendChild(dateHeader);
+                            
+                            // Add reports for this date
+                            groupedReports[date].forEach(report => {
+                                // Format file size
+                                const size = formatFileSize(report.size);
+                                
+                                // Get report type from name
+                                let reportType = 'Unknown';
+                                let reportIcon = 'file-earmark-text';
+                                
+                                if (report.name.includes('correlation')) {
+                                    reportType = 'Correlation Analysis';
+                                    reportIcon = 'file-earmark-bar-graph';
+                                } else if (report.name.includes('insight')) {
+                                    reportType = 'Domain Insights';
+                                    reportIcon = 'file-earmark-text';
+                                } else if (report.name.includes('prediction')) {
+                                    reportType = 'Prediction Performance';
+                                    reportIcon = 'file-earmark-bar-graph';
+                                }
+                                
+                                // Create report card
+                                const reportCard = document.createElement('div');
+                                reportCard.className = 'card report-card mb-3';
+                                
+                                // Get format icon
+                                let formatIcon = 'file-earmark';
+                                let formatColor = 'primary';
+                                if (report.format === 'html') {
+                                    formatIcon = 'filetype-html';
+                                    formatColor = 'danger';
+                                } else if (report.format === 'md') {
+                                    formatIcon = 'filetype-md';
+                                    formatColor = 'success';
+                                } else if (report.format === 'json') {
+                                    formatIcon = 'filetype-json';
+                                    formatColor = 'warning';
+                                }
+                                
+                                reportCard.innerHTML = `
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="bi bi-${reportIcon} text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0">${report.name}</h6>
+                                                <div class="text-muted small">
+                                                    ${reportType} • 
+                                                    <span class="text-${formatColor}">
+                                                        <i class="bi bi-${formatIcon}"></i> ${report.format.toUpperCase()}
+                                                    </span> • 
+                                                    ${size}
+                                                </div>
+                                                <div class="text-muted small">
+                                                    ${new Date(report.created).toLocaleTimeString()}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-sm btn-primary view-report-btn" 
+                                                        data-report-path="${report.path}"
+                                                        data-report-format="${report.format}">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                // Add event listener for view button
+                                reportCard.querySelector('.view-report-btn').addEventListener('click', function() {
+                                    const path = this.getAttribute('data-report-path');
+                                    const format = this.getAttribute('data-report-format');
+                                    viewReport(path, format);
+                                });
+                                
+                                // Add to container
+                                reportsContainer.appendChild(reportCard);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading reports:', error);
+                        reportsContainer.innerHTML = `
+                            <div class="text-center my-5">
+                                <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Error loading reports. Please try again.</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes < 1024) {
+                    return bytes + ' bytes';
+                } else if (bytes < 1024 * 1024) {
+                    return (bytes / 1024).toFixed(1) + ' KB';
+                } else {
+                    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                }
+            }
+            
+            // View report
+            function viewReport(path, format) {
+                if (format === 'html') {
+                    // For HTML, show in modal iframe
+                    fetch(path)
+                        .then(response => response.text())
+                        .then(html => {
+                            // Set iframe content
+                            const iframe = document.getElementById('reportFrame');
+                            iframe.srcdoc = html;
+                            
+                            // Set modal title
+                            document.getElementById('reportViewerModalLabel').textContent = 'Report Viewer';
+                            
+                            // Show modal
+                            new bootstrap.Modal(document.getElementById('reportViewerModal')).show();
+                        })
+                        .catch(error => {
+                            console.error('Error loading report:', error);
+                            alert('Error loading report. Please try again.');
+                        });
+                } else {
+                    // For other formats, download file
+                    window.location.href = path;
+                }
+            }
+            
+            // Refresh reports button
+            document.getElementById('refreshReportsBtn').addEventListener('click', function() {
+                loadReports();
+            });
+            
+            // Initial load
+            loadReports();
+        });
+    </script>
+</body>
+</html>
