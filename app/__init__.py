@@ -35,9 +35,12 @@ def create_app():
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
     
-    # Register Natural Language Query blueprint
-    from app.api.natural_language_query import nlq_api
-    app.register_blueprint(nlq_api)
+    # Register Natural Language Query blueprints
+    from app.nlq.api import nlq_blueprint
+    app.register_blueprint(nlq_blueprint)
+    
+    from app.nlq.routes import nlq_routes
+    app.register_blueprint(nlq_routes)
     
     # Register demo-related blueprints
     try:
