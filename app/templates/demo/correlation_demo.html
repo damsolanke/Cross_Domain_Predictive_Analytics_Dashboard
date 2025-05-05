@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .alert-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        #loadingIndicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .domain-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .domain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .event-badge {
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Correlation Demo</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/demo/correlation">Correlation Demo</a>
+                    </li>
+                </ul>
+                
+                <!-- Status Indicator -->
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="badge bg-success me-2" id="demoStatus">Ready</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Demo Controls -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Demo Controls</h5>
+                            <div class="d-flex">
+                                <select class="form-select form-select-sm me-2" id="intervalSelector" style="width: 150px;">
+                                    <option value="1">1 second</option>
+                                    <option value="3">3 seconds</option>
+                                    <option value="5" selected>5 seconds</option>
+                                    <option value="10">10 seconds</option>
+                                    <option value="30">30 seconds</option>
+                                </select>
+                                <button class="btn btn-primary me-2" id="startDemoBtn">
+                                    <i class="bi bi-play-fill"></i> Start Demo
+                                </button>
+                                <button class="btn btn-danger" id="stopDemoBtn" disabled>
+                                    <i class="bi bi-stop-fill"></i> Stop Demo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Visualizations Column -->
+            <div class="col-lg-8">
+                <!-- Correlation Visualizations -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="correlationTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#heatmapTab">Correlation Heatmap</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#networkTab">Correlation Network</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="heatmapTab">
+                                <div id="correlationHeatmap" class="chart-container"></div>
+                            </div>
+                            <div class="tab-pane fade" id="networkTab">
+                                <div id="correlationNetwork" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Domain Data -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Domain Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="domainDataContainer">
+                            <!-- Weather Domain -->
+                            <div class="col-md-6">
+                                <div class="card domain-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Weather</h6>
+                                        <span class="badge bg-info domain-update-time">-</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tbody id="weatherData">
+                                                <tr><td>Temperature</td><td>-</td></tr>
+                                                <tr><td>Humidity</td><td>-</td></tr>
+                                                <tr><td>Wind Speed</td><td>-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Transportation Domain -->
+                            <div class="col-md-6">
+                                <div class="card domain-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Transportation</h6>
+                                        <span class="badge bg-info domain-update-time">-</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tbody id="transportationData">
+                                                <tr><td>Congestion</td><td>-</td></tr>
+                                                <tr><td>Average Speed</td><td>-</td></tr>
+                                                <tr><td>Vehicle Count</td><td>-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Economic Domain -->
+                            <div class="col-md-6">
+                                <div class="card domain-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Economic</h6>
+                                        <span class="badge bg-info domain-update-time">-</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tbody id="economicData">
+                                                <tr><td>Market Index</td><td>-</td></tr>
+                                                <tr><td>Trading Volume</td><td>-</td></tr>
+                                                <tr><td>Volatility</td><td>-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Social Media Domain -->
+                            <div class="col-md-6">
+                                <div class="card domain-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">Social Media</h6>
+                                        <span class="badge bg-info domain-update-time">-</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tbody id="social_mediaData">
+                                                <tr><td>Sentiment</td><td>-</td></tr>
+                                                <tr><td>Post Volume</td><td>-</td></tr>
+                                                <tr><td>Engagement Rate</td><td>-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controls & Info Column -->
+            <div class="col-lg-4">
+                <!-- Events Panel -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Events</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
+                            <i class="bi bi-lightning-fill"></i> Trigger Event
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="activeEvents" class="mb-3">
+                            <div class="alert alert-info">No active events</div>
+                        </div>
+                        
+                        <h6>Available Events:</h6>
+                        <div id="availableEvents">
+                            <span class="badge bg-secondary event-badge">sudden_temperature_drop</span>
+                            <span class="badge bg-secondary event-badge">market_crash</span>
+                            <span class="badge bg-secondary event-badge">traffic_incident</span>
+                            <span class="badge bg-secondary event-badge">viral_content</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Correlation Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Correlation Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="correlationSettingsForm">
+                            <div class="mb-3">
+                                <label for="timeWindowHours" class="form-label">Time Window (hours)</label>
+                                <input type="number" class="form-control" id="timeWindowHours" min="1" max="168" value="24">
+                                <div class="form-text">Set the time window for correlation analysis.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Apply Settings</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Insights Panel -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Correlation Insights</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="correlationInsights">
+                            <div class="alert alert-info">No correlation insights yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Trigger Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="eventSelector" class="form-label">Select Event</label>
+                        <select class="form-select" id="eventSelector">
+                            <option value="sudden_temperature_drop">Sudden Temperature Drop</option>
+                            <option value="market_crash">Market Crash</option>
+                            <option value="traffic_incident">Traffic Incident</option>
+                            <option value="viral_content">Viral Content</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="triggerEventBtn">Trigger Event</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- Demo Script -->
+    <script>
+        class CorrelationDemo {
+            constructor() {
+                this.socket = io('/system-updates');
+                this.demoRunning = false;
+                this.correlationData = null;
+                this.chartInstances = {};
+                this.domainData = {
+                    weather: {},
+                    transportation: {},
+                    economic: {},
+                    social_media: {}
+                };
+                this.insights = [];
+                this.events = [];
+                
+                this.initSocket();
+                this.initUI();
+                this.checkStatus();
+            }
+            
+            initSocket() {
+                // WebSocket event handlers
+                this.socket.on('connect', () => {
+                    console.log('Connected to real-time updates');
+                    this.updateStatus(true);
+                });
+                
+                this.socket.on('disconnect', () => {
+                    console.log('Disconnected from real-time updates');
+                    this.updateStatus(false);
+                });
+                
+                // Data update handlers
+                this.socket.on('data_update', (data) => {
+                    const type = data.type;
+                    
+                    if (type === 'domain_data') {
+                        this.handleDomainDataUpdate(data.data);
+                    } else if (type === 'correlation_data') {
+                        this.handleCorrelationDataUpdate(data.data);
+                    } else if (type === 'correlation_insight') {
+                        this.handleCorrelationInsight(data.data);
+                    } else if (type === 'correlation_anomaly') {
+                        this.handleCorrelationAnomaly(data.data);
+                    }
+                });
+                
+                // Alert handler
+                this.socket.on('alert_notification', (data) => {
+                    this.handleAlert(data);
+                });
+            }
+            
+            initUI() {
+                // Start demo button
+                document.getElementById('startDemoBtn').addEventListener('click', () => {
+                    this.startDemo();
+                });
+                
+                // Stop demo button
+                document.getElementById('stopDemoBtn').addEventListener('click', () => {
+                    this.stopDemo();
+                });
+                
+                // Correlation settings form
+                document.getElementById('correlationSettingsForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.updateCorrelationSettings();
+                });
+                
+                // Trigger event button
+                document.getElementById('triggerEventBtn').addEventListener('click', () => {
+                    this.triggerEvent();
+                });
+                
+                // Initialize Highcharts
+                Highcharts.setOptions({
+                    colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4'],
+                    chart: {
+                        style: {
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                });
+                
+                // Initialize correlation heatmap
+                this.initCorrelationHeatmap();
+            }
+            
+            // Check demo status
+            checkStatus() {
+                fetch('/demo/correlation/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.demoRunning = data.running;
+                        this.updateDemoUI();
+                        
+                        // Update events
+                        this.events = data.generator.active_events;
+                        this.updateEventsUI();
+                    })
+                    .catch(error => {
+                        console.error('Error checking status:', error);
+                    });
+            }
+            
+            // Start demo
+            startDemo() {
+                const interval = document.getElementById('intervalSelector').value;
+                
+                fetch('/demo/correlation/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interval_seconds: parseInt(interval)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        this.demoRunning = true;
+                        this.updateDemoUI();
+                    } else {
+                        this.showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    this.showAlert('danger', 'Error starting demo: ' + error);
+                });
+            }
+            
+            // Stop demo
+            stopDemo() {
+                fetch('/demo/correlation/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        this.demoRunning = false;
+                        this.updateDemoUI();
+                    } else {
+                        this.showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    this.showAlert('danger', 'Error stopping demo: ' + error);
+                });
+            }
+            
+            // Update correlation settings
+            updateCorrelationSettings() {
+                const hours = document.getElementById('timeWindowHours').value;
+                
+                fetch('/demo/correlation/set_time_window', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        hours: parseInt(hours)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        this.showAlert('success', data.message);
+                    } else {
+                        this.showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    this.showAlert('danger', 'Error updating settings: ' + error);
+                });
+            }
+            
+            // Trigger event
+            triggerEvent() {
+                const eventName = document.getElementById('eventSelector').value;
+                
+                fetch('/demo/correlation/force_event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_name: eventName
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Hide modal
+                        bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+                        
+                        // Show alert
+                        this.showAlert('success', data.message);
+                        
+                        // Check status for updated events
+                        setTimeout(() => this.checkStatus(), 500);
+                    } else {
+                        this.showAlert('danger', data.message);
+                    }
+                })
+                .catch(error => {
+                    this.showAlert('danger', 'Error triggering event: ' + error);
+                });
+            }
+            
+            // Handle domain data update
+            handleDomainDataUpdate(data) {
+                const domain = data.domain;
+                
+                // Update domain data
+                if (domain && this.domainData[domain]) {
+                    this.domainData[domain] = data;
+                    this.updateDomainUI(domain);
+                }
+                
+                // Check for new events
+                this.checkStatus();
+            }
+            
+            // Handle correlation data update
+            handleCorrelationDataUpdate(data) {
+                this.correlationData = data;
+                
+                // Update visualizations
+                this.updateCorrelationHeatmap();
+                this.updateCorrelationNetwork();
+            }
+            
+            // Handle correlation insight
+            handleCorrelationInsight(insight) {
+                // Add to insights
+                this.insights.unshift(insight);
+                
+                // Limit to 10 insights
+                if (this.insights.length > 10) {
+                    this.insights.pop();
+                }
+                
+                // Update UI
+                this.updateInsightsUI();
+            }
+            
+            // Handle correlation anomaly
+            handleCorrelationAnomaly(anomaly) {
+                // Show alert
+                this.showAlert('warning', `Anomaly detected: ${anomaly.description}`);
+                
+                // Add to insights with special styling
+                anomaly.isAnomaly = true;
+                this.insights.unshift(anomaly);
+                
+                // Limit to 10 insights
+                if (this.insights.length > 10) {
+                    this.insights.pop();
+                }
+                
+                // Update UI
+                this.updateInsightsUI();
+            }
+            
+            // Handle alert notification
+            handleAlert(alert) {
+                const level = alert.level === 'info' ? 'info' : 
+                             alert.level === 'warning' ? 'warning' : 
+                             alert.level === 'critical' ? 'danger' : 'secondary';
+                             
+                this.showAlert(level, alert.message);
+            }
+            
+            // Update domain UI
+            updateDomainUI(domain) {
+                const data = this.domainData[domain];
+                const container = document.getElementById(`${domain}Data`);
+                
+                if (!container || !data) return;
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                // Add rows for each property (except timestamp)
+                for (const [key, value] of Object.entries(data)) {
+                    if (key === 'timestamp') continue;
+                    
+                    const row = document.createElement('tr');
+                    
+                    // Format value
+                    let displayValue = value;
+                    if (typeof value === 'number') {
+                        if (value < 0.01) {
+                            displayValue = value.toFixed(4);
+                        } else if (value < 1) {
+                            displayValue = value.toFixed(2);
+                        } else if (value < 10) {
+                            displayValue = value.toFixed(1);
+                        } else {
+                            displayValue = Math.round(value);
+                        }
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${this.formatKey(key)}</td>
+                        <td>${displayValue}</td>
+                    `;
+                    
+                    container.appendChild(row);
+                }
+                
+                // Update timestamp
+                const timestampEl = container.closest('.card').querySelector('.domain-update-time');
+                if (timestampEl && data.timestamp) {
+                    const time = new Date(data.timestamp).toLocaleTimeString();
+                    timestampEl.textContent = time;
+                }
+            }
+            
+            // Format key for display
+            formatKey(key) {
+                return key
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, c => c.toUpperCase());
+            }
+            
+            // Initialize correlation heatmap
+            initCorrelationHeatmap() {
+                // Create empty heatmap
+                this.chartInstances.heatmap = Highcharts.chart('correlationHeatmap', {
+                    chart: {
+                        type: 'heatmap',
+                        marginTop: 40,
+                        marginBottom: 80,
+                        plotBorderWidth: 1
+                    },
+                    title: {
+                        text: 'Cross-Domain Correlation Matrix'
+                    },
+                    xAxis: {
+                        categories: []
+                    },
+                    yAxis: {
+                        categories: [],
+                        title: null
+                    },
+                    colorAxis: {
+                        min: -1,
+                        max: 1,
+                        stops: [
+                            [0, '#c4463a'],   // Red for negative correlation
+                            [0.5, '#fffbbc'], // Yellow for no correlation
+                            [1, '#3060cf']    // Blue for positive correlation
+                        ]
+                    },
+                    legend: {
+                        align: 'right',
+                        layout: 'vertical',
+                        margin: 0,
+                        verticalAlign: 'top',
+                        y: 25,
+                        symbolHeight: 280
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.series.xAxis.categories[this.point.x] + '</b> and <b>' +
+                                this.series.yAxis.categories[this.point.y] + '</b><br>' +
+                                'Correlation: <b>' + this.point.value.toFixed(2) + '</b>';
+                        }
+                    },
+                    series: [{
+                        name: 'Correlation',
+                        borderWidth: 1,
+                        data: [],
+                        dataLabels: {
+                            enabled: true,
+                            color: '#000000',
+                            format: '{point.value:.2f}'
+                        }
+                    }]
+                });
+            }
+            
+            // Update correlation heatmap
+            updateCorrelationHeatmap() {
+                if (!this.correlationData || !this.correlationData.heatmap_data || !this.chartInstances.heatmap) {
+                    return;
+                }
+                
+                const heatmapData = this.correlationData.heatmap_data;
+                if (heatmapData.length === 0) return;
+                
+                const dataset = heatmapData[0];
+                if (!dataset || !dataset.data) return;
+                
+                // Get x and y categories from the dataset
+                const xCategories = [];
+                const yCategories = [];
+                const formattedData = [];
+                
+                // Extract categories and format data for the heatmap
+                dataset.data.forEach(item => {
+                    if (!xCategories.includes(item.x)) {
+                        xCategories.push(item.x);
+                    }
+                    
+                    if (!yCategories.includes(item.y)) {
+                        yCategories.push(item.y);
+                    }
+                });
+                
+                // Format data as [x_index, y_index, value]
+                dataset.data.forEach(item => {
+                    const xIndex = xCategories.indexOf(item.x);
+                    const yIndex = yCategories.indexOf(item.y);
+                    formattedData.push([xIndex, yIndex, item.value]);
+                });
+                
+                // Update chart
+                this.chartInstances.heatmap.update({
+                    xAxis: {
+                        categories: xCategories
+                    },
+                    yAxis: {
+                        categories: yCategories
+                    },
+                    series: [{
+                        data: formattedData
+                    }]
+                });
+            }
+            
+            // Update correlation network
+            updateCorrelationNetwork() {
+                if (!this.correlationData || !this.correlationData.network_data) return;
+                
+                const container = document.getElementById('correlationNetwork');
+                if (!container) return;
+                
+                const networkData = this.correlationData.network_data;
+                
+                // Check if we have valid network data
+                if (!networkData.nodes || !networkData.links || networkData.nodes.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">No correlation network data available</div>';
+                    return;
+                }
+                
+                // Clear previous network
+                container.innerHTML = '';
+                
+                // Set up SVG
+                const width = container.clientWidth;
+                const height = 400;
+                
+                const svg = d3.select(container)
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height);
+                
+                // Define the forces
+                const simulation = d3.forceSimulation(networkData.nodes)
+                    .force('link', d3.forceLink(networkData.links).id(d => d.id))
+                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('center', d3.forceCenter(width / 2, height / 2));
+                
+                // Add domain group colors
+                const color = d3.scaleOrdinal(d3.schemeCategory10);
+                
+                // Create links
+                const link = svg.append('g')
+                    .selectAll('line')
+                    .data(networkData.links)
+                    .enter().append('line')
+                    .attr('stroke-width', d => Math.max(1, d.value * 3))
+                    .attr('stroke', d => d.direction === 'positive' ? '#3060cf' : '#c4463a')
+                    .attr('stroke-opacity', 0.6);
+                
+                // Create nodes
+                const node = svg.append('g')
+                    .selectAll('circle')
+                    .data(networkData.nodes)
+                    .enter().append('circle')
+                    .attr('r', 8)
+                    .attr('fill', d => color(d.group))
+                    .call(d3.drag()
+                        .on('start', dragstarted)
+                        .on('drag', dragged)
+                        .on('end', dragended));
+                
+                // Add labels
+                const label = svg.append('g')
+                    .selectAll('text')
+                    .data(networkData.nodes)
+                    .enter().append('text')
+                    .text(d => d.id.split(':')[1] || d.id) // Show only variable name if possible
+                    .attr('font-size', 10)
+                    .attr('dx', 12)
+                    .attr('dy', '.35em');
+                
+                // Set up tick function
+                simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+                    
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+                    
+                    label
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+                
+                // Drag functions
+                function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+                
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+                
+                function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+            }
+            
+            // Update insights UI
+            updateInsightsUI() {
+                const container = document.getElementById('correlationInsights');
+                if (!container) return;
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (this.insights.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">No correlation insights yet</div>';
+                    return;
+                }
+                
+                // Add each insight
+                this.insights.forEach(insight => {
+                    const insightElement = document.createElement('div');
+                    insightElement.className = insight.isAnomaly ? 
+                        'alert alert-warning mb-3' : 'alert alert-info mb-3';
+                    
+                    let header = '';
+                    if (insight.domain1 && insight.domain2) {
+                        header = `<strong>${insight.domain1.toUpperCase()} ↔ ${insight.domain2.toUpperCase()}</strong>`;
+                    } else if (insight.title) {
+                        header = `<strong>${insight.title}</strong>`;
+                    }
+                    
+                    let correlationText = '';
+                    if (insight.correlation_value !== undefined) {
+                        correlationText = `<br>Correlation: ${insight.correlation_value.toFixed(2)}`;
+                    }
+                    
+                    insightElement.innerHTML = `
+                        ${header}
+                        <p class="mb-0">${insight.description}</p>
+                        ${correlationText}
+                    `;
+                    
+                    container.appendChild(insightElement);
+                });
+            }
+            
+            // Update events UI
+            updateEventsUI() {
+                const container = document.getElementById('activeEvents');
+                if (!container) return;
+                
+                // Clear container
+                container.innerHTML = '';
+                
+                if (this.events.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">No active events</div>';
+                    return;
+                }
+                
+                // Add each event
+                this.events.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'alert alert-warning mb-3';
+                    
+                    // Format variables
+                    const variables = Object.entries(event.variables)
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(', ');
+                    
+                    // Format remaining time
+                    const remaining = Math.round(event.remaining_seconds);
+                    const remainingText = remaining > 60 ? 
+                        `${Math.floor(remaining / 60)}m ${remaining % 60}s` : 
+                        `${remaining}s`;
+                    
+                    eventElement.innerHTML = `
+                        <strong>${event.name}</strong> (${event.domain})
+                        <p class="mb-1">Effects: ${variables}</p>
+                        <small>Remaining: ${remainingText}</small>
+                    `;
+                    
+                    container.appendChild(eventElement);
+                });
+            }
+            
+            // Update demo UI
+            updateDemoUI() {
+                const statusEl = document.getElementById('demoStatus');
+                const startBtn = document.getElementById('startDemoBtn');
+                const stopBtn = document.getElementById('stopDemoBtn');
+                
+                if (this.demoRunning) {
+                    statusEl.textContent = 'Running';
+                    statusEl.className = 'badge bg-success me-2';
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                } else {
+                    statusEl.textContent = 'Stopped';
+                    statusEl.className = 'badge bg-secondary me-2';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }
+            
+            // Update connection status
+            updateStatus(connected) {
+                const statusEl = document.getElementById('demoStatus');
+                
+                if (connected) {
+                    if (!this.demoRunning) {
+                        statusEl.textContent = 'Connected';
+                        statusEl.className = 'badge bg-primary me-2';
+                    }
+                } else {
+                    statusEl.textContent = 'Disconnected';
+                    statusEl.className = 'badge bg-danger me-2';
+                }
+            }
+            
+            // Show alert
+            showAlert(type, message) {
+                // Create alert element
+                const alertContainer = document.createElement('div');
+                alertContainer.className = `alert alert-${type} alert-dismissible fade show fixed-top mx-auto mt-3`;
+                alertContainer.style.maxWidth = '500px';
+                alertContainer.setAttribute('role', 'alert');
+                
+                alertContainer.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Add to body
+                document.body.appendChild(alertContainer);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    alertContainer.classList.remove('show');
+                    setTimeout(() => alertContainer.remove(), 500);
+                }, 5000);
+            }
+        }
+        
+        // Initialize demo when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.demo = new CorrelationDemo();
+        });
+    </script>
+</body>
+</html>
