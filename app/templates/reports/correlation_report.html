@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .timestamp {
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .insights-container {
+            margin-bottom: 30px;
+        }
+        .insight-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .insight-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0066cc;
+        }
+        .correlation-value {
+            font-weight: bold;
+        }
+        .positive {
+            color: #28a745;
+        }
+        .negative {
+            color: #dc3545;
+        }
+        .figure-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        .figure-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .predictions-container {
+            margin-bottom: 30px;
+        }
+        .prediction-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title }}</h1>
+        <div class="timestamp">
+            Generated at: {{ generated_at | format_date }}
+        </div>
+        <div>
+            Report period: {{ start_date | format_date("%Y-%m-%d") }} to {{ end_date | format_date("%Y-%m-%d") }}
+        </div>
+    </div>
+    
+    <div class="summary-box">
+        <h2>Summary</h2>
+        <p>This report analyzes correlations between different data domains and presents key insights derived from these correlations.</p>
+        
+        <h3>Key Statistics</h3>
+        <ul>
+            <li><strong>Total Insights:</strong> {{ summary.total_insights }}</li>
+            <li><strong>Strong Correlations:</strong> {{ summary.strong_correlations }}</li>
+            <li><strong>Domain Pairs:</strong> {{ summary.domain_pairs | length }}</li>
+        </ul>
+        
+        {% if summary.most_significant_insight %}
+        <h3>Most Significant Insight</h3>
+        <div class="insight-card">
+            <div class="insight-header">
+                {{ summary.most_significant_insight.domain1 | upper }} ↔ {{ summary.most_significant_insight.domain2 | upper }}
+            </div>
+            <p>{{ summary.most_significant_insight.description }}</p>
+            <p>
+                Correlation: 
+                <span class="correlation-value {% if summary.most_significant_insight.correlation_value > 0 %}positive{% else %}negative{% endif %}">
+                    {{ summary.most_significant_insight.correlation_value | format_number }}
+                </span>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <h2>Correlation Analysis</h2>
+    
+    {% if figures and 'heatmap' in figures %}
+    <div class="figure-container">
+        <h3>Correlation Heatmap</h3>
+        <img src="data:image/png;base64,{{ figures['heatmap'] }}" alt="Correlation Heatmap">
+    </div>
+    {% endif %}
+    
+    {% if figures and 'network' in figures %}
+    <div class="figure-container">
+        <h3>Correlation Network</h3>
+        <img src="data:image/png;base64,{{ figures['network'] }}" alt="Correlation Network">
+        <p>This network shows significant relationships between variables across domains, with line thickness indicating correlation strength.</p>
+    </div>
+    {% endif %}
+    
+    <h2>Top Insights</h2>
+    <div class="insights-container">
+        {% if insights %}
+            {% for insight in insights[:10] %}
+                <div class="insight-card">
+                    <div class="insight-header">
+                        {{ insight.domain1 | upper }} ↔ {{ insight.domain2 | upper }}
+                    </div>
+                    <p>{{ insight.description }}</p>
+                    <p>
+                        Correlation between {{ insight.variable1 }} and {{ insight.variable2 }}: 
+                        <span class="correlation-value {% if insight.correlation_value > 0 %}positive{% else %}negative{% endif %}">
+                            {{ insight.correlation_value | format_number }}
+                        </span>
+                    </p>
+                    <div class="timestamp">
+                        {{ insight.timestamp | format_date }}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            {% if insights | length > 10 %}
+                <p><em>Showing 10 of {{ insights | length }} insights.</em></p>
+            {% endif %}
+        {% else %}
+            <p>No insights available for the selected period.</p>
+        {% endif %}
+    </div>
+    
+    {% if predictions %}
+    <h2>Related Predictions</h2>
+    <div class="predictions-container">
+        {% for prediction in predictions[:5] %}
+            <div class="prediction-card">
+                <h3>{{ prediction.target_domain | title }}: {{ prediction.target_variable }}</h3>
+                <p>
+                    <strong>Prediction:</strong> {{ prediction.prediction | format_number }}
+                    <br>
+                    <strong>Confidence:</strong> {{ (prediction.confidence * 100) | format_number }}%
+                </p>
+                <div class="timestamp">
+                    {{ prediction.timestamp | format_date }}
+                </div>
+            </div>
+        {% endfor %}
+        
+        {% if predictions | length > 5 %}
+            <p><em>Showing 5 of {{ predictions | length }} predictions.</em></p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if figures and 'insights' in figures %}
+    <div class="figure-container">
+        <h3>Insights by Domain Pair</h3>
+        <img src="data:image/png;base64,{{ figures['insights'] }}" alt="Insights by Domain Pair">
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Cross-Domain Predictive Analytics Dashboard</p>
+        <p>Report generated using automated correlation analysis</p>
+    </div>
+</body>
+</html>
