@@ -4,7 +4,50 @@ Tests for the Natural Language Query API endpoints.
 
 import unittest
 import json
-from app import create_app
+from unittest.mock import patch, MagicMock
+
+# Create mock classes for dependencies
+class MockCorrelator:
+    def __init__(self):
+        self.domains = ['weather', 'economic', 'transportation', 'social_media']
+    
+    def calculate_correlations(self):
+        return True
+    
+    def get_correlation_data_for_visualization(self):
+        return {'correlation_matrices': [], 'heatmap_data': [], 'network_data': {}}
+    
+    def generate_insights(self):
+        return []
+    
+    def detect_anomalies(self):
+        return []
+
+class MockPredictor:
+    def __init__(self, correlator=None):
+        pass
+    
+    def predict_domain(self, domain, variable=None):
+        return []
+    
+    def get_prediction_history(self, limit=10):
+        return []
+
+class MockNLProcessor:
+    def __init__(self, correlator=None, predictor=None):
+        pass
+    
+    def process_query(self, query_text):
+        return {
+            'parsed': {'intent': 'simple_data', 'domains': ['weather']},
+            'explanation': 'Test explanation'
+        }
+
+# Apply mocks
+with patch('app.system_integration.cross_domain_correlation.CrossDomainCorrelator', MockCorrelator), \
+     patch('app.system_integration.cross_domain_prediction.CrossDomainPredictor', MockPredictor), \
+     patch('app.system_integration.natural_language_processor.NaturalLanguageProcessor', MockNLProcessor):
+    from app import create_app
 
 
 class TestNLQAPI(unittest.TestCase):

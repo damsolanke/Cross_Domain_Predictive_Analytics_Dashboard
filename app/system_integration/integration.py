@@ -2,6 +2,9 @@
 Integration module for the Cross-Domain Predictive Analytics Dashboard.
 """
 
+# Import event functions from events module instead of routes
+from app.system_integration.events import emit_data_update, emit_alert
+
 # System integrator instance (shared globally)
 class SystemIntegrator:
     """
