@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_socketio import SocketIO
+import os
 
 # Initialize SocketIO without an app (will be attached in create_app)
 socketio = SocketIO()
@@ -9,8 +10,22 @@ def create_app():
     
     # Configure the app
     app.config['SECRET_KEY'] = 'REDACTED'
+    app.config['TESTING'] = os.environ.get('TESTING', 'False') == 'True'
     
-    # Register blueprints
+    # Initialize extensions with app
+    socketio.init_app(app, cors_allowed_origins="*")
+    
+    # Initialize system integration first to avoid circular imports
+    with app.app_context():
+        # First, initialize events system
+        # In a real implementation, this could set up Socket.IO events
+        pass
+        
+        # Then initialize system integration
+        from app.system_integration.integration import init_system_integration
+        init_system_integration(app)
+    
+    # Now register blueprints
     from app.main import main as main_blueprint
     app.register_blueprint(main_blueprint)
     
@@ -20,19 +35,16 @@ def create_app():
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
     
-    from app.demo.correlation_demo import correlation_demo as correlation_demo_blueprint
-    app.register_blueprint(correlation_demo_blueprint)
-    
     # Register Natural Language Query blueprint
     from app.api.natural_language_query import nlq_api
     app.register_blueprint(nlq_api)
     
-    # Initialize extensions with app
-    socketio.init_app(app, cors_allowed_origins="*")
-    
-    # Initialize system integration
-    with app.app_context():
-        from app.system_integration.integration import init_system_integration
-        init_system_integration(app)
+    # Register demo-related blueprints
+    try:
+        from app.demo.correlation_demo import correlation_demo as correlation_demo_blueprint
+        app.register_blueprint(correlation_demo_blueprint)
+    except ImportError:
+        # This is fine if the demo is not available
+        pass
     
     return app

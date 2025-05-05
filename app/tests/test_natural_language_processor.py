@@ -3,8 +3,40 @@ Unit tests for the natural language processor.
 """
 
 import unittest
+from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
-from app.system_integration.natural_language_processor import NaturalLanguageProcessor
+
+# Create mock classes for dependencies
+class MockCorrelator:
+    def __init__(self):
+        self.domains = ['weather', 'economic', 'transportation', 'social_media']
+    
+    def calculate_correlations(self):
+        return True
+    
+    def get_correlation_data_for_visualization(self):
+        return {'correlation_matrices': [], 'heatmap_data': [], 'network_data': {}}
+    
+    def generate_insights(self):
+        return []
+    
+    def detect_anomalies(self):
+        return []
+
+class MockPredictor:
+    def __init__(self, correlator=None):
+        pass
+    
+    def predict_domain(self, domain, variable=None):
+        return []
+    
+    def get_prediction_history(self, limit=10):
+        return []
+
+# Use the mocks instead of real implementations
+with patch('app.system_integration.cross_domain_correlation.CrossDomainCorrelator', MockCorrelator), \
+     patch('app.system_integration.cross_domain_prediction.CrossDomainPredictor', MockPredictor):
+    from app.system_integration.natural_language_processor import NaturalLanguageProcessor
 
 
 class TestNaturalLanguageProcessor(unittest.TestCase):
