@@ -1,0 +1,115 @@
+"""
+Unit tests for the natural language processor.
+"""
+
+import unittest
+from datetime import datetime, timedelta
+from app.system_integration.natural_language_processor import NaturalLanguageProcessor
+
+
+class TestNaturalLanguageProcessor(unittest.TestCase):
+    """Test the natural language processor."""
+
+    def setUp(self):
+        """Set up the test case."""
+        self.processor = NaturalLanguageProcessor()
+
+    def test_parse_query_simple_data(self):
+        """Test parsing a simple data query."""
+        query_text = "What's the current temperature?"
+        parsed = self.processor._parse_query(query_text)
+        
+        self.assertEqual(parsed['intent'], 'simple_data')
+        self.assertIn('weather', parsed['domains'])
+        self.assertGreater(parsed['confidence'], 0.0)
+        self.assertIn('temperature', parsed['variables'])
+        
+    def test_parse_query_correlation(self):
+        """Test parsing a correlation query."""
+        query_text = "How does temperature affect traffic congestion?"
+        parsed = self.processor._parse_query(query_text)
+        
+        self.assertEqual(parsed['intent'], 'correlation')
+        self.assertIn('weather', parsed['domains'])
+        self.assertIn('transportation', parsed['domains'])
+        self.assertGreater(parsed['confidence'], 0.0)
+        
+    def test_parse_query_prediction(self):
+        """Test parsing a prediction query."""
+        query_text = "Predict tomorrow's traffic congestion"
+        parsed = self.processor._parse_query(query_text)
+        
+        self.assertEqual(parsed['intent'], 'prediction')
+        self.assertIn('transportation', parsed['domains'])
+        self.assertGreater(parsed['confidence'], 0.0)
+        
+    def test_parse_query_comparison(self):
+        """Test parsing a comparison query."""
+        query_text = "Compare weather patterns and traffic congestion"
+        parsed = self.processor._parse_query(query_text)
+        
+        self.assertEqual(parsed['intent'], 'comparison')
+        self.assertIn('weather', parsed['domains'])
+        self.assertIn('transportation', parsed['domains'])
+        self.assertGreater(parsed['confidence'], 0.0)
+        
+    def test_parse_query_anomaly(self):
+        """Test parsing an anomaly query."""
+        query_text = "Identify anomalies in transportation metrics"
+        parsed = self.processor._parse_query(query_text)
+        
+        self.assertEqual(parsed['intent'], 'anomaly')
+        self.assertIn('transportation', parsed['domains'])
+        self.assertGreater(parsed['confidence'], 0.0)
+        
+    def test_extract_time_range(self):
+        """Test extracting time range from a query."""
+        now = datetime.now()
+        
+        # Test "today"
+        time_range = self.processor._extract_time_range("Show today's weather")
+        end_date = datetime.fromisoformat(time_range['end_date'])
+        start_date = datetime.fromisoformat(time_range['start_date'])
+        self.assertLessEqual((now - end_date).total_seconds(), 10)  # Within 10 seconds
+        self.assertAlmostEqual((end_date - start_date).total_seconds(), 
+                             timedelta(days=0).total_seconds(), 
+                             delta=10)  # Allow small difference
+        
+        # Test "last week"
+        time_range = self.processor._extract_time_range("Show last week's weather")
+        end_date = datetime.fromisoformat(time_range['end_date'])
+        start_date = datetime.fromisoformat(time_range['start_date'])
+        self.assertLessEqual((now - end_date).total_seconds(), 10)  # Within 10 seconds
+        self.assertAlmostEqual((end_date - start_date).total_seconds(), 
+                             timedelta(days=7).total_seconds(), 
+                             delta=10)  # Allow small difference
+        
+    def test_extract_variables(self):
+        """Test extracting variables from a query."""
+        variables = self.processor._extract_variables("What's the temperature and humidity today?")
+        self.assertIn('temperature', variables)
+        self.assertIn('humidity', variables)
+        
+    def test_process_query(self):
+        """Test processing a complete query."""
+        result = self.processor.process_query("What's the current temperature?")
+        
+        self.assertEqual(result['parsed']['intent'], 'simple_data')
+        self.assertIn('weather', result['parsed']['domains'])
+        self.assertIn('explanation', result)
+        self.assertIn('data', result)
+        self.assertIn('visualizations', result)
+        
+    def test_error_handling(self):
+        """Test error handling for invalid queries."""
+        # Test empty query
+        result = self.processor.process_query("")
+        self.assertIn('error', result)
+        
+        # Test very weird query (should still work but may have low confidence)
+        result = self.processor.process_query("asjkdhajksdhkasjhdjkashdkjahsd")
+        self.assertIn('parsed', result)  # Should still parse
+        
+
+if __name__ == '__main__':
+    unittest.main()
