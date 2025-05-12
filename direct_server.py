@@ -112,49 +112,28 @@ def correlation():
     """Cross-domain correlation analysis page"""
     return render_template('correlation.html', title='Cross-Domain Correlation Analysis')
 
-# Print debug info about templates
-@app.before_first_request
-def print_template_info():
-    print(f"Template folder: {app.template_folder}")
-    print(f"Template folder exists: {os.path.exists(app.template_folder)}")
-    use_cases_path = os.path.join(app.template_folder, 'use_cases')
-    print(f"Use cases path: {use_cases_path}")
-    print(f"Use cases path exists: {os.path.exists(use_cases_path)}")
-    if os.path.exists(use_cases_path):
-        print(f"Files in use_cases: {os.listdir(use_cases_path)}")
+# Debug info will be printed in main block
 
 # Use Case routes
 @app.route('/use-cases/supply-chain')
 def supply_chain_use_case():
     """Supply Chain Optimization use case page"""
-    # Render a simple template with the use case data
-    return render_template('index.html', 
-                          title='Supply Chain Optimization',
-                          use_case_message="Supply Chain Optimization use case details would be displayed here.")
+    return render_template('use_cases/supply_chain.html', title='Supply Chain Optimization')
 
 @app.route('/use-cases/public-health')
 def public_health_use_case():
     """Public Health Response Planning use case page"""
-    # Render a simple template with the use case data
-    return render_template('index.html', 
-                          title='Public Health Response Planning',
-                          use_case_message="Public Health Response Planning use case details would be displayed here.")
+    return render_template('use_cases/public_health.html', title='Public Health Response Planning')
 
 @app.route('/use-cases/urban-infrastructure')
 def urban_infrastructure_use_case():
     """Urban Infrastructure Management use case page"""
-    # Render a simple template with the use case data
-    return render_template('index.html', 
-                          title='Urban Infrastructure Management',
-                          use_case_message="Urban Infrastructure Management use case details would be displayed here.")
+    return render_template('use_cases/urban_infrastructure.html', title='Urban Infrastructure Management')
 
 @app.route('/use-cases/financial-market')
 def financial_market_use_case():
     """Financial Market Strategy use case page"""
-    # Render a simple template with the use case data
-    return render_template('index.html', 
-                          title='Financial Market Strategy',
-                          use_case_message="Financial Market Strategy use case details would be displayed here.")
+    return render_template('use_cases/financial_market.html', title='Financial Market Strategy')
 
 @app.route('/api/dashboard/data')
 def dashboard_data():
@@ -200,6 +179,16 @@ def configure_correlation():
 # Run the application directly
 if __name__ == '__main__':
     print("Starting direct server for Cross-Domain Predictive Analytics Dashboard...")
+    
+    # Print template info
+    print(f"Template folder: {app.template_folder}")
+    print(f"Template folder exists: {os.path.exists(app.template_folder)}")
+    use_cases_path = os.path.join(app.template_folder, 'use_cases')
+    print(f"Use cases path: {use_cases_path}")
+    print(f"Use cases path exists: {os.path.exists(use_cases_path)}")
+    if os.path.exists(use_cases_path):
+        print(f"Files in use_cases: {os.listdir(use_cases_path)}")
+    
     # Print static file information
     print(f"Static folder: {app.static_folder}")
     print(f"Static folder exists: {os.path.exists(app.static_folder)}")
