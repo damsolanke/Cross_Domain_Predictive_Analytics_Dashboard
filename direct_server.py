@@ -199,6 +199,7 @@ def financial_market_use_case():
     # Create mock data for the template
     mock_data = {
         'weather_data': {'temperature_anomaly': '+1.2°C', 'trend': 'warming'},
+        'economic_indicators': {'trend': 'upward', 'gdp_growth': 2.8, 'inflation': 3.2},
         'market_indices': {'s_and_p': 4285, 'trend': 'upward'},
         'social_sentiment': {'overall': 0.65, 'trend': 'positive'},
         'investment_opportunities': [
