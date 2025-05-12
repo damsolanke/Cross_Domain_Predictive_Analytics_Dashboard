@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Cross-Domain Predictive Analytics Dashboard</h1>
+            
+            <!-- Visualization Controls -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="timeRange">Time Range:</label>
+                            <select class="form-control" id="timeRange">
+                                <option value="1d">Last 24 Hours</option>
+                                <option value="1w">Last Week</option>
+                                <option value="1m">Last Month</option>
+                                <option value="3m">Last 3 Months</option>
+                                <option value="1y">Last Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="updateInterval">Update Interval:</label>
+                            <select class="form-control" id="updateInterval">
+                                <option value="60">1 Minute</option>
+                                <option value="300">5 Minutes</option>
+                                <option value="900">15 Minutes</option>
+                                <option value="3600">1 Hour</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="exportFormat">Export Format:</label>
+                            <select class="form-control" id="exportFormat">
+                                <option value="csv">CSV</option>
+                                <option value="json">JSON</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary mt-4" onclick="exportData()">Export Data</button>
+                            <button class="btn btn-secondary mt-4" onclick="batchExport()">Batch Export</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Correlation Matrix -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Cross-Domain Correlation Matrix</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('correlation-matrix')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('correlation-matrix')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="correlation-matrix"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prediction Plot -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Prediction vs Actual</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('prediction-plot')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('prediction-plot')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="prediction-plot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time Series Decomposition -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Time Series Decomposition</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('time-series-decomposition')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('time-series-decomposition')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="time-series-decomposition"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature Importance -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Feature Importance</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('feature-importance')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('feature-importance')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="feature-importance"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Anomaly Detection -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Anomaly Detection</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('anomaly-detection')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('anomaly-detection')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="anomaly-detection"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparison View -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Comparison View</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen('comparison-view')">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportVisualization('comparison-view')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="comparison-view"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include required libraries -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+
+<!-- Custom JavaScript for visualization updates and interactions -->
+<script>
+// Configuration
+let updateInterval = 300000; // 5 minutes default
+let timeRange = '1w'; // 1 week default
+
+// Update interval handler
+document.getElementById('updateInterval').addEventListener('change', function(e) {
+    updateInterval = parseInt(e.target.value) * 1000;
+    clearInterval(updateTimer);
+    updateTimer = setInterval(updateVisualizations, updateInterval);
+});
+
+// Time range handler
+document.getElementById('timeRange').addEventListener('change', function(e) {
+    timeRange = e.target.value;
+    updateVisualizations();
+});
+
+// Fullscreen toggle
+function toggleFullscreen(elementId) {
+    const element = document.getElementById(elementId);
+    if (!document.fullscreenElement) {
+        element.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+// Export single visualization
+function exportVisualization(elementId) {
+    const format = document.getElementById('exportFormat').value;
+    const data = window[elementId + 'Data'];
+    
+    fetch(`/visualization/export/${format}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: data })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${elementId}_data.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    });
+}
+
+// Batch export
+function batchExport() {
+    const format = document.getElementById('exportFormat').value;
+    const visualizations = {
+        'correlation-matrix': window.correlationData,
+        'prediction-plot': window.predictionData,
+        'time-series-decomposition': window.timeSeriesData,
+        'feature-importance': window.featureImportanceData,
+        'anomaly-detection': window.anomalyData,
+        'comparison-view': window.comparisonData
+    };
+    
+    fetch('/visualization/batch-export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            format: format,
+            visualizations: visualizations
+        })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `batch_export.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    });
+}
+
+// Update all visualizations
+function updateVisualizations() {
+    // Fetch and update correlation matrix
+    fetch('/visualization/correlation-matrix', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.correlationData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('correlation-matrix', JSON.parse(data.visualization));
+        }
+    });
+    
+    // Fetch and update prediction plot
+    fetch('/visualization/prediction-plot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.predictionData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('prediction-plot', JSON.parse(data.visualization));
+        }
+    });
+    
+    // Fetch and update time series decomposition
+    fetch('/visualization/time-series-decomposition', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.timeSeriesData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('time-series-decomposition', JSON.parse(data.visualization));
+        }
+    });
+    
+    // Fetch and update feature importance
+    fetch('/visualization/feature-importance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.featureImportanceData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('feature-importance', JSON.parse(data.visualization));
+        }
+    });
+    
+    // Fetch and update anomaly detection
+    fetch('/visualization/anomaly-detection', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.anomalyData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('anomaly-detection', JSON.parse(data.visualization));
+        }
+    });
+    
+    // Fetch and update comparison view
+    fetch('/visualization/comparison-view', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: window.comparisonData,
+            timeRange: timeRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Plotly.newPlot('comparison-view', JSON.parse(data.visualization));
+        }
+    });
+}
+
+// Initialize update timer
+let updateTimer = setInterval(updateVisualizations, updateInterval);
+
+// Initial update
+document.addEventListener('DOMContentLoaded', updateVisualizations);
+</script>
+{% endblock %} 
