@@ -73,7 +73,7 @@ class CrossDomainPredictor:
             
             if weight_sum == 0:
                 normalized_weights = [1.0 / len(weights)] * len(weights)
-        else:
+            else:
                 normalized_weights = [w / weight_sum for w in weights]
                 
             prediction = sum(v * w for v, w in zip(input_values, normalized_weights))
