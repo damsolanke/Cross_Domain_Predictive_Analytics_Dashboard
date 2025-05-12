@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Domain Predictive Analytics Dashboard - User Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            position: relative;
+            padding-top: 56px;
+        }
+        .sidebar {
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+        .sidebar .nav-link {
+            color: #333;
+            font-weight: 500;
+        }
+        .sidebar .nav-link.active {
+            color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        .sidebar .nav-link:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .section {
+            padding-top: 80px;
+            margin-bottom: 40px;
+        }
+        h2 {
+            margin-top: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        h3 {
+            margin-top: 1.5rem;
+            color: #0d6efd;
+        }
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            font-size: 1.5rem;
+            color: #fff;
+            border-radius: .5rem;
+            background-color: #0d6efd;
+            margin-bottom: 1rem;
+        }
+        img.screenshot {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
+        }
+        .alert-documentation {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: monospace;
+            margin: 1rem 0;
+        }
+        .table-of-contents {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .table-of-contents ul {
+            list-style-type: none;
+            padding-left: 1rem;
+        }
+        .table-of-contents ul li {
+            margin-bottom: 0.5rem;
+        }
+        .table-of-contents ul li a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#sidebar" data-bs-offset="80">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics/models">Predictive Models</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics/reports">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/documentation">Documentation</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="sidebar p-3 bg-light" id="sidebar">
+                    <h5>Contents</h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="#introduction">Introduction</a>
+                        <a class="nav-link" href="#dashboard">Dashboard</a>
+                        <a class="nav-link" href="#cross-domain-correlation">Cross-Domain Correlation</a>
+                        <a class="nav-link" href="#predictive-models">Predictive Models</a>
+                        <a class="nav-link" href="#reports">Reports</a>
+                        <a class="nav-link" href="#data-sources">Data Sources</a>
+                        <a class="nav-link" href="#natural-language">Natural Language Queries</a>
+                        <a class="nav-link" href="#notifications">Notifications</a>
+                        <a class="nav-link" href="#advanced-features">Advanced Features</a>
+                        <a class="nav-link" href="#api">API Reference</a>
+                        <a class="nav-link" href="#troubleshooting">Troubleshooting</a>
+                    </nav>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Introduction -->
+                <div id="introduction" class="section">
+                    <h1>Cross-Domain Predictive Analytics Dashboard</h1>
+                    <h2>User Guide</h2>
+                    
+                    <div class="alert alert-primary" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <strong>Welcome to the Cross-Domain Predictive Analytics Dashboard!</strong>
+                                <p class="mb-0">This guide will help you navigate the dashboard and understand its features.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-of-contents">
+                        <h5>Table of Contents</h5>
+                        <ul>
+                            <li><a href="#introduction">1. Introduction</a></li>
+                            <li><a href="#dashboard">2. Dashboard Overview</a></li>
+                            <li><a href="#cross-domain-correlation">3. Cross-Domain Correlation</a></li>
+                            <li><a href="#predictive-models">4. Predictive Models</a></li>
+                            <li><a href="#reports">5. Reports</a></li>
+                            <li><a href="#data-sources">6. Data Sources</a></li>
+                            <li><a href="#natural-language">7. Natural Language Queries</a></li>
+                            <li><a href="#notifications">8. Notifications</a></li>
+                            <li><a href="#advanced-features">9. Advanced Features</a></li>
+                            <li><a href="#api">10. API Reference</a></li>
+                            <li><a href="#troubleshooting">11. Troubleshooting</a></li>
+                        </ul>
+                    </div>
+                    
+                    <h3>What is the Cross-Domain Predictive Analytics Dashboard?</h3>
+                    <p>
+                        The Cross-Domain Predictive Analytics Dashboard is a powerful tool that allows you to analyze and visualize 
+                        relationships between data from different domains such as weather, transportation, economics, and social media. 
+                        It helps identify correlations, generate insights, and make predictions based on these relationships.
+                    </p>
+                    
+                    <h3>Key Features</h3>
+                    <div class="row g-4 py-4">
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-primary">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <h4>Real-Time Analytics</h4>
+                            <p>Monitor and analyze data across domains in real-time with interactive visualizations.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-success">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <h4>Cross-Domain Correlation</h4>
+                            <p>Discover hidden relationships between variables across different domains.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-warning">
+                                <i class="bi bi-cpu"></i>
+                            </div>
+                            <h4>Predictive Models</h4>
+                            <p>Create and deploy machine learning models to predict future values.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-danger">
+                                <i class="bi bi-bell"></i>
+                            </div>
+                            <h4>Alert System</h4>
+                            <p>Get notified of important events, anomalies, and insights.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-info">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <h4>Automated Reports</h4>
+                            <p>Generate comprehensive reports with visualizations and insights.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-icon bg-secondary">
+                                <i class="bi bi-chat-dots"></i>
+                            </div>
+                            <h4>Natural Language Queries</h4>
+                            <p>Ask questions about your data in plain English and get visualized answers.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dashboard -->
+                <div id="dashboard" class="section">
+                    <h2>Dashboard Overview</h2>
+                    
+                    <p>
+                        The main dashboard provides an overview of data from all domains and highlights key metrics, 
+                        trends, and insights. It's designed to give you a quick understanding of the current state 
+                        across all monitored domains.
+                    </p>
+                    
+                    <h3>Navigation</h3>
+                    <p>
+                        The dashboard is organized into tabs that represent different domains and aspects of the system:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>Overview</strong>: Shows key metrics and system health</li>
+                        <li><strong>Weather</strong>: Weather-related data and forecasts</li>
+                        <li><strong>Economic</strong>: Economic indicators and market data</li>
+                        <li><strong>Transportation</strong>: Traffic conditions and transportation metrics</li>
+                        <li><strong>Social Media</strong>: Social media trends and sentiment analysis</li>
+                        <li><strong>Cross-Domain</strong>: Correlation analysis and cross-domain insights</li>
+                    </ul>
+                    
+                    <h3>Components</h3>
+                    
+                    <h4>System Health Overview</h4>
+                    <p>
+                        At the top of the dashboard, you'll find indicators showing the system's health, including:
+                    </p>
+                    <ul>
+                        <li>System uptime</li>
+                        <li>Processing rate</li>
+                        <li>Active components</li>
+                        <li>Queue size</li>
+                    </ul>
+                    
+                    <h4>Domain Cards</h4>
+                    <p>
+                        The overview tab features cards for each domain, showing key metrics like:
+                    </p>
+                    <ul>
+                        <li>Current temperature (Weather)</li>
+                        <li>Economic health index (Economic)</li>
+                        <li>Congestion level (Transportation)</li>
+                        <li>Sentiment index (Social Media)</li>
+                    </ul>
+                    
+                    <h4>Alerts Panel</h4>
+                    <p>
+                        The alerts panel shows real-time notifications about important events, anomalies, 
+                        and insights. You can configure alert settings and threshold values.
+                    </p>
+                    
+                    <h3>Interacting with the Dashboard</h3>
+                    
+                    <h4>Time Range Selection</h4>
+                    <p>
+                        You can adjust the time range for displayed data using the time range selector 
+                        in the dashboard controls.
+                    </p>
+                    
+                    <h4>Auto-Refresh</h4>
+                    <p>
+                        Toggle automatic data refreshing to keep the dashboard updated in real-time.
+                    </p>
+                    
+                    <h4>Chart Interactions</h4>
+                    <p>
+                        Most charts are interactive, allowing you to:
+                    </p>
+                    <ul>
+                        <li>Hover over data points to see detailed information</li>
+                        <li>Zoom in on specific time periods</li>
+                        <li>Export chart data or images</li>
+                        <li>Toggle the visibility of different data series</li>
+                    </ul>
+                </div>
+                
+                <!-- Cross-Domain Correlation -->
+                <div id="cross-domain-correlation" class="section">
+                    <h2>Cross-Domain Correlation</h2>
+                    
+                    <p>
+                        One of the most powerful features of the dashboard is its ability to identify and 
+                        visualize correlations between variables across different domains. This helps you 
+                        understand how changes in one domain might affect another.
+                    </p>
+                    
+                    <h3>Correlation Analysis</h3>
+                    
+                    <p>
+                        The correlation analysis shows the strength and direction of relationships between 
+                        variables from different domains. A correlation coefficient of 1 indicates a perfect 
+                        positive correlation, -1 indicates a perfect negative correlation, and 0 indicates 
+                        no correlation.
+                    </p>
+                    
+                    <div class="alert alert-documentation">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-lightbulb-fill text-warning fs-4"></i>
+                            </div>
+                            <div>
+                                <strong>Understanding Correlation Strength</strong>
+                                <ul class="mb-0">
+                                    <li><strong>0.8 to 1.0 or -0.8 to -1.0</strong>: Very strong correlation</li>
+                                    <li><strong>0.6 to 0.8 or -0.6 to -0.8</strong>: Strong correlation</li>
+                                    <li><strong>0.4 to 0.6 or -0.4 to -0.6</strong>: Moderate correlation</li>
+                                    <li><strong>0.2 to 0.4 or -0.2 to -0.4</strong>: Weak correlation</li>
+                                    <li><strong>0.0 to 0.2 or 0.0 to -0.2</strong>: Very weak or no correlation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Correlation Visualizations</h3>
+                    
+                    <h4>Heatmap</h4>
+                    <p>
+                        The correlation heatmap provides a visual representation of correlation coefficients 
+                        between variables. Red indicates negative correlation, blue indicates positive 
+                        correlation, and white indicates no correlation.
+                    </p>
+                    
+                    <h4>Network Graph</h4>
+                    <p>
+                        The network graph shows significant correlations as connections between variables. 
+                        The thickness of the line indicates the strength of the correlation, and the color 
+                        indicates the direction (blue for positive, red for negative).
+                    </p>
+                    
+                    <h3>Correlation Insights</h3>
+                    <p>
+                        The system automatically generates insights based on correlation analysis. These insights 
+                        highlight significant relationships and potential causal connections between variables.
+                    </p>
+                    
+                    <h3>Correlation Settings</h3>
+                    <p>
+                        You can adjust correlation analysis settings, such as:
+                    </p>
+                    <ul>
+                        <li>Time window for analysis (hours, days, weeks)</li>
+                        <li>Correlation threshold for significance</li>
+                        <li>Variables to include or exclude</li>
+                    </ul>
+                </div>
+                
+                <!-- Predictive Models -->
+                <div id="predictive-models" class="section">
+                    <h2>Predictive Models</h2>
+                    
+                    <p>
+                        The Predictive Models feature allows you to create, manage, and deploy machine learning 
+                        models that use correlations between domains to make predictions.
+                    </p>
+                    
+                    <h3>Creating a Model</h3>
+                    
+                    <p>
+                        To create a new predictive model:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to the <strong>Predictive Models</strong> page from the main navigation</li>
+                        <li>Click on the <strong>Create New Model</strong> section</li>
+                        <li>Select the <strong>Target Domain</strong> and <strong>Target Variable</strong> you want to predict</li>
+                        <li>Choose the <strong>Model Type</strong> (Linear Regression, Random Forest, etc.)</li>
+                        <li>Select <strong>Feature Domains</strong> to use as predictors (cannot include the target domain)</li>
+                        <li>Set the <strong>Lookback Period</strong> for training data</li>
+                        <li>Click <strong>Train Model</strong> to create and train the model</li>
+                    </ol>
+                    
+                    <div class="alert alert-documentation">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <strong>Model Types</strong>
+                                <ul class="mb-0">
+                                    <li><strong>Linear Regression</strong>: Simple, interpretable model for linear relationships</li>
+                                    <li><strong>Ridge Regression</strong>: Linear regression with regularization to prevent overfitting</li>
+                                    <li><strong>Random Forest</strong>: Ensemble model that works well for complex relationships</li>
+                                    <li><strong>Gradient Boosting</strong>: Advanced ensemble model for high accuracy</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Model Details</h3>
+                    
+                    <p>
+                        After creating a model, you can view its details including:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>Performance Metrics</strong>: R² score, RMSE, MAE</li>
+                        <li><strong>Important Features</strong>: Variables that have the strongest influence on predictions</li>
+                        <li><strong>Model Information</strong>: Type, creation date, parameters</li>
+                    </ul>
+                    
+                    <h3>Making Predictions</h3>
+                    
+                    <p>
+                        To make a prediction with a trained model:
+                    </p>
+                    
+                    <ol>
+                        <li>Open the model details by clicking <strong>View Details</strong> on a model card</li>
+                        <li>Click the <strong>Make Prediction</strong> button</li>
+                        <li>The system will use the latest available data to make a prediction</li>
+                        <li>The prediction result will show the predicted value and confidence score</li>
+                    </ol>
+                    
+                    <h3>Managing Models</h3>
+                    
+                    <p>
+                        You can manage your models in the following ways:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>View Details</strong>: See model performance and features</li>
+                        <li><strong>Make Predictions</strong>: Use the model for predictions</li>
+                        <li><strong>Delete Model</strong>: Remove models that are no longer needed</li>
+                    </ul>
+                </div>
+                
+                <!-- Reports -->
+                <div id="reports" class="section">
+                    <h2>Reports</h2>
+                    
+                    <p>
+                        The Reports feature allows you to generate comprehensive analytics reports 
+                        on correlations, insights, and predictions. These reports can be shared with 
+                        team members or stakeholders.
+                    </p>
+                    
+                    <h3>Types of Reports</h3>
+                    
+                    <h4>Correlation Report</h4>
+                    <p>
+                        This report focuses on cross-domain correlations, showing heatmaps, network 
+                        graphs, and insights derived from correlation analysis.
+                    </p>
+                    
+                    <h4>Domain Insights Report</h4>
+                    <p>
+                        This report provides insights for a specific domain or across all domains, 
+                        highlighting significant patterns and relationships.
+                    </p>
+                    
+                    <h4>Prediction Performance Report</h4>
+                    <p>
+                        This report evaluates the performance of predictive models, showing metrics, 
+                        feature importance, and prediction history.
+                    </p>
+                    
+                    <h3>Generating Reports</h3>
+                    
+                    <p>
+                        To generate a report:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to the <strong>Reports</strong> page from the main navigation</li>
+                        <li>Select the <strong>Report Type</strong> you want to generate</li>
+                        <li>Choose a <strong>Domain Filter</strong> if applicable</li>
+                        <li>Set the <strong>Time Window</strong> for the report</li>
+                        <li>Select the <strong>Format</strong> (HTML, Markdown, JSON)</li>
+                        <li>Click <strong>Generate Report</strong></li>
+                    </ol>
+                    
+                    <h3>Report Formats</h3>
+                    
+                    <ul>
+                        <li><strong>HTML</strong>: Interactive web-based report with visualizations</li>
+                        <li><strong>Markdown</strong>: Text-based report suitable for documentation</li>
+                        <li><strong>JSON</strong>: Machine-readable format for integration with other tools</li>
+                    </ul>
+                    
+                    <h3>Viewing and Sharing Reports</h3>
+                    
+                    <p>
+                        After generating a report, you can:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>View</strong>: Open the report in the browser</li>
+                        <li><strong>Download</strong>: Save the report for offline viewing</li>
+                        <li><strong>Share</strong>: Send the report to team members or stakeholders</li>
+                    </ul>
+                </div>
+                
+                <!-- Data Sources -->
+                <div id="data-sources" class="section">
+                    <h2>Data Sources</h2>
+                    
+                    <p>
+                        The dashboard integrates data from multiple sources across different domains. 
+                        Understanding these data sources is important for interpreting the dashboard's 
+                        visualizations and insights.
+                    </p>
+                    
+                    <h3>Domain Data Sources</h3>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Data Sources</th>
+                                    <th>Key Variables</th>
+                                    <th>Update Frequency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Weather</td>
+                                    <td>
+                                        <ul>
+                                            <li>Weather API</li>
+                                            <li>Historical weather database</li>
+                                            <li>Weather stations</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>Temperature</li>
+                                            <li>Humidity</li>
+                                            <li>Wind Speed</li>
+                                            <li>Precipitation</li>
+                                        </ul>
+                                    </td>
+                                    <td>Every 10-30 minutes</td>
+                                </tr>
+                                <tr>
+                                    <td>Economic</td>
+                                    <td>
+                                        <ul>
+                                            <li>Financial APIs</li>
+                                            <li>Market data feeds</li>
+                                            <li>Economic indicators databases</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>Market Index</li>
+                                            <li>Trading Volume</li>
+                                            <li>Volatility</li>
+                                            <li>Interest Rate</li>
+                                        </ul>
+                                    </td>
+                                    <td>Every 1-24 hours</td>
+                                </tr>
+                                <tr>
+                                    <td>Transportation</td>
+                                    <td>
+                                        <ul>
+                                            <li>Traffic APIs</li>
+                                            <li>Transportation department feeds</li>
+                                            <li>GPS data aggregators</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>Congestion</li>
+                                            <li>Average Speed</li>
+                                            <li>Vehicle Count</li>
+                                            <li>Incident Count</li>
+                                        </ul>
+                                    </td>
+                                    <td>Every 5-15 minutes</td>
+                                </tr>
+                                <tr>
+                                    <td>Social Media</td>
+                                    <td>
+                                        <ul>
+                                            <li>Social media APIs</li>
+                                            <li>Sentiment analysis services</li>
+                                            <li>Trend monitoring tools</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>Sentiment</li>
+                                            <li>Post Volume</li>
+                                            <li>Engagement Rate</li>
+                                            <li>Topic Mentions</li>
+                                        </ul>
+                                    </td>
+                                    <td>Every 15-60 minutes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3>Adding Custom Data Sources</h3>
+                    
+                    <p>
+                        Administrators can add custom data sources to the dashboard by:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigating to the <strong>Data Sources</strong> configuration</li>
+                        <li>Clicking <strong>Add New Source</strong></li>
+                        <li>Selecting the source type (API, CSV, Database)</li>
+                        <li>Configuring connection parameters</li>
+                        <li>Mapping data fields to dashboard variables</li>
+                        <li>Setting the update frequency</li>
+                    </ol>
+                    
+                    <div class="alert alert-warning">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <strong>Note:</strong> Adding custom data sources requires administrator privileges.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Natural Language Queries -->
+                <div id="natural-language" class="section">
+                    <h2>Natural Language Queries</h2>
+                    
+                    <p>
+                        The Natural Language Query feature allows you to ask questions about your data 
+                        in plain English and receive visualized answers. This makes it easier to explore 
+                        your data without needing to know specific technical terms or navigation paths.
+                    </p>
+                    
+                    <h3>Using Natural Language Queries</h3>
+                    
+                    <p>
+                        To use the Natural Language Query feature:
+                    </p>
+                    
+                    <ol>
+                        <li>Click on the query bar at the top of any dashboard page</li>
+                        <li>Type your question in plain English</li>
+                        <li>Press Enter or click the search icon</li>
+                        <li>The system will interpret your question and display relevant visualizations and insights</li>
+                    </ol>
+                    
+                    <h3>Example Queries</h3>
+                    
+                    <div class="code-block">
+                        <p><strong>Simple Questions:</strong></p>
+                        <ul>
+                            <li>"What's the current temperature?"</li>
+                            <li>"Show me today's traffic congestion"</li>
+                            <li>"What's the social media sentiment trend for the past week?"</li>
+                        </ul>
+                        
+                        <p><strong>Correlation Questions:</strong></p>
+                        <ul>
+                            <li>"How does temperature affect traffic congestion?"</li>
+                            <li>"Is there a relationship between market volatility and social media sentiment?"</li>
+                            <li>"What factors correlate most strongly with travel time?"</li>
+                        </ul>
+                        
+                        <p><strong>Prediction Questions:</strong></p>
+                        <ul>
+                            <li>"Predict tomorrow's traffic congestion based on weather forecast"</li>
+                            <li>"What will social media sentiment be if market volatility increases?"</li>
+                            <li>"Which model best predicts transportation patterns?"</li>
+                        </ul>
+                        
+                        <p><strong>Analysis Questions:</strong></p>
+                        <ul>
+                            <li>"Compare weather patterns and traffic congestion over the last month"</li>
+                            <li>"Show the impact of weather on all other domains"</li>
+                            <li>"Identify anomalies in cross-domain correlations"</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Query Results</h3>
+                    
+                    <p>
+                        Query results typically include:
+                    </p>
+                    
+                    <ul>
+                        <li>Visualizations relevant to your question</li>
+                        <li>Text explanation of the results</li>
+                        <li>Related insights and correlations</li>
+                        <li>Options to refine your query or explore related topics</li>
+                    </ul>
+                    
+                    <h3>Saving and Sharing Queries</h3>
+                    
+                    <p>
+                        You can save interesting queries for future reference or share them with team members:
+                    </p>
+                    
+                    <ol>
+                        <li>Click the <strong>Save</strong> button on a query result</li>
+                        <li>Give the query a name and description</li>
+                        <li>Choose to add it to your favorites or share with specific team members</li>
+                        <li>Access saved queries from your user profile or the query history panel</li>
+                    </ol>
+                </div>
+                
+                <!-- Notifications -->
+                <div id="notifications" class="section">
+                    <h2>Notifications</h2>
+                    
+                    <p>
+                        The Notifications system keeps you informed about important events, insights, and 
+                        anomalies across all domains. You can receive notifications in the dashboard and 
+                        optionally via email or other channels.
+                    </p>
+                    
+                    <h3>Types of Notifications</h3>
+                    
+                    <h4>Alert Notifications</h4>
+                    <p>
+                        Alerts are triggered when a metric crosses a defined threshold. For example, an 
+                        alert might be triggered when traffic congestion exceeds 80% or when temperature 
+                        drops below freezing.
+                    </p>
+                    
+                    <h4>Correlation Insights</h4>
+                    <p>
+                        These notifications inform you about newly discovered significant correlations 
+                        between domains. They help you understand how different systems interact.
+                    </p>
+                    
+                    <h4>Anomaly Detections</h4>
+                    <p>
+                        The system continuously monitors data for unusual patterns or outliers. When an 
+                        anomaly is detected, a notification is generated to bring it to your attention.
+                    </p>
+                    
+                    <h4>Prediction Alerts</h4>
+                    <p>
+                        These notifications inform you about significant predictions made by your models, 
+                        such as predicted traffic congestion spikes or economic volatility.
+                    </p>
+                    
+                    <h3>Notification Settings</h3>
+                    
+                    <p>
+                        You can customize your notification preferences:
+                    </p>
+                    
+                    <ol>
+                        <li>Click on the notifications icon in the top navigation</li>
+                        <li>Select <strong>Notification Settings</strong></li>
+                        <li>Choose which types of notifications you want to receive</li>
+                        <li>Set priority levels for different notification types</li>
+                        <li>Configure delivery methods (dashboard, email, etc.)</li>
+                        <li>Set quiet hours during which notifications are suppressed</li>
+                    </ol>
+                    
+                    <h3>Managing Notifications</h3>
+                    
+                    <p>
+                        The notification center allows you to:
+                    </p>
+                    
+                    <ul>
+                        <li>View all notifications in chronological order</li>
+                        <li>Filter notifications by type, domain, or priority</li>
+                        <li>Mark notifications as read</li>
+                        <li>Dismiss notifications</li>
+                        <li>Take action directly from notification (e.g., view insight, run prediction)</li>
+                        <li>Export notification history</li>
+                    </ul>
+                </div>
+                
+                <!-- Advanced Features -->
+                <div id="advanced-features" class="section">
+                    <h2>Advanced Features</h2>
+                    
+                    <p>
+                        The dashboard includes several advanced features for power users who want to 
+                        get more out of their data analysis.
+                    </p>
+                    
+                    <h3>Presentation Generator</h3>
+                    
+                    <p>
+                        The Presentation Generator allows you to create slide decks from insights and 
+                        visualizations with just a few clicks:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to the Reports section</li>
+                        <li>Click on <strong>Create Presentation</strong></li>
+                        <li>Select the insights and visualizations to include</li>
+                        <li>Choose a presentation template</li>
+                        <li>Generate the presentation in PowerPoint or PDF format</li>
+                    </ol>
+                    
+                    <h3>Data Export</h3>
+                    
+                    <p>
+                        You can export data from the dashboard in various formats for use in other tools:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>CSV/Excel</strong>: For spreadsheet analysis</li>
+                        <li><strong>JSON</strong>: For programmatic processing</li>
+                        <li><strong>API Access</strong>: For integration with other systems</li>
+                    </ul>
+                    
+                    <p>
+                        To export data:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to the visualization or data table you want to export</li>
+                        <li>Click the <strong>Export</strong> button</li>
+                        <li>Select the export format</li>
+                        <li>Choose export options (time range, variables, etc.)</li>
+                        <li>Click <strong>Export</strong> to download the data</li>
+                    </ol>
+                    
+                    <h3>Custom Dashboards</h3>
+                    
+                    <p>
+                        Create personalized dashboards with the specific visualizations and insights 
+                        that matter most to you:
+                    </p>
+                    
+                    <ol>
+                        <li>Click on <strong>Customize Dashboard</strong> in the user menu</li>
+                        <li>Select <strong>Create New Dashboard</strong></li>
+                        <li>Choose a layout template</li>
+                        <li>Add widgets from the widget library</li>
+                        <li>Configure each widget with specific data sources and visualization settings</li>
+                        <li>Save your custom dashboard with a name and description</li>
+                    </ol>
+                    
+                    <h3>Scheduled Reports</h3>
+                    
+                    <p>
+                        Set up automated report generation and delivery on a schedule:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to the Reports section</li>
+                        <li>Configure a report as usual</li>
+                        <li>Click <strong>Schedule</strong> instead of <strong>Generate</strong></li>
+                        <li>Set the frequency (daily, weekly, monthly)</li>
+                        <li>Choose delivery methods (email, shared folder, etc.)</li>
+                        <li>Specify recipients if sending via email</li>
+                    </ol>
+                    
+                    <h3>Advanced Analytics Settings</h3>
+                    
+                    <p>
+                        Fine-tune the analytics engine for specific use cases:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>Correlation Settings</strong>: Adjust correlation calculation methods and thresholds</li>
+                        <li><strong>Anomaly Detection Sensitivity</strong>: Tune how aggressively the system flags anomalies</li>
+                        <li><strong>Prediction Parameters</strong>: Set default parameters for predictive models</li>
+                        <li><strong>Time Window Settings</strong>: Configure default time windows for different analyses</li>
+                    </ul>
+                </div>
+                
+                <!-- API Reference -->
+                <div id="api" class="section">
+                    <h2>API Reference</h2>
+                    
+                    <p>
+                        The dashboard provides a comprehensive API for programmatic access to all its 
+                        features and data. This allows for integration with other systems and custom 
+                        applications.
+                    </p>
+                    
+                    <h3>API Endpoints</h3>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Description</th>
+                                    <th>Method</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>/api/dashboard/data</code></td>
+                                    <td>Get current dashboard data</td>
+                                    <td>GET</td>
+                                    <td><code>/api/dashboard/data</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/analytics/correlations</code></td>
+                                    <td>Get correlation data</td>
+                                    <td>GET</td>
+                                    <td><code>/api/analytics/correlations</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/analytics/insights</code></td>
+                                    <td>Get correlation insights</td>
+                                    <td>GET</td>
+                                    <td><code>/api/analytics/insights?domain=weather</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/analytics/prediction/models</code></td>
+                                    <td>Get or create prediction models</td>
+                                    <td>GET/POST</td>
+                                    <td><code>/api/analytics/prediction/models</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/analytics/prediction/predict/{model_name}</code></td>
+                                    <td>Make a prediction with a model</td>
+                                    <td>GET</td>
+                                    <td><code>/api/analytics/prediction/predict/weather_temperature_linear</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/analytics/reports/{report_type}</code></td>
+                                    <td>Generate a report</td>
+                                    <td>GET</td>
+                                    <td><code>/api/analytics/reports/correlation?format=json</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/api/system/system-health</code></td>
+                                    <td>Get system health status</td>
+                                    <td>GET</td>
+                                    <td><code>/api/system/system-health</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3>Authentication</h3>
+                    
+                    <p>
+                        API requests require authentication using an API key or JWT token. To get an API key:
+                    </p>
+                    
+                    <ol>
+                        <li>Navigate to your user profile</li>
+                        <li>Select the <strong>API Access</strong> tab</li>
+                        <li>Click <strong>Generate API Key</strong></li>
+                        <li>Set permissions and expiration for the key</li>
+                        <li>Copy the generated key</li>
+                    </ol>
+                    
+                    <p>
+                        Include the API key in your requests using the <code>X-API-Key</code> header:
+                    </p>
+                    
+                    <div class="code-block">
+                        <pre>curl -H "X-API-Key: your_api_key" https://dashboard.example.com/api/dashboard/data</pre>
+                    </div>
+                    
+                    <h3>API Documentation</h3>
+                    
+                    <p>
+                        Comprehensive API documentation is available at:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>Swagger UI</strong>: <code>/api/docs</code></li>
+                        <li><strong>OpenAPI Specification</strong>: <code>/api/openapi.json</code></li>
+                    </ul>
+                </div>
+                
+                <!-- Troubleshooting -->
+                <div id="troubleshooting" class="section">
+                    <h2>Troubleshooting</h2>
+                    
+                    <p>
+                        This section covers common issues you might encounter when using the dashboard 
+                        and how to resolve them.
+                    </p>
+                    
+                    <h3>Common Issues</h3>
+                    
+                    <div class="accordion" id="troubleshootingAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Dashboard not updating in real-time
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Cause:</strong> WebSocket connection might be interrupted or auto-refresh might be disabled.</p>
+                                    <p><strong>Solution:</strong></p>
+                                    <ol>
+                                        <li>Check that the auto-refresh toggle is enabled</li>
+                                        <li>Look at the connection status indicator in the top right</li>
+                                        <li>If disconnected, try refreshing the page</li>
+                                        <li>Check your network connection</li>
+                                        <li>If the issue persists, contact support</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Error when creating a prediction model
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Cause:</strong> Insufficient data, invalid parameters, or server issues.</p>
+                                    <p><strong>Solution:</strong></p>
+                                    <ol>
+                                        <li>Check that you have sufficient historical data for the selected lookback period</li>
+                                        <li>Ensure you've selected valid feature domains</li>
+                                        <li>Try a different model type</li>
+                                        <li>Reduce the complexity of the model</li>
+                                        <li>Check the error message for specific issues</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    No correlation insights showing
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Cause:</strong> Insufficient data, no significant correlations, or correlation threshold too high.</p>
+                                    <p><strong>Solution:</strong></p>
+                                    <ol>
+                                        <li>Check that you have data for multiple domains</li>
+                                        <li>Increase the time window for correlation analysis</li>
+                                        <li>Lower the correlation threshold in the settings</li>
+                                        <li>Ensure data is being collected for all domains</li>
+                                        <li>Try using the demo data generator to test the system</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Charts not rendering correctly
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Cause:</strong> Browser compatibility issues, JavaScript errors, or data formatting problems.</p>
+                                    <p><strong>Solution:</strong></p>
+                                    <ol>
+                                        <li>Try a different browser (Chrome, Firefox, or Edge recommended)</li>
+                                        <li>Clear your browser cache and reload the page</li>
+                                        <li>Check for JavaScript errors in the browser console</li>
+                                        <li>Ensure your browser is up to date</li>
+                                        <li>Disable browser extensions that might interfere with charts</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFive">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    Natural language query not returning expected results
+                                </button>
+                            </h2>
+                            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#troubleshootingAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Cause:</strong> Query ambiguity, unsupported query type, or data limitations.</p>
+                                    <p><strong>Solution:</strong></p>
+                                    <ol>
+                                        <li>Try rephrasing your query to be more specific</li>
+                                        <li>Check the examples for supported query types</li>
+                                        <li>Ensure the data you're querying exists in the system</li>
+                                        <li>Break complex queries into simpler ones</li>
+                                        <li>Check the query history for similar queries that worked</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Getting Help</h3>
+                    
+                    <p>
+                        If you encounter issues not covered in this guide, you can get help in several ways:
+                    </p>
+                    
+                    <ul>
+                        <li><strong>In-App Help</strong>: Click the help icon in the top navigation</li>
+                        <li><strong>Support Ticket</strong>: Submit a support ticket from the help menu</li>
+                        <li><strong>Documentation</strong>: Check the full documentation for detailed information</li>
+                        <li><strong>Community Forum</strong>: Ask questions and share solutions with other users</li>
+                        <li><strong>Training Resources</strong>: Access tutorials and webinars from the learning center</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-5 py-3 text-center text-muted border-top">
+            <p>Cross-Domain Predictive Analytics Dashboard</p>
+            <p><small>Documentation Version 1.0</small></p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

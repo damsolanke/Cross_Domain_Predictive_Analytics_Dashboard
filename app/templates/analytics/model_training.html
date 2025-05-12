@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .model-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .feature-bar {
+            display: flex;
+            height: 24px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .feature-item {
+            height: 100%;
+            text-align: center;
+            color: white;
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 2px 4px;
+        }
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .prediction-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .progress {
+            height: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analytics/models">Predictive Models</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system/system-status">System Status</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Predictive Model Management</h1>
+                <p class="lead">Train and manage cross-domain predictive models.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Model Training Form -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Create New Model</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="modelTrainingForm">
+                            <div class="mb-3">
+                                <label for="targetDomain" class="form-label">Target Domain</label>
+                                <select class="form-select" id="targetDomain" required>
+                                    <option value="" selected disabled>Select domain</option>
+                                    <option value="weather">Weather</option>
+                                    <option value="economic">Economic</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="social_media">Social Media</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="targetVariable" class="form-label">Target Variable</label>
+                                <select class="form-select" id="targetVariable" required disabled>
+                                    <option value="" selected disabled>Select domain first</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="modelType" class="form-label">Model Type</label>
+                                <select class="form-select" id="modelType" required>
+                                    <option value="linear" selected>Linear Regression</option>
+                                    <option value="ridge">Ridge Regression</option>
+                                    <option value="forest">Random Forest</option>
+                                    <option value="gbm">Gradient Boosting</option>
+                                </select>
+                                <div class="form-text">Select the algorithm to use for prediction.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Feature Domains</label>
+                                <div class="form-check">
+                                    <input class="form-check-input feature-domain-checkbox" type="checkbox" value="weather" id="weatherDomain" checked>
+                                    <label class="form-check-label" for="weatherDomain">
+                                        Weather
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input feature-domain-checkbox" type="checkbox" value="economic" id="economicDomain" checked>
+                                    <label class="form-check-label" for="economicDomain">
+                                        Economic
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input feature-domain-checkbox" type="checkbox" value="transportation" id="transportationDomain" checked>
+                                    <label class="form-check-label" for="transportationDomain">
+                                        Transportation
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input feature-domain-checkbox" type="checkbox" value="social_media" id="socialMediaDomain" checked>
+                                    <label class="form-check-label" for="socialMediaDomain">
+                                        Social Media
+                                    </label>
+                                </div>
+                                <div class="form-text">Select domains to use as features.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="lookbackDays" class="form-label">Lookback Period (days)</label>
+                                <input type="number" class="form-control" id="lookbackDays" min="1" max="90" value="30" required>
+                                <div class="form-text">Number of days of historical data to use for training.</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-cpu"></i> Train Model
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Model List -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Trained Models</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshModelsBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="modelsList">
+                            <!-- Models will be added here dynamically -->
+                            <div class="text-center my-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Loading models...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Model Details Modal -->
+    <div class="modal fade" id="modelDetailsModal" tabindex="-1" aria-labelledby="modelDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modelDetailsModalLabel">Model Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="modelDetailsContent">
+                        <!-- Model details will be loaded here -->
+                    </div>
+                    
+                    <div class="border-top mt-4 pt-4">
+                        <h5>Make a Prediction</h5>
+                        <p>Use this model to make a prediction based on current data.</p>
+                        <button class="btn btn-primary" id="makePredictionBtn">
+                            <i class="bi bi-lightning"></i> Make Prediction
+                        </button>
+                        
+                        <div id="predictionResult" class="prediction-result">
+                            <!-- Prediction result will be displayed here -->
+                        </div>
+                    </div>
+                    
+                    <div class="border-top mt-4 pt-4">
+                        <h5>Important Features</h5>
+                        <div id="featuresContent">
+                            <!-- Feature importance will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteModelBtn">
+                        <i class="bi bi-trash"></i> Delete Model
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div class="loading-container" id="loadingIndicator" style="display: none;">
+        <div class="card p-4 shadow">
+            <div class="d-flex flex-column align-items-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 id="loadingMessage">Processing...</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Domain variables mapping
+            const domainVariables = {
+                'weather': ['temperature', 'humidity', 'wind_speed', 'precipitation', 'pressure'],
+                'economic': ['market_index', 'trading_volume', 'volatility', 'interest_rate', 'exchange_rate'],
+                'transportation': ['congestion', 'avg_speed', 'vehicle_count', 'incident_count', 'travel_time'],
+                'social_media': ['sentiment', 'post_volume', 'engagement_rate', 'trend_strength', 'mentions']
+            };
+            
+            // Update target variables when domain changes
+            document.getElementById('targetDomain').addEventListener('change', function() {
+                const domain = this.value;
+                const variableSelect = document.getElementById('targetVariable');
+                
+                // Clear existing options
+                variableSelect.innerHTML = '';
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select variable';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                variableSelect.appendChild(defaultOption);
+                
+                // Add variables for selected domain
+                if (domain in domainVariables) {
+                    domainVariables[domain].forEach(variable => {
+                        const option = document.createElement('option');
+                        option.value = variable;
+                        option.textContent = variable;
+                        variableSelect.appendChild(option);
+                    });
+                }
+                
+                // Enable select
+                variableSelect.disabled = false;
+                
+                // Uncheck the corresponding domain in feature domains
+                document.querySelectorAll('.feature-domain-checkbox').forEach(checkbox => {
+                    if (checkbox.value === domain) {
+                        checkbox.checked = false;
+                    }
+                });
+            });
+            
+            // Prevent selecting target domain as feature
+            document.querySelectorAll('.feature-domain-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const domain = this.value;
+                    const targetDomain = document.getElementById('targetDomain').value;
+                    
+                    if (domain === targetDomain && this.checked) {
+                        alert('You cannot use the target domain as a feature domain.');
+                        this.checked = false;
+                    }
+                });
+            });
+            
+            // Form submission
+            document.getElementById('modelTrainingForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const targetDomain = document.getElementById('targetDomain').value;
+                const targetVariable = document.getElementById('targetVariable').value;
+                const modelType = document.getElementById('modelType').value;
+                const lookbackDays = parseInt(document.getElementById('lookbackDays').value);
+                
+                // Get selected feature domains
+                const featureDomains = [];
+                document.querySelectorAll('.feature-domain-checkbox:checked').forEach(checkbox => {
+                    featureDomains.push(checkbox.value);
+                });
+                
+                if (featureDomains.length === 0) {
+                    alert('Please select at least one feature domain.');
+                    return;
+                }
+                
+                // Show loading indicator
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                loadingIndicator.style.display = 'flex';
+                document.getElementById('loadingMessage').textContent = 'Training model...';
+                
+                // Create model
+                fetch('/api/analytics/prediction/models', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        target_domain: targetDomain,
+                        target_variable: targetVariable,
+                        model_type: modelType,
+                        feature_domains: featureDomains,
+                        lookback_days: lookbackDays
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    loadingIndicator.style.display = 'none';
+                    
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        alert('Model created successfully!');
+                        
+                        // Refresh model list
+                        loadModels();
+                        
+                        // Reset form
+                        document.getElementById('modelTrainingForm').reset();
+                        document.getElementById('targetVariable').disabled = true;
+                    }
+                })
+                .catch(error => {
+                    // Hide loading indicator
+                    loadingIndicator.style.display = 'none';
+                    
+                    console.error('Error creating model:', error);
+                    alert('Error creating model. Please try again.');
+                });
+            });
+            
+            // Load models
+            function loadModels() {
+                const modelsContainer = document.getElementById('modelsList');
+                
+                // Show loading state
+                modelsContainer.innerHTML = `
+                    <div class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading models...</p>
+                    </div>
+                `;
+                
+                // Fetch models
+                fetch('/api/analytics/prediction/models')
+                    .then(response => response.json())
+                    .then(models => {
+                        if (models.length === 0) {
+                            modelsContainer.innerHTML = `
+                                <div class="text-center my-5">
+                                    <i class="bi bi-emoji-neutral" style="font-size: 3rem;"></i>
+                                    <p class="mt-2">No models found. Create your first model!</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Sort by creation date (newest first)
+                        models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        
+                        // Clear container
+                        modelsContainer.innerHTML = '';
+                        
+                        // Add models
+                        models.forEach(model => {
+                            // Format metrics
+                            const r2 = model.metrics.r2 ?? 0;
+                            const r2Percent = Math.round(r2 * 100);
+                            const r2ColorClass = r2 > 0.8 ? 'bg-success' : 
+                                               r2 > 0.6 ? 'bg-info' : 
+                                               r2 > 0.4 ? 'bg-warning' : 'bg-danger';
+                            
+                            // Format date
+                            const createdDate = new Date(model.created_at).toLocaleString();
+                            
+                            // Create card
+                            const modelCard = document.createElement('div');
+                            modelCard.className = 'card model-card mb-3';
+                            modelCard.innerHTML = `
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title">${model.target.replace('.', ': ')}</h5>
+                                        <span class="badge bg-primary">${model.type}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Created: ${createdDate}</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label mb-1">Model Performance (R²)</label>
+                                        <div class="progress">
+                                            <div class="progress-bar ${r2ColorClass}" role="progressbar" 
+                                                style="width: ${r2Percent}%;" aria-valuenow="${r2Percent}" 
+                                                aria-valuemin="0" aria-valuemax="100">${r2Percent}%</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-sm btn-outline-primary view-details-btn" 
+                                            data-model-name="${model.name}">
+                                        <i class="bi bi-info-circle"></i> View Details
+                                    </button>
+                                </div>
+                            `;
+                            
+                            // Add event listener for details button
+                            modelCard.querySelector('.view-details-btn').addEventListener('click', function() {
+                                viewModelDetails(this.getAttribute('data-model-name'));
+                            });
+                            
+                            // Add to container
+                            modelsContainer.appendChild(modelCard);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading models:', error);
+                        modelsContainer.innerHTML = `
+                            <div class="text-center my-5">
+                                <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Error loading models. Please try again.</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // View model details
+            function viewModelDetails(modelName) {
+                const modal = new bootstrap.Modal(document.getElementById('modelDetailsModal'));
+                const modalTitle = document.getElementById('modelDetailsModalLabel');
+                const modelDetailsContent = document.getElementById('modelDetailsContent');
+                const featuresContent = document.getElementById('featuresContent');
+                
+                // Show loading state
+                modelDetailsContent.innerHTML = `
+                    <div class="text-center my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading model details...</p>
+                    </div>
+                `;
+                
+                featuresContent.innerHTML = `
+                    <div class="text-center my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Set current model name for prediction and deletion
+                document.getElementById('makePredictionBtn').setAttribute('data-model-name', modelName);
+                document.getElementById('deleteModelBtn').setAttribute('data-model-name', modelName);
+                
+                // Hide prediction result
+                document.getElementById('predictionResult').style.display = 'none';
+                
+                // Show modal
+                modal.show();
+                
+                // Fetch model details
+                Promise.all([
+                    fetch(`/api/analytics/prediction/models/${modelName}`).then(resp => resp.json()),
+                    fetch(`/api/analytics/prediction/features/${modelName}`).then(resp => resp.json())
+                ])
+                .then(([modelDetails, featureImportance]) => {
+                    // Update modal title
+                    modalTitle.textContent = `${modelDetails.target_domain}: ${modelDetails.target_variable}`;
+                    
+                    // Format metrics
+                    const metrics = modelDetails.metrics || {};
+                    const r2 = metrics.r2 ?? 0;
+                    const r2Percent = Math.round(r2 * 100);
+                    const rmse = metrics.rmse ?? 0;
+                    const mae = metrics.mae ?? 0;
+                    
+                    // Update model details
+                    modelDetailsContent.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Model Information</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Model Type
+                                        <span class="badge bg-primary">${modelDetails.model_type}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Target Domain
+                                        <span>${modelDetails.target_domain}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Target Variable
+                                        <span>${modelDetails.target_variable}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Created
+                                        <span>${new Date(modelDetails.created_at).toLocaleString()}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Model Performance</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        R² Score
+                                        <span class="badge ${r2 > 0.7 ? 'bg-success' : r2 > 0.4 ? 'bg-warning' : 'bg-danger'}">
+                                            ${r2.toFixed(4)} (${r2Percent}%)
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Root Mean Squared Error
+                                        <span>${rmse.toFixed(4)}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Mean Absolute Error
+                                        <span>${mae.toFixed(4)}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Update feature importance
+                    if (featureImportance.error) {
+                        featuresContent.innerHTML = `
+                            <div class="alert alert-warning">
+                                ${featureImportance.error}
+                            </div>
+                        `;
+                    } else if (featureImportance.length === 0) {
+                        featuresContent.innerHTML = `
+                            <div class="alert alert-info">
+                                No feature importance information available.
+                            </div>
+                        `;
+                    } else {
+                        // Sort features by importance
+                        featureImportance.sort((a, b) => b.importance - a.importance);
+                        
+                        // Calculate total importance for percentage
+                        const totalImportance = featureImportance.reduce((sum, feature) => sum + feature.importance, 0);
+                        
+                        // Create feature bars
+                        const featureBar = document.createElement('div');
+                        featureBar.className = 'feature-bar';
+                        
+                        // Color array for features
+                        const colors = [
+                            '#4285F4', '#EA4335', '#FBBC05', '#34A853', 
+                            '#FF6D01', '#46BDC6', '#7BAAF7', '#F07B72'
+                        ];
+                        
+                        // Add feature items
+                        featureImportance.forEach((feature, index) => {
+                            const percent = (feature.importance / totalImportance) * 100;
+                            if (percent < 1) return; // Skip very small features
+                            
+                            const featureItem = document.createElement('div');
+                            featureItem.className = 'feature-item';
+                            featureItem.style.width = `${percent}%`;
+                            featureItem.style.backgroundColor = colors[index % colors.length];
+                            featureItem.textContent = feature.feature.split('_').pop();
+                            
+                            featureBar.appendChild(featureItem);
+                        });
+                        
+                        // Create table
+                        let tableHTML = `
+                            <p>The chart below shows the relative importance of each feature in the model:</p>
+                            ${featureBar.outerHTML}
+                            <table class="table table-sm mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Importance</th>
+                                        <th>Relative</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        
+                        featureImportance.forEach((feature, index) => {
+                            const percent = (feature.importance / totalImportance) * 100;
+                            const featureName = feature.feature.replace(/_/g, ' ');
+                            
+                            tableHTML += `
+                                <tr>
+                                    <td>${featureName}</td>
+                                    <td>${feature.importance.toFixed(4)}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" 
+                                                style="width: ${percent}%; background-color: ${colors[index % colors.length]};" 
+                                                aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        
+                        tableHTML += `
+                                </tbody>
+                            </table>
+                        `;
+                        
+                        featuresContent.innerHTML = tableHTML;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching model details:', error);
+                    modelDetailsContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            Error loading model details: ${error.message}
+                        </div>
+                    `;
+                    featuresContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            Error loading feature importance.
+                        </div>
+                    `;
+                });
+            }
+            
+            // Make prediction
+            document.getElementById('makePredictionBtn').addEventListener('click', function() {
+                const modelName = this.getAttribute('data-model-name');
+                const resultContainer = document.getElementById('predictionResult');
+                
+                // Show loading state
+                resultContainer.style.display = 'block';
+                resultContainer.innerHTML = `
+                    <div class="text-center my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Making prediction...</p>
+                    </div>
+                `;
+                
+                // Make prediction
+                fetch(`/api/analytics/prediction/predict/${modelName}`)
+                    .then(response => response.json())
+                    .then(prediction => {
+                        if (prediction.error) {
+                            resultContainer.innerHTML = `
+                                <div class="alert alert-danger">
+                                    ${prediction.error}
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Format confidence
+                        const confidence = prediction.confidence * 100;
+                        const confidenceClass = confidence > 80 ? 'bg-success' : 
+                                              confidence > 60 ? 'bg-info' : 
+                                              confidence > 40 ? 'bg-warning' : 'bg-danger';
+                        
+                        // Update result container
+                        resultContainer.innerHTML = `
+                            <h6>Prediction Result</h6>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h2 class="mb-0">${prediction.prediction.toFixed(2)}</h2>
+                                            <p class="text-muted">${prediction.target_variable} (${prediction.target_domain})</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1">Confidence</p>
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar ${confidenceClass}" role="progressbar" 
+                                                    style="width: ${confidence}%;" aria-valuenow="${confidence}" 
+                                                    aria-valuemin="0" aria-valuemax="100">${confidence.toFixed(0)}%</div>
+                                            </div>
+                                            <small class="text-muted">
+                                                Based on ${prediction.input_features} features
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    Prediction made at ${new Date(prediction.timestamp).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        console.error('Error making prediction:', error);
+                        resultContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                Error making prediction: ${error.message}
+                            </div>
+                        `;
+                    });
+            });
+            
+            // Delete model
+            document.getElementById('deleteModelBtn').addEventListener('click', function() {
+                const modelName = this.getAttribute('data-model-name');
+                
+                if (confirm('Are you sure you want to delete this model? This action cannot be undone.')) {
+                    // Show loading indicator
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    loadingIndicator.style.display = 'flex';
+                    document.getElementById('loadingMessage').textContent = 'Deleting model...';
+                    
+                    // Delete model
+                    fetch(`/api/analytics/prediction/models/${modelName}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading indicator
+                        loadingIndicator.style.display = 'none';
+                        
+                        if (data.error) {
+                            alert('Error: ' + data.error);
+                        } else {
+                            // Close modal
+                            bootstrap.Modal.getInstance(document.getElementById('modelDetailsModal')).hide();
+                            
+                            // Refresh model list
+                            loadModels();
+                            
+                            alert('Model deleted successfully!');
+                        }
+                    })
+                    .catch(error => {
+                        // Hide loading indicator
+                        loadingIndicator.style.display = 'none';
+                        
+                        console.error('Error deleting model:', error);
+                        alert('Error deleting model. Please try again.');
+                    });
+                }
+            });
+            
+            // Refresh models button
+            document.getElementById('refreshModelsBtn').addEventListener('click', function() {
+                loadModels();
+            });
+            
+            // Initial load
+            loadModels();
+        });
+    </script>
+</body>
+</html>
