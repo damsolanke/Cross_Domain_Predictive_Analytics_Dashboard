@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nlq.css') }}">
+    <style>
+        .tab-content {
+            padding: 20px 0;
+        }
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .map-container {
+            height: 400px;
+        }
+        .alert-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        #loadingIndicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .domain-card {
+            transition: all 0.3s ease;
+        }
+        .domain-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/nlq">Natural Language Queries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system/system-status">System Status</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/demo/control">Demo Control</a>
+                    </li>
+                </ul>
+                
+                <!-- System Status -->
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="badge bg-success me-2" id="connectionStatus">Connected</span>
+                    <button class="btn btn-sm btn-outline-light" id="refreshBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Natural Language Query Input -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        {% include 'components/nlq_input.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Natural Language Query Results (hidden by default) -->
+        <div class="row mb-3" id="nlq-results-row" style="display: none;">
+            <div class="col-12">
+                {% include 'components/nlq_results.html' %}
+            </div>
+        </div>
+        
+        <!-- Dashboard Controls -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Cross-Domain Analytics Dashboard</h5>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+                                <label class="form-check-label" for="autoRefreshToggle">Auto Refresh</label>
+                            </div>
+                            <div class="form-check form-switch me-3">
+                                <input class="form-check-input" type="checkbox" id="notificationsToggle" checked>
+                                <label class="form-check-label" for="notificationsToggle">Notifications</label>
+                            </div>
+                            <select class="form-select form-select-sm me-3" id="timeRangeSelector" style="width: 150px;">
+                                <option value="1h">Last Hour</option>
+                                <option value="6h">Last 6 Hours</option>
+                                <option value="1d" selected>Last 24 Hours</option>
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Health Overview -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="card domain-card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">System Uptime</h5>
+                        <div class="display-4 my-3" id="systemUptime">0m 0s</div>
+                        <p class="text-muted">Time since last restart</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card domain-card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Processing Rate</h5>
+                        <div class="display-4 my-3" id="processingRate">0.00</div>
+                        <p class="text-muted">Items processed per second</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card domain-card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Active Components</h5>
+                        <div class="display-4 my-3" id="componentCount">0</div>
+                        <p class="text-muted">Connected system components</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card domain-card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Queue Size</h5>
+                        <div class="display-4 my-3" id="queueSize">0</div>
+                        <p class="text-muted">Items waiting for processing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Domain Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="domainTabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-tab-target="#overview" href="#">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-tab-target="#weatherTab" href="#">Weather</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-tab-target="#economicTab" href="#">Economic</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-tab-target="#transportationTab" href="#">Transportation</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-tab-target="#socialMediaTab" href="#">Social Media</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-tab-target="#crossDomainTab" href="#">Cross-Domain</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <!-- Overview Tab -->
+                            <div class="tab-pane active" id="overview" data-tab-content>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Overview Chart -->
+                                        <div class="chart-container">
+                                            <div id="overviewChart" data-chart="time-series"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Active Alerts -->
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Active Alerts</h5>
+                                                <span class="badge bg-danger alert-badge" id="alertCount">0</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="alertsContainer" class="overflow-auto" style="max-height: 250px;">
+                                                    <div class="alert alert-info">
+                                                        No active alerts
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Domain Cards -->
+                                <div class="row mt-4">
+                                    <div class="col-md-3">
+                                        <div class="card domain-card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Weather</h5>
+                                                <div id="weatherGaugeSmall" data-chart="gauge" class="chart-container"></div>
+                                                <p class="text-center">Current Temperature</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="#" class="btn btn-sm btn-primary" data-tab-target="#weatherTab">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card domain-card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Economic</h5>
+                                                <div id="economicGaugeSmall" data-chart="gauge" class="chart-container"></div>
+                                                <p class="text-center">Economic Health</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="#" class="btn btn-sm btn-primary" data-tab-target="#economicTab">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card domain-card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Transportation</h5>
+                                                <div id="transportationGaugeSmall" data-chart="gauge" class="chart-container"></div>
+                                                <p class="text-center">Congestion Level</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="#" class="btn btn-sm btn-primary" data-tab-target="#transportationTab">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card domain-card h-100">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Social Media</h5>
+                                                <div id="socialMediaGaugeSmall" data-chart="gauge" class="chart-container"></div>
+                                                <p class="text-center">Sentiment Index</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="#" class="btn btn-sm btn-primary" data-tab-target="#socialMediaTab">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Weather Tab -->
+                            <div class="tab-pane" id="weatherTab" data-tab-content data-domain="weather">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Temperature Chart -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Temperature Forecast</h5>
+                                                <div class="chart-container">
+                                                    <div id="weatherTempChart" data-chart="time-series"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Weather Comparison -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Location Comparison</h5>
+                                                <div class="chart-container">
+                                                    <div id="weatherComparisonChart" data-chart="bar"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Current Weather -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Current Conditions</h5>
+                                                <div class="chart-container">
+                                                    <div id="weatherGauge" data-chart="gauge"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Weather Map -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Weather Map</h5>
+                                                <div class="map-container">
+                                                    <div id="weatherMap" data-chart="map"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Economic Tab -->
+                            <div class="tab-pane" id="economicTab" data-tab-content data-domain="economic">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Economic Trends Chart -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Economic Indicators</h5>
+                                                <div class="chart-container">
+                                                    <div id="economicTrendsChart" data-chart="time-series"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Indicator Comparison -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Indicator Comparison</h5>
+                                                <div class="chart-container">
+                                                    <div id="economicComparisonChart" data-chart="bar"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Economic Health -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Economic Health</h5>
+                                                <div class="chart-container">
+                                                    <div id="economicGauge" data-chart="gauge"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Economic Map -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Economic Map</h5>
+                                                <div class="map-container">
+                                                    <div id="economicMap" data-chart="map"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Transportation Tab -->
+                            <div class="tab-pane" id="transportationTab" data-tab-content data-domain="transportation">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Traffic Trends Chart -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Traffic Trends</h5>
+                                                <div class="chart-container">
+                                                    <div id="trafficTrendsChart" data-chart="time-series"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Time of Day Comparison -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Time of Day Comparison</h5>
+                                                <div class="chart-container">
+                                                    <div id="transportationComparisonChart" data-chart="bar"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Congestion Level -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Congestion Level</h5>
+                                                <div class="chart-container">
+                                                    <div id="congestionGauge" data-chart="gauge"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Traffic Map -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Traffic Map</h5>
+                                                <div class="map-container">
+                                                    <div id="trafficMap" data-chart="map"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Social Media Tab -->
+                            <div class="tab-pane" id="socialMediaTab" data-tab-content data-domain="social-media">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Sentiment Trends Chart -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Sentiment Trends</h5>
+                                                <div class="chart-container">
+                                                    <div id="sentimentTrendsChart" data-chart="time-series"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Platform Comparison -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Platform Comparison</h5>
+                                                <div class="chart-container">
+                                                    <div id="socialMediaComparisonChart" data-chart="bar"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Sentiment Index -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Sentiment Index</h5>
+                                                <div class="chart-container">
+                                                    <div id="sentimentGauge" data-chart="gauge"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Top Trending Topics -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Top Trending Topics</h5>
+                                                <div id="trendingTopics" class="list-group">
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>No trending topics available</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cross-Domain Tab -->
+                            <div class="tab-pane" id="crossDomainTab" data-tab-content data-domain="cross-domain">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- Correlation Heatmap -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Cross-Domain Correlation Heatmap</h5>
+                                                <div class="chart-container">
+                                                    <div id="correlation-heatmap" data-chart="correlation-heatmap"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Correlation Network -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Correlation Network</h5>
+                                                <div class="chart-container">
+                                                    <div id="correlation-network" data-chart="correlation-network"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <!-- Cross-Domain Insights -->
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Correlation Insights</h5>
+                                                <div id="correlation-insights" data-content="insights">
+                                                    <div class="alert alert-info">
+                                                        No correlation insights available yet. As more data becomes available, insights will be displayed here.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Correlation Settings -->
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="card-title">Correlation Settings</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="correlation-settings-form">
+                                                    <div class="form-group mb-3">
+                                                        <label for="correlation-time-window">Time Window (hours)</label>
+                                                        <input type="number" class="form-control" id="correlation-time-window" min="1" max="168" value="24">
+                                                        <small class="form-text text-muted">Set the time window for correlation analysis (1-168 hours).</small>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Apply Settings</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    
+    <!-- Error Container -->
+    <div id="errorContainer" class="alert alert-danger fixed-top mx-auto mt-3" style="max-width: 500px; display: none;">
+        Error loading data
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/modules/sankey.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="{{ url_for('static', filename='js/nlq.js') }}"></script>
+</body>
+</html>

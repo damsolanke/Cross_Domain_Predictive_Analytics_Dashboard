@@ -1,0 +1,193 @@
+/* 
+Natural Language Query Styles
+Author: Ademola Solanke
+Date: May 2025
+*/
+
+.nlq-container {
+    margin: 2rem 0;
+    width: 100%;
+    max-width: 800px;
+}
+
+.nlq-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nlq-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 1.2rem;
+}
+
+#nlq-input {
+    padding-left: 40px;
+    height: 50px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid #ced4da;
+}
+
+#nlq-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+#nlq-submit {
+    position: absolute;
+    right: 5px;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nlq-suggestions {
+    margin-top: 0.5rem;
+}
+
+.nlq-suggestions p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.nlq-suggestion-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.suggestion-pill {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.suggestion-pill:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.nlq-results {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+}
+
+.nlq-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nlq-explanation {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.nlq-visualizations {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.nlq-visualization-container {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.nlq-visualization-container h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #495057;
+}
+
+.nlq-viz {
+    height: 300px;
+    width: 100%;
+    background-color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-viz {
+    text-align: center;
+    color: #6c757d;
+}
+
+.nlq-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Media queries for responsive design */
+@media (min-width: 768px) {
+    .nlq-visualizations {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+/* Additional custom styles */
+.nlq-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+}
+
+.nlq-badge-intent {
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+.nlq-badge-confidence {
+    color: #212529;
+    background-color: #ffc107;
+}
+
+.nlq-history-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s;
+}
+
+.nlq-history-item:hover {
+    background-color: #f8f9fa;
+}
+
+.nlq-history-item:last-child {
+    border-bottom: none;
+}
