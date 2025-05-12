@@ -60,4 +60,7 @@ coverage.xml
 
 # Project specific
 .env
-.flaskenv 
+.flaskenv
+
+# GitHub CLI installer
+gh.msi 
