@@ -25,7 +25,11 @@ def create_app():
         from app.system_integration.integration import init_system_integration
         init_system_integration(app)
     
-    # Now register blueprints
+    # Import and register blueprints
+    from .visualizations import visualization_bp
+    app.register_blueprint(visualization_bp, url_prefix='/visualization')
+    
+    # Now register other blueprints
     from app.main import main as main_blueprint
     app.register_blueprint(main_blueprint)
     
