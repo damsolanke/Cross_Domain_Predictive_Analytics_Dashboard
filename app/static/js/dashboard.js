@@ -1,1576 +1,840 @@
 /**
- * Dashboard JavaScript for real-time updates and dynamic visualizations
+ * Cross-Domain Predictive Analytics Dashboard
+ * Main dashboard JavaScript for loading and rendering dashboard components
  */
 
-// Dashboard controller
-class DashboardController {
-    constructor() {
-        this.socket = io('/system-updates');
-        this.dataCache = {
-            weather: [],
-            economic: [],
-            transportation: [],
-            'social-media': [],
-            'cross-domain': []
-        };
-        this.chartInstances = {};
-        this.updateInterval = 30000; // Fallback polling interval
-        this.initializeEventHandlers();
-    }
+// Dashboard state
+const dashboardState = {
+    isLoading: false,
+    lastUpdated: null,
+    dataCache: {},
+    components: []
+};
 
-    /**
-     * Initialize event handlers for WebSocket and UI
-     */
-    initializeEventHandlers() {
-        // WebSocket event handlers
-        this.socket.on('connect', () => {
-            console.log('Connected to real-time updates');
-            this.setConnectionStatus(true);
-            
-            // Subscribe to all update types
-            this.socket.emit('subscribe_to_updates', { update_type: 'all' });
-        });
+// Configuration
+const config = {
+    apiEndpoints: {
+        dashboardData: '/api/dashboard-data',
+        correlations: '/api/correlations',
+        systemStatus: '/api/system-status'
+    },
+    refreshInterval: 30000, // 30 seconds
+    cacheExpiry: 60000, // 60 seconds
+};
 
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from real-time updates');
-            this.setConnectionStatus(false);
-            
-            // Set up polling as fallback
-            this.startPolling();
-        });
-
-        this.socket.on('connection_response', (data) => {
-            console.log('Connection response:', data);
-        });
-
-        this.socket.on('subscription_response', (data) => {
-            console.log('Subscription response:', data);
-        });
-
-        // Data update event
-        this.socket.on('data_update', (data) => {
-            console.log('Data update received:', data);
-            this.handleDataUpdate(data);
-        });
-
-        // Alert notification event
-        this.socket.on('alert_notification', (data) => {
-            console.log('Alert notification received:', data);
-            this.handleAlertNotification(data);
-        });
-        
-        // Correlation data event
-        this.socket.on('correlation_data', (data) => {
-            console.log('Correlation data received:', data);
-            this.handleCorrelationDataUpdate(data);
-        });
-        
-        // Correlation insight event
-        this.socket.on('correlation_insight', (data) => {
-            console.log('Correlation insight received:', data);
-            this.handleCorrelationInsight(data);
-        });
-        
-        // Correlation anomaly event
-        this.socket.on('correlation_anomaly', (data) => {
-            console.log('Correlation anomaly received:', data);
-            this.handleCorrelationAnomaly(data);
-        });
-
-        // Initialize tabs and other UI elements
-        document.addEventListener('DOMContentLoaded', () => {
-            this.initializeTabs();
-            this.initializeControls();
-            this.loadInitialData();
-        });
-    }
-
-    /**
-     * Initialize tab switching
-     */
-    initializeTabs() {
-        const tabs = document.querySelectorAll('[data-tab-target]');
-        const tabContents = document.querySelectorAll('[data-tab-content]');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Deactivate all tabs
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(tc => tc.classList.remove('active'));
-                
-                // Activate clicked tab
-                tab.classList.add('active');
-                const target = document.querySelector(tab.dataset.tabTarget);
-                if (target) {
-                    target.classList.add('active');
-                    
-                    // Refresh charts when tab becomes visible
-                    this.refreshChartsInContainer(target);
-                }
-            });
-        });
-    }
-
-    /**
-     * Initialize dashboard controls
-     */
-    initializeControls() {
-        // Refresh button
-        const refreshBtn = document.getElementById('refreshBtn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.loadInitialData();
-            });
-        }
-
-        // Auto-refresh toggle
-        const autoRefreshToggle = document.getElementById('autoRefreshToggle');
-        if (autoRefreshToggle) {
-            autoRefreshToggle.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    this.startPolling();
-                } else {
-                    this.stopPolling();
-                }
-            });
-        }
-
-        // Time range selector
-        const timeRangeSelector = document.getElementById('timeRangeSelector');
-        if (timeRangeSelector) {
-            timeRangeSelector.addEventListener('change', (e) => {
-                this.updateTimeRange(e.target.value);
-            });
-        }
-        
-        // Correlation settings form
-        const correlationSettingsForm = document.getElementById('correlation-settings-form');
-        if (correlationSettingsForm) {
-            correlationSettingsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const timeWindow = document.getElementById('correlation-time-window').value;
-                this.updateCorrelationSettings(timeWindow);
-            });
-        }
-    }
+/**
+ * Initialize the dashboard
+ */
+function initDashboard() {
+    console.log('Initializing dashboard...');
     
-    /**
-     * Update correlation settings
-     */
-    updateCorrelationSettings(timeWindow) {
-        // Send settings to server
-        fetch('/api/system/correlation/configure', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                time_window_hours: parseInt(timeWindow)
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Show success message
-                this.showErrorMessage('Correlation settings updated successfully');
-                
-                // Request updated correlation data
-                this.socket.emit('get_correlation_data');
-            } else {
-                // Show error message
-                this.showErrorMessage('Error updating correlation settings: ' + data.message);
-            }
-        })
-        .catch(error => {
-            this.showErrorMessage('Error updating correlation settings: ' + error);
-        });
-    }
-
-    /**
-     * Set connection status indicator
-     */
-    setConnectionStatus(connected) {
-        const statusIndicator = document.getElementById('connectionStatus');
-        if (statusIndicator) {
-            if (connected) {
-                statusIndicator.classList.remove('bg-danger');
-                statusIndicator.classList.add('bg-success');
-                statusIndicator.textContent = 'Connected';
-            } else {
-                statusIndicator.classList.remove('bg-success');
-                statusIndicator.classList.add('bg-danger');
-                statusIndicator.textContent = 'Disconnected';
-            }
-        }
-    }
-
-    /**
-     * Start polling for updates (fallback when WebSocket is unavailable)
-     */
-    startPolling() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-        }
-        
-        this.pollingInterval = setInterval(() => {
-            this.fetchDashboardData();
-        }, this.updateInterval);
-        
-        console.log(`Started polling every ${this.updateInterval / 1000} seconds`);
-    }
-
-    /**
-     * Stop polling for updates
-     */
-    stopPolling() {
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
-            console.log('Stopped polling');
-        }
-    }
-
-    /**
-     * Load initial dashboard data
-     */
-    loadInitialData() {
-        this.showLoadingIndicator(true);
-        this.fetchDashboardData();
-        
-        // Request correlation data
-        this.socket.emit('get_correlation_data');
-        this.socket.emit('get_correlation_insights');
-    }
-
-    /**
-     * Fetch dashboard data from API
-     */
-    fetchDashboardData() {
-        fetch('/api/dashboard/data')
-            .then(response => response.json())
-            .then(data => {
-                this.processApiData(data);
-                this.showLoadingIndicator(false);
-            })
-            .catch(error => {
-                console.error('Error fetching dashboard data:', error);
-                this.showLoadingIndicator(false);
-                this.showErrorMessage('Failed to load dashboard data');
-            });
-    }
-
-    /**
-     * Process API data and update dashboard
-     */
-    processApiData(apiData) {
-        // Update data cache
-        for (const domain in apiData.data) {
-            if (apiData.data[domain].length > 0) {
-                this.dataCache[domain] = apiData.data[domain];
-            }
-        }
-        
-        // Update system health indicators
-        this.updateSystemHealth(apiData.health);
-        
-        // Update visualizations
-        this.updateVisualizations();
-    }
-
-    /**
-     * Handle real-time data update
-     */
-    handleDataUpdate(updateData) {
-        const dataType = updateData.type;
-        const data = updateData.data;
-        
-        if (dataType === 'system_metrics') {
-            // Update system health indicators
-            this.updateSystemHealth(data.health);
-        } else if (dataType === 'processed_data') {
-            // Add to appropriate domain cache
-            const source = data.source || 'unknown';
-            if (this.dataCache[source]) {
-                this.dataCache[source].push(data);
-                
-                // Keep cache size reasonable
-                if (this.dataCache[source].length > 100) {
-                    this.dataCache[source] = this.dataCache[source].slice(-100);
-                }
-                
-                // Update visualizations
-                this.updateDomainVisualizations(source);
-            }
-        }
-    }
-
-    /**
-     * Handle alert notification
-     */
-    handleAlertNotification(alertData) {
-        // Create alert element
-        this.addAlertToDisplay(alertData);
-        
-        // Play notification sound if enabled
-        this.playNotificationSound();
-    }
-
-    /**
-     * Add alert to alerts display
-     */
-    addAlertToDisplay(alertData) {
-        const alertsContainer = document.getElementById('alertsContainer');
-        if (!alertsContainer) return;
-        
-        // Create alert element
-        const alertElement = document.createElement('div');
-        alertElement.className = `alert alert-${this.getAlertClass(alertData.level)} alert-dismissible fade show`;
-        alertElement.setAttribute('role', 'alert');
-        
-        // Create alert content
-        alertElement.innerHTML = `
-            <strong>${alertData.type}:</strong> ${alertData.message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Add to container
-        alertsContainer.prepend(alertElement);
-        
-        // Remove after 30 seconds
-        setTimeout(() => {
-            alertElement.classList.remove('show');
-            setTimeout(() => alertElement.remove(), 500);
-        }, 30000);
-    }
-
-    /**
-     * Map alert level to Bootstrap class
-     */
-    getAlertClass(level) {
-        switch (level) {
-            case 'critical': return 'danger';
-            case 'warning': return 'warning';
-            case 'info': return 'info';
-            default: return 'secondary';
-        }
-    }
-
-    /**
-     * Play notification sound
-     */
-    playNotificationSound() {
-        // Check if notifications are enabled
-        const notificationsEnabled = document.getElementById('notificationsToggle')?.checked;
-        if (!notificationsEnabled) return;
-        
-        // Create and play audio element
-        const audio = new Audio('/static/audio/notification.mp3');
-        audio.play().catch(e => console.log('Error playing notification sound:', e));
-    }
-
-    /**
-     * Update system health indicators
-     */
-    updateSystemHealth(healthData) {
-        if (!healthData) return;
-        
-        // Update uptime
-        const uptimeElement = document.getElementById('systemUptime');
-        if (uptimeElement && healthData.uptime_seconds) {
-            const uptime = this.formatUptime(healthData.uptime_seconds);
-            uptimeElement.textContent = uptime;
-        }
-        
-        // Update processing rate
-        const processingRateElement = document.getElementById('processingRate');
-        if (processingRateElement && healthData.processing_rate !== undefined) {
-            processingRateElement.textContent = `${healthData.processing_rate.toFixed(2)} items/sec`;
-        }
-        
-        // Update component counts
-        const componentsElement = document.getElementById('componentCount');
-        if (componentsElement && healthData.component_counts) {
-            const total = Object.values(healthData.component_counts).reduce((a, b) => a + b, 0);
-            componentsElement.textContent = total;
-        }
-        
-        // Update queue sizes
-        const queueElement = document.getElementById('queueSize');
-        if (queueElement && healthData.queue_sizes) {
-            const total = Object.values(healthData.queue_sizes).reduce((a, b) => a + b, 0);
-            queueElement.textContent = total;
-        }
-    }
-
-    /**
-     * Format uptime seconds into human-readable string
-     */
-    formatUptime(seconds) {
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        
-        if (days > 0) {
-            return `${days}d ${hours}h ${minutes}m`;
-        } else if (hours > 0) {
-            return `${hours}h ${minutes}m`;
-        } else {
-            return `${minutes}m ${Math.floor(seconds % 60)}s`;
-        }
-    }
-
-    /**
-     * Update all visualizations
-     */
-    updateVisualizations() {
-        // Update domain-specific visualizations
-        for (const domain in this.dataCache) {
-            this.updateDomainVisualizations(domain);
-        }
-        
-        // Update cross-domain visualizations
-        this.updateCrossDomainVisualizations();
-    }
-
-    /**
-     * Update visualizations for a specific domain
-     */
-    updateDomainVisualizations(domain) {
-        const data = this.dataCache[domain];
-        if (!data || data.length === 0) return;
-        
-        // Get domain container
-        const container = document.querySelector(`[data-domain="${domain}"]`);
-        if (!container) return;
-        
-        // Update charts in this container
-        this.updateChartsInContainer(container, domain, data);
-    }
-
-    /**
-     * Update cross-domain visualizations
-     */
-    updateCrossDomainVisualizations() {
-        const crossDomainData = this.dataCache['cross-domain'];
-        if (!crossDomainData) return;
-        
-        // Get cross-domain container
-        const container = document.querySelector('[data-domain="cross-domain"]');
-        if (!container) return;
-        
-        // Update correlation matrix or heatmap
-        if (crossDomainData.heatmap_data) {
-            this.updateCorrelationHeatmap(container, crossDomainData.heatmap_data);
-        }
-        
-        // Update network graph if data is available
-        if (crossDomainData.network_data) {
-            this.updateCorrelationNetwork(container, crossDomainData.network_data);
-        }
-        
-        // Update cross-domain insights
-        if (crossDomainData.insights) {
-            this.updateCrossDomainInsights(container, crossDomainData.insights);
-        }
-    }
-
-    /**
-     * Update charts in a container
-     */
-    updateChartsInContainer(container, domain, data) {
-        // Find all chart containers in this domain
-        const chartContainers = container.querySelectorAll('[data-chart]');
-        
-        chartContainers.forEach(chartContainer => {
-            const chartType = chartContainer.getAttribute('data-chart');
-            const chartId = chartContainer.id;
-            
-            // Create or update chart based on type
-            switch (chartType) {
-                case 'time-series':
-                    this.updateTimeSeriesChart(chartId, domain, data);
-                    break;
-                case 'gauge':
-                    this.updateGaugeChart(chartId, domain, data);
-                    break;
-                case 'bar':
-                    this.updateBarChart(chartId, domain, data);
-                    break;
-                case 'map':
-                    this.updateMapVisualization(chartId, domain, data);
-                    break;
-                default:
-                    console.log(`Unknown chart type: ${chartType}`);
-            }
-        });
-    }
-
-    /**
-     * Refresh charts in a container (when tab becomes visible)
-     */
-    refreshChartsInContainer(container) {
-        // Find all chart instances in this container
-        const chartContainers = container.querySelectorAll('[data-chart]');
-        
-        chartContainers.forEach(chartContainer => {
-            const chartId = chartContainer.id;
-            if (this.chartInstances[chartId]) {
-                this.chartInstances[chartId].reflow();
-            }
-        });
-    }
-
-    /**
-     * Update time series chart
-     */
-    updateTimeSeriesChart(chartId, domain, data) {
-        // Extract time series data based on domain
-        let seriesData = [];
-        let title = '';
-        
-        if (domain === 'weather') {
-            seriesData = this.extractWeatherTimeSeries(data);
-            title = 'Weather Trends';
-        } else if (domain === 'economic') {
-            seriesData = this.extractEconomicTimeSeries(data);
-            title = 'Economic Indicators';
-        } else if (domain === 'transportation') {
-            seriesData = this.extractTransportationTimeSeries(data);
-            title = 'Transportation Metrics';
-        } else if (domain === 'social-media') {
-            seriesData = this.extractSocialMediaTimeSeries(data);
-            title = 'Social Media Trends';
-        }
-        
-        // Create or update chart
-        if (this.chartInstances[chartId]) {
-            // Update existing chart
-            const chart = this.chartInstances[chartId];
-            
-            // Update series data
-            seriesData.forEach((series, index) => {
-                if (chart.series[index]) {
-                    chart.series[index].setData(series.data, false);
-                } else {
-                    chart.addSeries(series, false);
-                }
-            });
-            
-            // Remove extra series
-            while (chart.series.length > seriesData.length) {
-                chart.series[chart.series.length - 1].remove(false);
-            }
-            
-            chart.redraw();
-        } else {
-            // Create new chart
-            this.chartInstances[chartId] = Highcharts.chart(chartId, {
-                chart: {
-                    type: 'line',
-                    animation: true,
-                    style: {
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-                    }
-                },
-                time: {
-                    useUTC: false
-                },
-                title: {
-                    text: title
-                },
-                xAxis: {
-                    type: 'datetime',
-                    title: {
-                        text: 'Time'
-                    }
-                },
-                yAxis: {
-                    title: {
-                        text: 'Value'
-                    }
-                },
-                tooltip: {
-                    shared: true,
-                    crosshairs: true
-                },
-                plotOptions: {
-                    series: {
-                        marker: {
-                            enabled: false
-                        }
-                    }
-                },
-                series: seriesData,
-                responsive: {
-                    rules: [{
-                        condition: {
-                            maxWidth: 500
-                        },
-                        chartOptions: {
-                            legend: {
-                                layout: 'horizontal',
-                                align: 'center',
-                                verticalAlign: 'bottom'
-                            }
-                        }
-                    }]
-                }
-            });
-        }
-    }
-
-    /**
-     * Update gauge chart
-     */
-    updateGaugeChart(chartId, domain, data) {
-        // Extract gauge data based on domain
-        let gaugeData = 0;
-        let title = '';
-        let min = 0;
-        let max = 100;
-        
-        if (domain === 'weather') {
-            gaugeData = this.extractWeatherGaugeData(data);
-            title = 'Current Temperature';
-            min = -20;
-            max = 40;
-        } else if (domain === 'economic') {
-            gaugeData = this.extractEconomicGaugeData(data);
-            title = 'Economic Health';
-        } else if (domain === 'transportation') {
-            gaugeData = this.extractTransportationGaugeData(data);
-            title = 'Congestion Level';
-            max = 1;
-        } else if (domain === 'social-media') {
-            gaugeData = this.extractSocialMediaGaugeData(data);
-            title = 'Sentiment Index';
-            min = -1;
-            max = 1;
-        }
-        
-        // Create or update chart
-        if (this.chartInstances[chartId]) {
-            // Update existing chart
-            const point = this.chartInstances[chartId].series[0].points[0];
-            point.update(gaugeData);
-        } else {
-            // Create new chart
-            this.chartInstances[chartId] = Highcharts.chart(chartId, {
-                chart: {
-                    type: 'gauge',
-                    plotBackgroundColor: null,
-                    plotBackgroundImage: null,
-                    plotBorderWidth: 0,
-                    plotShadow: false,
-                    height: '80%'
-                },
-                title: {
-                    text: title
-                },
-                pane: {
-                    startAngle: -150,
-                    endAngle: 150,
-                    background: [{
-                        backgroundColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [
-                                [0, '#FFF'],
-                                [1, '#333']
-                            ]
-                        },
-                        borderWidth: 0,
-                        outerRadius: '109%'
-                    }, {
-                        backgroundColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [
-                                [0, '#333'],
-                                [1, '#FFF']
-                            ]
-                        },
-                        borderWidth: 1,
-                        outerRadius: '107%'
-                    }, {
-                        // default background
-                    }, {
-                        backgroundColor: '#DDD',
-                        borderWidth: 0,
-                        outerRadius: '105%',
-                        innerRadius: '103%'
-                    }]
-                },
-                yAxis: {
-                    min: min,
-                    max: max,
-                    minorTickInterval: 'auto',
-                    minorTickWidth: 1,
-                    minorTickLength: 10,
-                    minorTickPosition: 'inside',
-                    minorTickColor: '#666',
-                    tickPixelInterval: 30,
-                    tickWidth: 2,
-                    tickPosition: 'inside',
-                    tickLength: 10,
-                    tickColor: '#666',
-                    labels: {
-                        step: 2,
-                        rotation: 'auto'
-                    },
-                    title: {
-                        text: ''
-                    },
-                    plotBands: this.getGaugePlotBands(domain, min, max)
-                },
-                series: [{
-                    name: title,
-                    data: [gaugeData],
-                    tooltip: {
-                        valueSuffix: this.getGaugeValueSuffix(domain)
-                    }
-                }]
-            });
-        }
-    }
-
-    /**
-     * Update bar chart
-     */
-    updateBarChart(chartId, domain, data) {
-        // Extract bar chart data based on domain
-        let categories = [];
-        let seriesData = [];
-        let title = '';
-        
-        if (domain === 'weather') {
-            [categories, seriesData] = this.extractWeatherBarData(data);
-            title = 'Weather Comparison';
-        } else if (domain === 'economic') {
-            [categories, seriesData] = this.extractEconomicBarData(data);
-            title = 'Economic Indicators';
-        } else if (domain === 'transportation') {
-            [categories, seriesData] = this.extractTransportationBarData(data);
-            title = 'Transportation Metrics';
-        } else if (domain === 'social-media') {
-            [categories, seriesData] = this.extractSocialMediaBarData(data);
-            title = 'Social Media Engagement';
-        }
-        
-        // Create or update chart
-        if (this.chartInstances[chartId]) {
-            // Update existing chart
-            const chart = this.chartInstances[chartId];
-            
-            // Update categories
-            chart.xAxis[0].setCategories(categories);
-            
-            // Update series data
-            seriesData.forEach((series, index) => {
-                if (chart.series[index]) {
-                    chart.series[index].setData(series.data, false);
-                } else {
-                    chart.addSeries(series, false);
-                }
-            });
-            
-            // Remove extra series
-            while (chart.series.length > seriesData.length) {
-                chart.series[chart.series.length - 1].remove(false);
-            }
-            
-            chart.redraw();
-        } else {
-            // Create new chart
-            this.chartInstances[chartId] = Highcharts.chart(chartId, {
-                chart: {
-                    type: 'column'
-                },
-                title: {
-                    text: title
-                },
-                xAxis: {
-                    categories: categories
-                },
-                yAxis: {
-                    title: {
-                        text: 'Value'
-                    }
-                },
-                tooltip: {
-                    shared: true
-                },
-                plotOptions: {
-                    column: {
-                        pointPadding: 0.2,
-                        borderWidth: 0
-                    }
-                },
-                series: seriesData
-            });
-        }
-    }
-
-    /**
-     * Update map visualization
-     */
-    updateMapVisualization(chartId, domain, data) {
-        // Implementation depends on the mapping library you choose
-        // This is a placeholder for map visualization
-        console.log(`Map visualization for ${domain} would be updated here`);
-    }
-
-    /**
-     * Update correlation heatmap
-     */
-    updateCorrelationHeatmap(container, heatmapData) {
-        // Find correlation heatmap container
-        const chartContainer = container.querySelector('[data-chart="correlation-heatmap"]');
-        if (!chartContainer) return;
-        
-        const chartId = chartContainer.id;
-        
-        // Get the first heatmap dataset if available
-        if (!heatmapData || heatmapData.length === 0) return;
-        
-        const dataset = heatmapData[0];
-        if (!dataset || !dataset.data) return;
-        
-        // Get x and y categories from the dataset
-        const xCategories = [];
-        const yCategories = [];
-        const formattedData = [];
-        
-        // Extract categories and format data for the heatmap
-        dataset.data.forEach(item => {
-            if (!xCategories.includes(item.x)) {
-                xCategories.push(item.x);
-            }
-            
-            if (!yCategories.includes(item.y)) {
-                yCategories.push(item.y);
-            }
-        });
-        
-        // Format data as [x_index, y_index, value]
-        dataset.data.forEach(item => {
-            const xIndex = xCategories.indexOf(item.x);
-            const yIndex = yCategories.indexOf(item.y);
-            formattedData.push([xIndex, yIndex, item.value]);
-        });
-        
-        const title = dataset.domain_pair ? 
-            `Correlation: ${dataset.domain_pair.replace('_vs_', ' vs ')}` : 
-            'Cross-Domain Correlations';
-        
-        // Create or update chart
-        if (this.chartInstances[chartId]) {
-            // Update existing chart
-            const chart = this.chartInstances[chartId];
-            chart.update({
-                title: {
-                    text: title
-                },
-                xAxis: {
-                    categories: xCategories
-                },
-                yAxis: {
-                    categories: yCategories
-                },
-                series: [{
-                    data: formattedData
-                }]
-            });
-        } else {
-            // Create new chart
-            this.chartInstances[chartId] = Highcharts.chart(chartId, {
-                chart: {
-                    type: 'heatmap',
-                    marginTop: 40,
-                    marginBottom: 80,
-                    plotBorderWidth: 1
-                },
-                title: {
-                    text: title
-                },
-                xAxis: {
-                    categories: xCategories
-                },
-                yAxis: {
-                    categories: yCategories,
-                    title: null
-                },
-                colorAxis: {
-                    min: -1,
-                    max: 1,
-                    stops: [
-                        [0, '#c4463a'],   // Red for negative correlation
-                        [0.5, '#fffbbc'], // Yellow for no correlation
-                        [1, '#3060cf']    // Blue for positive correlation
-                    ]
-                },
-                legend: {
-                    align: 'right',
-                    layout: 'vertical',
-                    margin: 0,
-                    verticalAlign: 'top',
-                    y: 25,
-                    symbolHeight: 280
-                },
-                tooltip: {
-                    formatter: function () {
-                        return '<b>' + this.series.xAxis.categories[this.point.x] + '</b> and <b>' +
-                            this.series.yAxis.categories[this.point.y] + '</b><br>' +
-                            'Correlation: <b>' + this.point.value.toFixed(2) + '</b>';
-                    }
-                },
-                series: [{
-                    name: 'Correlation',
-                    borderWidth: 1,
-                    data: formattedData,
-                    dataLabels: {
-                        enabled: true,
-                        color: '#000000',
-                        format: '{point.value:.2f}'
-                    }
-                }]
-            });
-        }
-    }
+    // Register components to be loaded
+    registerComponents();
     
-    /**
-     * Update correlation network
-     */
-    updateCorrelationNetwork(container, networkData) {
-        // Find correlation network container
-        const chartContainer = container.querySelector('[data-chart="correlation-network"]');
-        if (!chartContainer) return;
-        
-        // Clear previous network
-        chartContainer.innerHTML = '';
-        
-        // Check if we have valid network data
-        if (!networkData.nodes || !networkData.links || networkData.nodes.length === 0) {
-            chartContainer.innerHTML = '<div class="alert alert-info">No correlation network data available</div>';
-            return;
-        }
-        
-        // Set up SVG
-        const width = chartContainer.clientWidth;
-        const height = 500;
-        
-        const svg = d3.select(chartContainer)
-            .append('svg')
-            .attr('width', width)
-            .attr('height', height);
-        
-        // Define the forces
-        const simulation = d3.forceSimulation(networkData.nodes)
-            .force('link', d3.forceLink(networkData.links).id(d => d.id))
-            .force('charge', d3.forceManyBody().strength(-300))
-            .force('center', d3.forceCenter(width / 2, height / 2));
-        
-        // Add domain group colors
-        const color = d3.scaleOrdinal(d3.schemeCategory10);
-        
-        // Create links
-        const link = svg.append('g')
-            .selectAll('line')
-            .data(networkData.links)
-            .enter().append('line')
-            .attr('stroke-width', d => Math.max(1, d.value * 3))
-            .attr('stroke', d => d.direction === 'positive' ? '#3060cf' : '#c4463a')
-            .attr('stroke-opacity', 0.6);
-        
-        // Create nodes
-        const node = svg.append('g')
-            .selectAll('circle')
-            .data(networkData.nodes)
-            .enter().append('circle')
-            .attr('r', 8)
-            .attr('fill', d => color(d.group))
-            .call(d3.drag()
-                .on('start', dragstarted)
-                .on('drag', dragged)
-                .on('end', dragended));
-        
-        // Add labels
-        const label = svg.append('g')
-            .selectAll('text')
-            .data(networkData.nodes)
-            .enter().append('text')
-            .text(d => d.id.split(':')[1] || d.id) // Show only variable name if possible
-            .attr('font-size', 10)
-            .attr('dx', 12)
-            .attr('dy', '.35em');
-        
-        // Set up tick function
-        simulation.on('tick', () => {
-            link
-                .attr('x1', d => d.source.x)
-                .attr('y1', d => d.source.y)
-                .attr('x2', d => d.target.x)
-                .attr('y2', d => d.target.y);
-            
-            node
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y);
-            
-            label
-                .attr('x', d => d.x)
-                .attr('y', d => d.y);
-        });
-        
-        // Drag functions
-        function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
-        
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
-        
-        function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
-    }
-
-    /**
-     * Update cross-domain insights
-     */
-    updateCrossDomainInsights(container, insights) {
-        // Find insights container
-        const insightsContainer = container.querySelector('[data-content="insights"]');
-        if (!insightsContainer) return;
-        
-        // Check if we have valid insights
-        if (!insights || insights.length === 0) {
-            insightsContainer.innerHTML = '<div class="alert alert-info">No correlation insights available yet</div>';
-            return;
-        }
-        
-        // Update insights container
-        insightsContainer.innerHTML = '';
-        
-        // Add each insight
-        insights.forEach(insight => {
-            const insightElement = document.createElement('div');
-            insightElement.className = 'card mb-3';
-            
-            // Create card header
-            const header = document.createElement('div');
-            header.className = 'card-header';
-            
-            // Set header content
-            if (insight.domain1 && insight.domain2) {
-                header.textContent = `${insight.domain1.toUpperCase()} ↔ ${insight.domain2.toUpperCase()}`;
-            } else if (insight.title) {
-                header.textContent = insight.title;
-            } else {
-                header.textContent = 'Correlation Insight';
-            }
-            
-            // Create card body
-            const body = document.createElement('div');
-            body.className = 'card-body';
-            
-            // Add description
-            const description = document.createElement('p');
-            description.className = 'card-text';
-            description.textContent = insight.description;
-            body.appendChild(description);
-            
-            // Add details if available
-            if (insight.correlation_value !== undefined) {
-                const details = document.createElement('ul');
-                details.className = 'list-group list-group-flush mt-2';
-                
-                const correlationItem = document.createElement('li');
-                correlationItem.className = 'list-group-item';
-                correlationItem.innerHTML = `<strong>Correlation:</strong> ${insight.correlation_value.toFixed(2)}`;
-                details.appendChild(correlationItem);
-                
-                if (insight.variable1 && insight.variable2) {
-                    const variablesItem = document.createElement('li');
-                    variablesItem.className = 'list-group-item';
-                    variablesItem.innerHTML = `<strong>Variables:</strong> ${insight.variable1} & ${insight.variable2}`;
-                    details.appendChild(variablesItem);
-                }
-                
-                body.appendChild(details);
-            }
-            
-            // Add timestamp if available
-            if (insight.timestamp) {
-                const timestamp = document.createElement('small');
-                timestamp.className = 'text-muted d-block mt-2';
-                timestamp.textContent = new Date(insight.timestamp).toLocaleString();
-                body.appendChild(timestamp);
-            }
-            
-            // Assemble card
-            insightElement.appendChild(header);
-            insightElement.appendChild(body);
-            
-            // Add to container
-            insightsContainer.appendChild(insightElement);
-        });
-    }
-
-    /**
-     * Extract weather time series data
-     */
-    extractWeatherTimeSeries(data) {
-        // Find weather forecasts
-        const temperatureSeries = {
-            name: 'Temperature',
-            data: []
-        };
-        
-        const humiditySeries = {
-            name: 'Humidity',
-            data: [],
-            yAxis: 1
-        };
-        
-        // Process weather data
-        data.forEach(item => {
-            if (item.predictions && item.predictions.length) {
-                item.predictions.forEach(prediction => {
-                    if (prediction.timestamp && prediction.temperature) {
-                        const timestamp = new Date(prediction.timestamp).getTime();
-                        temperatureSeries.data.push([timestamp, prediction.temperature]);
-                    }
-                });
-            }
-            
-            if (item.original && item.original.current) {
-                const current = item.original.current;
-                if (current.temp) {
-                    const timestamp = new Date().getTime();
-                    temperatureSeries.data.push([timestamp, current.temp]);
-                }
-                
-                if (current.humidity) {
-                    const timestamp = new Date().getTime();
-                    humiditySeries.data.push([timestamp, current.humidity]);
-                }
-            }
-        });
-        
-        // Sort by timestamp
-        temperatureSeries.data.sort((a, b) => a[0] - b[0]);
-        humiditySeries.data.sort((a, b) => a[0] - b[0]);
-        
-        return [temperatureSeries, humiditySeries];
-    }
-
-    /**
-     * Extract economic time series data
-     */
-    extractEconomicTimeSeries(data) {
-        // Example: return empty series
-        return [{
-            name: 'GDP Growth',
-            data: []
-        }, {
-            name: 'Inflation',
-            data: []
-        }];
-    }
-
-    /**
-     * Extract transportation time series data
-     */
-    extractTransportationTimeSeries(data) {
-        // Example: return empty series
-        return [{
-            name: 'Congestion',
-            data: []
-        }, {
-            name: 'Avg Speed',
-            data: []
-        }];
-    }
-
-    /**
-     * Extract social media time series data
-     */
-    extractSocialMediaTimeSeries(data) {
-        // Example: return empty series
-        return [{
-            name: 'Positive Sentiment',
-            data: []
-        }, {
-            name: 'Negative Sentiment',
-            data: []
-        }];
-    }
-
-    /**
-     * Extract weather gauge data
-     */
-    extractWeatherGaugeData(data) {
-        // Find latest temperature
-        for (let i = data.length - 1; i >= 0; i--) {
-            const item = data[i];
-            if (item.original && item.original.current && item.original.current.temp) {
-                return item.original.current.temp;
-            }
-        }
-        
-        return 20; // Default
-    }
-
-    /**
-     * Extract economic gauge data
-     */
-    extractEconomicGaugeData(data) {
-        // Example: return dummy value
-        return 50;
-    }
-
-    /**
-     * Extract transportation gauge data
-     */
-    extractTransportationGaugeData(data) {
-        // Example: return dummy value
-        return 0.4;
-    }
-
-    /**
-     * Extract social media gauge data
-     */
-    extractSocialMediaGaugeData(data) {
-        // Example: return dummy value
-        return 0.2;
-    }
-
-    /**
-     * Extract weather bar data
-     */
-    extractWeatherBarData(data) {
-        // Example: return dummy data
-        const categories = ['Location A', 'Location B', 'Location C'];
-        const series = [{
-            name: 'Temperature',
-            data: [20, 15, 25]
-        }];
-        
-        return [categories, series];
-    }
-
-    /**
-     * Extract economic bar data
-     */
-    extractEconomicBarData(data) {
-        // Example: return dummy data
-        const categories = ['GDP', 'Inflation', 'Interest Rate'];
-        const series = [{
-            name: 'Current',
-            data: [2.5, 2.0, 3.0]
-        }];
-        
-        return [categories, series];
-    }
-
-    /**
-     * Extract transportation bar data
-     */
-    extractTransportationBarData(data) {
-        // Example: return dummy data
-        const categories = ['Morning', 'Afternoon', 'Evening'];
-        const series = [{
-            name: 'Congestion',
-            data: [0.7, 0.5, 0.8]
-        }];
-        
-        return [categories, series];
-    }
-
-    /**
-     * Extract social media bar data
-     */
-    extractSocialMediaBarData(data) {
-        // Example: return dummy data
-        const categories = ['Twitter', 'Facebook', 'Instagram'];
-        const series = [{
-            name: 'Engagement',
-            data: [500, 300, 800]
-        }];
-        
-        return [categories, series];
-    }
-
-    /**
-     * Extract correlation data from cross-domain data
-     */
-    extractCorrelationData(data) {
-        // Look for correlation data
-        for (let i = data.length - 1; i >= 0; i--) {
-            const item = data[i];
-            
-            if (item.correlations && item.domains) {
-                const domains = item.domains;
-                const matrix = [];
-                
-                // Create matrix data for heatmap
-                for (let i = 0; i < domains.length; i++) {
-                    for (let j = 0; j < domains.length; j++) {
-                        let value = 0;
-                        
-                        // Find correlation between these domains
-                        if (i !== j) {
-                            for (const correlation of item.correlations) {
-                                if (correlation.domains.includes(domains[i]) && 
-                                    correlation.domains.includes(domains[j])) {
-                                    value = correlation.correlation;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        matrix.push([i, j, value]);
-                    }
-                }
-                
-                return {
-                    domains: domains,
-                    data: matrix
-                };
-            }
-        }
-        
-        // Default empty result
-        return {
-            domains: [],
-            data: []
-        };
-    }
-
-    /**
-     * Extract cross-domain insights
-     */
-    extractCrossDomainInsights(data) {
-        // Look for insights
-        for (let i = data.length - 1; i >= 0; i--) {
-            const item = data[i];
-            
-            if (item.predictions && item.predictions.key_insights) {
-                return item.predictions.key_insights;
-            }
-        }
-        
-        return [];
-    }
-
-    /**
-     * Get gauge plot bands based on domain
-     */
-    getGaugePlotBands(domain, min, max) {
-        if (domain === 'weather') {
-            return [
-                {
-                    from: min,
-                    to: 0,
-                    color: '#8AD8FF',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                },
-                {
-                    from: 0,
-                    to: 25,
-                    color: '#AEFF8A',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                },
-                {
-                    from: 25,
-                    to: max,
-                    color: '#FF8A8A',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                }
-            ];
-        } else if (domain === 'transportation') {
-            return [
-                {
-                    from: 0,
-                    to: 0.4,
-                    color: '#C6F6BE',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                },
-                {
-                    from: 0.4,
-                    to: 0.7,
-                    color: '#FEFEC0',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                },
-                {
-                    from: 0.7,
-                    to: max,
-                    color: '#FFC1BE',
-                    innerRadius: '105%',
-                    outerRadius: '150%'
-                }
-            ];
-        }
-        
-        // Default
-        return [
-            {
-                from: min,
-                to: min + (max - min) / 3,
-                color: '#DF5353',
-                innerRadius: '105%',
-                outerRadius: '150%'
-            },
-            {
-                from: min + (max - min) / 3,
-                to: min + 2 * (max - min) / 3,
-                color: '#DDDF0D',
-                innerRadius: '105%',
-                outerRadius: '150%'
-            },
-            {
-                from: min + 2 * (max - min) / 3,
-                to: max,
-                color: '#55BF3B',
-                innerRadius: '105%',
-                outerRadius: '150%'
-            }
-        ];
-    }
-
-    /**
-     * Get gauge value suffix based on domain
-     */
-    getGaugeValueSuffix(domain) {
-        if (domain === 'weather') {
-            return ' °C';
-        } else if (domain === 'economic') {
-            return ' %';
-        } else if (domain === 'transportation') {
-            return '';
-        } else if (domain === 'social-media') {
-            return '';
-        }
-        
-        return '';
-    }
-
-    /**
-     * Show/hide loading indicator
-     */
-    showLoadingIndicator(show) {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        if (loadingIndicator) {
-            loadingIndicator.style.display = show ? 'flex' : 'none';
-        }
-    }
-
-    /**
-     * Show error message
-     */
-    showErrorMessage(message) {
-        const errorContainer = document.getElementById('errorContainer');
-        if (errorContainer) {
-            errorContainer.textContent = message;
-            errorContainer.style.display = 'block';
-            
-            // Hide after 5 seconds
-            setTimeout(() => {
-                errorContainer.style.display = 'none';
-            }, 5000);
-        }
-    }
-
-    /**
-     * Update time range for visualizations
-     */
-    updateTimeRange(range) {
-        console.log(`Time range changed to: ${range}`);
-        // Implementation depends on how you want to filter data by time range
-    }
+    // Set up loading indicator
+    setupLoadingIndicator();
     
-    /**
-     * Handle correlation data update
-     */
-    handleCorrelationDataUpdate(data) {
-        // Store correlation data
-        this.dataCache['cross-domain'] = data;
-        
-        // Update correlation visualizations
-        this.updateCrossDomainVisualizations();
-    }
+    // Load core components first (lazy loading)
+    loadCoreComponents().then(() => {
+        // Then load data for those components
+        loadDashboardData().then(() => {
+            // Finally, load secondary components
+            loadSecondaryComponents();
+        });
+    });
     
-    /**
-     * Handle new correlation insight
-     */
-    handleCorrelationInsight(insight) {
-        // Add insight to cross-domain data cache
-        if (!this.dataCache['cross-domain']) {
-            this.dataCache['cross-domain'] = { insights: [] };
-        } else if (!this.dataCache['cross-domain'].insights) {
-            this.dataCache['cross-domain'].insights = [];
-        }
-        
-        this.dataCache['cross-domain'].insights.push(insight);
-        
-        // Update insights visualization
-        const container = document.querySelector('[data-domain="cross-domain"]');
-        if (container) {
-            this.updateCrossDomainInsights(container, [this.dataCache['cross-domain']]);
-        }
-        
-        // Create alert for significant insights
-        if (insight.correlation_value && Math.abs(insight.correlation_value) > 0.7) {
-            const alertData = {
-                type: 'Correlation Insight',
-                level: 'info',
-                message: insight.description
-            };
-            this.addAlertToDisplay(alertData);
-        }
-    }
+    // Set up refresh interval
+    setupRefreshInterval();
     
-    /**
-     * Handle correlation anomaly
-     */
-    handleCorrelationAnomaly(anomaly) {
-        // Create alert for anomaly
-        const alertData = {
-            type: 'Correlation Anomaly',
-            level: 'warning',
-            message: anomaly.description
-        };
-        this.addAlertToDisplay(alertData);
+    // Set up socket connections for real-time updates
+    setupSocketConnections();
+}
+
+/**
+ * Register dashboard components
+ */
+function registerComponents() {
+    dashboardState.components = [
+        { id: 'weather-widget', priority: 'core', loaded: false },
+        { id: 'economic-indicators', priority: 'core', loaded: false },
+        { id: 'transportation-status', priority: 'core', loaded: false },
+        { id: 'social-media-trends', priority: 'core', loaded: false },
+        { id: 'correlation-insights', priority: 'secondary', loaded: false },
+        { id: 'system-health', priority: 'secondary', loaded: false }
+    ];
+}
+
+/**
+ * Set up loading indicator
+ */
+function setupLoadingIndicator() {
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        // Show initially
+        loadingIndicator.style.display = 'block';
         
-        // Play notification sound for anomalies
-        this.playNotificationSound();
+        // Update loading state
+        dashboardState.isLoading = true;
     }
 }
 
-// Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Highcharts global options
-    Highcharts.setOptions({
-        colors: ['#058DC7', '#50B432', '#ED561B', '#DDDF00', '#24CBE5', '#64E572', '#FF9655', '#FFF263', '#6AF9C4'],
-        chart: {
-            style: {
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-            }
-        },
-        credits: {
-            enabled: false
+/**
+ * Load core dashboard components
+ */
+async function loadCoreComponents() {
+    console.log('Loading core components...');
+    
+    const coreComponents = dashboardState.components.filter(comp => comp.priority === 'core');
+    const startTime = performance.now();
+    
+    // Create empty component containers first
+    for (const component of coreComponents) {
+        const elem = document.getElementById(component.id);
+        if (elem) {
+            elem.innerHTML = '<div class="component-loading">Loading component...</div>';
         }
+    }
+    
+    // Stagger loading to improve responsiveness
+    let delay = 0;
+    const loadPromises = coreComponents.map(component => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const elem = document.getElementById(component.id);
+                if (elem) {
+                    // Set up a placeholder with appropriate height to avoid layout shifts
+                    elem.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">${getComponentTitle(component.id)}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    component.loaded = true;
+                }
+                resolve();
+            }, delay);
+            delay += 50; // 50ms delay between components
+        });
     });
     
-    // Create dashboard controller
-    window.dashboardController = new DashboardController();
-});
+    await Promise.all(loadPromises);
+    
+    const loadTime = Math.round(performance.now() - startTime);
+    console.log(`Core components loaded in ${loadTime}ms`);
+}
+
+/**
+ * Get component title based on its ID
+ */
+function getComponentTitle(id) {
+    const titles = {
+        'weather-widget': 'Weather Conditions',
+        'economic-indicators': 'Economic Indicators',
+        'transportation-status': 'Transportation Status',
+        'social-media-trends': 'Social Media Trends',
+        'correlation-insights': 'Correlation Insights',
+        'system-health': 'System Health'
+    };
+    
+    return titles[id] || 'Loading...';
+}
+
+/**
+ * Load secondary dashboard components
+ */
+async function loadSecondaryComponents() {
+    console.log('Loading secondary components...');
+    
+    const secondaryComponents = dashboardState.components.filter(comp => comp.priority === 'secondary');
+    
+    // Create loading placeholder for secondary components
+    for (const component of secondaryComponents) {
+        const elem = document.getElementById(component.id);
+        if (elem) {
+            elem.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">${getComponentTitle(component.id)}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                            <div class="spinner-border text-secondary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // Load data for secondary components with a longer delay (async)
+    // This allows the dashboard to be interactive while secondary components load
+    setTimeout(() => {
+        // Check if the page is still visible before loading secondary data
+        if (document.visibilityState === 'visible') {
+            loadSecondaryData().then(() => {
+                secondaryComponents.forEach(comp => comp.loaded = true);
+                console.log('Secondary components loaded');
+            });
+        } else {
+            // If page is not visible (tab not active), delay loading further
+            // This saves resources when the user isn't actively viewing the page
+            console.log('Page not visible, delaying secondary component load');
+            
+            // Set up visibility change listener to load when page becomes visible
+            document.addEventListener('visibilitychange', function onVisibilityChange() {
+                if (document.visibilityState === 'visible') {
+                    loadSecondaryData().then(() => {
+                        secondaryComponents.forEach(comp => comp.loaded = true);
+                        console.log('Secondary components loaded after visibility change');
+                    });
+                    document.removeEventListener('visibilitychange', onVisibilityChange);
+                }
+            });
+        }
+    }, 1500); // 1.5 second delay
+}
+
+/**
+ * Load dashboard data from API
+ */
+async function loadDashboardData() {
+    console.log('Loading dashboard data...');
+    
+    const loadingIndicator = document.getElementById('loading-indicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+    
+    // Record start time to measure performance
+    const startTime = performance.now();
+    
+    try {
+        // Check cache first
+        const now = new Date().getTime();
+        if (dashboardState.dataCache.dashboardData && 
+            (now - dashboardState.dataCache.dashboardData.timestamp) < config.cacheExpiry) {
+            console.log('Using cached dashboard data');
+            updateDashboardComponents(dashboardState.dataCache.dashboardData.data);
+            
+            // Hide loading indicator quickly when using cache
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            
+            dashboardState.isLoading = false;
+            return;
+        }
+        
+        // Fetch fresh data with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        try {
+            console.log('Fetching fresh dashboard data...');
+            const response = await fetch(config.apiEndpoints.dashboardData, {
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'max-age=60'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            // Cache the data
+            dashboardState.dataCache.dashboardData = {
+                data: data,
+                timestamp: now
+            };
+            
+            // Calculate load time
+            const loadTime = Math.round(performance.now() - startTime);
+            console.log(`Dashboard data loaded in ${loadTime}ms`);
+            
+            // Update dashboard components with the data
+            updateDashboardComponents(data);
+            
+            // Update last updated timestamp
+            dashboardState.lastUpdated = now;
+            updateLastUpdatedDisplay();
+            
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            
+            // If we have cached data, use it as fallback when fetch fails
+            if (dashboardState.dataCache.dashboardData) {
+                console.warn('Fetch failed, using cached data as fallback');
+                updateDashboardComponents(dashboardState.dataCache.dashboardData.data);
+            } else {
+                throw fetchError;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
+    } finally {
+        // Hide loading indicator
+        if (loadingIndicator) {
+            // Add a small delay before hiding to avoid flickering
+            setTimeout(() => {
+                loadingIndicator.style.display = 'none';
+            }, 200);
+        }
+        
+        dashboardState.isLoading = false;
+        }
+    }
+
+    /**
+ * Load data for secondary components
+ */
+async function loadSecondaryData() {
+    console.log('Loading secondary data...');
+    
+    try {
+        // Load correlation data
+        const response = await fetch(config.apiEndpoints.correlations);
+        const data = await response.json();
+        
+        // Update correlation insights
+        updateCorrelationInsights(data);
+        
+        // Load system status
+        const statusResponse = await fetch(config.apiEndpoints.systemStatus);
+        const statusData = await statusResponse.json();
+        
+        // Update system health
+        updateSystemHealth(statusData);
+        
+    } catch (error) {
+        console.error('Error loading secondary data:', error);
+    }
+}
+
+/**
+ * Update dashboard components with data
+ */
+function updateDashboardComponents(data) {
+    // Update weather widget
+    updateWeatherWidget(data.weather);
+    
+    // Update economic indicators
+    updateEconomicIndicators(data.economic);
+    
+    // Update transportation status
+    updateTransportationStatus(data.transportation);
+    
+    // Update social media trends
+    updateSocialMediaTrends(data.social_media);
+}
+
+/**
+ * Update weather widget with data
+ */
+function updateWeatherWidget(weatherData) {
+    const widget = document.getElementById('weather-widget');
+    if (!widget) return;
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Weather Conditions</h5>
+            </div>
+            <div class="card-body">
+                <div class="current-weather">
+                    <h2>${weatherData.temperature}°F</h2>
+                    <p>${weatherData.condition}</p>
+                </div>
+                <div class="forecast">
+                    ${weatherData.forecast.map(day => `
+                        <div class="forecast-day">
+                            <div class="day">${day.day}</div>
+                            <div class="high-low">${day.high}° / ${day.low}°</div>
+                            <div class="condition">${day.condition}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Update economic indicators with data
+ */
+function updateEconomicIndicators(economicData) {
+    const widget = document.getElementById('economic-indicators');
+    if (!widget) return;
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Economic Indicators</h5>
+            </div>
+            <div class="card-body">
+                <div class="market-index">
+                    <h3>Market Index: ${economicData.market_index}</h3>
+                    <span class="${economicData.change_percent >= 0 ? 'text-success' : 'text-danger'}">
+                        ${economicData.change_percent >= 0 ? '▲' : '▼'} ${Math.abs(economicData.change_percent)}%
+                    </span>
+                </div>
+                <div class="indicators-list">
+                    ${economicData.indicators.map(indicator => `
+                        <div class="indicator-item">
+                            <span class="indicator-name">${indicator.name}:</span>
+                            <span class="indicator-value">${indicator.value}</span>
+                            <span class="indicator-trend ${getTrendClass(indicator.trend)}">
+                                ${getTrendIcon(indicator.trend)}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Update transportation status with data
+ */
+function updateTransportationStatus(transportationData) {
+    const widget = document.getElementById('transportation-status');
+    if (!widget) return;
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Transportation Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="overall-status">
+                    <div class="congestion">
+                        <h4>Congestion Level</h4>
+                        <div class="progress">
+                            <div class="progress-bar ${getCongestionClass(transportationData.congestion_level)}" 
+                                 role="progressbar" 
+                                 style="width: ${transportationData.congestion_level}%" 
+                                 aria-valuenow="${transportationData.congestion_level}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${transportationData.congestion_level}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="avg-speed">
+                        <h4>Avg. Speed: ${transportationData.average_speed} mph</h4>
+                    </div>
+                </div>
+                <div class="hotspots">
+                    <h4>Traffic Hotspots</h4>
+                    <ul class="list-group">
+                        ${transportationData.hotspots.map(hotspot => `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${hotspot.location}
+                                <span class="badge ${getCongestionClass(hotspot.level)} rounded-pill">
+                                    ${hotspot.level}% ${getTrendIcon(hotspot.trend)}
+                                </span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Update social media trends with data
+ */
+function updateSocialMediaTrends(socialData) {
+    const widget = document.getElementById('social-media-trends');
+    if (!widget) return;
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Social Media Trends</h5>
+            </div>
+            <div class="card-body">
+                <div class="sentiment">
+                    <h4>Overall Sentiment: ${socialData.sentiment}%</h4>
+                    <div class="progress">
+                        <div class="progress-bar ${getSentimentClass(socialData.sentiment)}" 
+                             role="progressbar" 
+                             style="width: ${socialData.sentiment}%" 
+                             aria-valuenow="${socialData.sentiment}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            ${socialData.sentiment}%
+                        </div>
+                    </div>
+                </div>
+                <div class="trending-topics">
+                    <h4>Trending Topics</h4>
+                    <ul class="list-group">
+                        ${socialData.trending_topics.map(topic => `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${topic.topic}
+                                <div>
+                                    <span class="badge ${getSentimentClass(topic.sentiment)} rounded-pill me-2">
+                                        ${topic.sentiment}%
+                                    </span>
+                                    <small class="text-muted">${formatNumber(topic.volume)} mentions</small>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Update correlation insights
+ */
+function updateCorrelationInsights(data) {
+    const widget = document.getElementById('correlation-insights');
+    if (!widget) return;
+    
+    // If we don't have actual data, use placeholder
+    if (!data || !data.correlations) {
+        data = {
+            correlations: [
+                {factor1: 'Weather', factor2: 'Energy Demand', correlation: 0.85, strength: 'strong'},
+                {factor1: 'Traffic', factor2: 'Air Quality', correlation: 0.72, strength: 'strong'},
+                {factor1: 'Social Media', factor2: 'Consumer Behavior', correlation: 0.68, strength: 'moderate'}
+            ]
+        };
+    }
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Cross-Domain Correlations</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    ${data.correlations.map(corr => `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>${corr.factor1} ↔ ${corr.factor2}</div>
+                                <div>
+                                    <span class="badge ${getCorrelationClass(corr.correlation)}">
+                                        ${Math.abs(corr.correlation).toFixed(2)} ${corr.strength}
+                                    </span>
+                                </div>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Update system health display
+ */
+function updateSystemHealth(data) {
+    const widget = document.getElementById('system-health');
+    if (!widget) return;
+    
+    // If we don't have actual data, use placeholder
+    if (!data) {
+        data = {
+            status: 'healthy',
+            uptime: 3600,
+            processors: 4,
+            data_sources: 5,
+            queue_size: 0
+        };
+    }
+    
+    widget.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">System Health</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>Status:</div>
+                    <div>
+                        <span class="badge ${data.status === 'healthy' ? 'bg-success' : 'bg-warning'}">
+                            ${data.status}
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Uptime:</div>
+                    <div>${formatUptime(data.uptime)}</div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Components:</div>
+                    <div>${data.processors}</div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <div>Data Sources:</div>
+                    <div>${data.data_sources}</div>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <div>Queue Size:</div>
+                    <div>${data.queue_size}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Set up automatic refresh interval
+ */
+function setupRefreshInterval() {
+    // Refresh data periodically
+    setInterval(() => {
+        if (!dashboardState.isLoading) {
+            loadDashboardData();
+        }
+    }, config.refreshInterval);
+}
+
+/**
+ * Set up SocketIO connections for real-time updates
+ */
+function setupSocketConnections() {
+    // Check if SocketIO is available
+    if (typeof io !== 'undefined') {
+        console.log('Setting up Socket.IO connections...');
+        
+        // Use a short timeout to defer socket connection until after initial page load
+        setTimeout(() => {
+            // Connect to system-updates namespace with options
+            const socket = io('/system-updates', {
+                reconnectionAttempts: 5,        // Only try to reconnect 5 times
+                reconnectionDelay: 1000,        // Start with 1 second delay
+                reconnectionDelayMax: 10000,    // Maximum 10 second delay
+                timeout: 20000,                 // Connection timeout
+                autoConnect: true,              // Auto connect on initialization
+                transports: ['websocket', 'polling'] // Prefer WebSocket
+            });
+            
+            socket.on('connect', () => {
+                console.log('Connected to system-updates socket');
+                
+                // Update connection status indicator
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.className = 'badge bg-success me-2';
+                    connectionStatus.textContent = 'Connected';
+                }
+                
+                // Subscribe to various update types
+                socket.emit('subscribe_to_updates', { update_type: 'all' });
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Disconnected from system-updates socket');
+                
+                // Update connection status indicator
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.className = 'badge bg-danger me-2';
+                    connectionStatus.textContent = 'Disconnected';
+                }
+            });
+            
+            socket.on('reconnect_attempt', (attemptNumber) => {
+                console.log(`Attempting to reconnect (${attemptNumber})...`);
+                
+                // Update connection status indicator
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.className = 'badge bg-warning me-2';
+                    connectionStatus.textContent = 'Reconnecting...';
+                }
+            });
+            
+            // Listen for real-time updates
+            socket.on('processed_data', (data) => {
+                console.log('Received real-time data update');
+                // Update relevant components without full page refresh
+                updateComponentsWithRealtimeData(data);
+            });
+            
+            socket.on('correlation_data', (data) => {
+                console.log('Received correlation update');
+                if (data.status === 'success') {
+                    updateCorrelationInsights(data.data);
+                }
+            });
+            
+            socket.on('system_metrics', (data) => {
+                console.log('Received system metrics update');
+                updateSystemHealth(data);
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error);
+                
+                // Update connection status indicator
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.className = 'badge bg-danger me-2';
+                    connectionStatus.textContent = 'Connection Error';
+                }
+            });
+            
+            // Store socket reference in dashboardState
+            dashboardState.socket = socket;
+        }, 1000); // 1-second delay before establishing socket connection
+        
+    } else {
+        console.log('Socket.IO not available, real-time updates disabled');
+    }
+}
+
+/**
+ * Update components with real-time data
+ */
+function updateComponentsWithRealtimeData(data) {
+    // Process real-time updates
+    if (data.source === 'weather') {
+        // Update just the weather component
+        updateWeatherWidget(data);
+    } else if (data.source === 'economic') {
+        // Update economic indicators
+        updateEconomicIndicators(data);
+    }
+    // Add other real-time update handlers as needed
+}
+
+/**
+ * Update the last updated display
+ */
+function updateLastUpdatedDisplay() {
+    const lastUpdatedElem = document.getElementById('last-updated');
+    if (lastUpdatedElem && dashboardState.lastUpdated) {
+        const date = new Date(dashboardState.lastUpdated);
+        lastUpdatedElem.textContent = date.toLocaleTimeString();
+    }
+}
+
+/**
+ * Show error message
+ */
+function showErrorMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger';
+    alertDiv.textContent = message;
+    
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (dashboardContainer) {
+        dashboardContainer.prepend(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+}
+
+/**
+ * Utility function to get trend CSS class
+ */
+function getTrendClass(trend) {
+    switch(trend) {
+        case 'increasing':
+            return 'text-success';
+        case 'decreasing':
+            return 'text-danger';
+        default:
+            return 'text-muted';
+    }
+}
+
+/**
+ * Utility function to get trend icon
+ */
+function getTrendIcon(trend) {
+    switch(trend) {
+        case 'increasing':
+            return '▲';
+        case 'decreasing':
+            return '▼';
+        default:
+            return '▬';
+    }
+}
+
+/**
+ * Utility function to get congestion CSS class
+ */
+function getCongestionClass(level) {
+    if (level > 80) return 'bg-danger';
+    if (level > 60) return 'bg-warning';
+    if (level > 40) return 'bg-info';
+    return 'bg-success';
+}
+
+/**
+ * Utility function to get sentiment CSS class
+ */
+function getSentimentClass(sentiment) {
+    if (sentiment > 80) return 'bg-success';
+    if (sentiment > 60) return 'bg-info';
+    if (sentiment > 40) return 'bg-warning';
+    return 'bg-danger';
+}
+
+/**
+ * Utility function to get correlation CSS class
+ */
+function getCorrelationClass(correlation) {
+    const abs = Math.abs(correlation);
+    if (abs > 0.8) return 'bg-danger';
+    if (abs > 0.6) return 'bg-warning';
+    if (abs > 0.4) return 'bg-info';
+    return 'bg-secondary';
+}
+
+/**
+ * Format a number with commas for thousands
+ */
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/**
+ * Format uptime in a readable format
+ */
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    let result = '';
+    if (days > 0) result += `${days}d `;
+    if (hours > 0 || days > 0) result += `${hours}h `;
+    result += `${minutes}m`;
+    
+    return result;
+}
+
+// Initialize dashboard when the DOM is ready
+document.addEventListener('DOMContentLoaded', initDashboard);

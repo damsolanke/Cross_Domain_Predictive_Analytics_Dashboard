@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}Public Health Response Planning{% endblock %}
+
+{% block content %}
+<header class="use-case-header use-case-public-health">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center">
+                <h1 class="display-4">Public Health Response Planning</h1>
+                <p class="lead">Leverage cross-domain analytics to predict disease outbreaks and optimize healthcare resource allocation</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Key Insights -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Key Insights</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-danger">High</h2>
+                                    <p class="text-muted mb-0">North County Risk</p>
+                                    <p class="mb-0"><strong>88% Confidence</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-warning">2,500</h2>
+                                    <p class="text-muted mb-0">Testing Kits Needed</p>
+                                    <p class="mb-0"><strong>Recommended</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-info">20</h2>
+                                    <p class="text-muted mb-0">Additional Staff</p>
+                                    <p class="mb-0"><strong>Recommended</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 2 Resource Alerts
+                                    </div>
+                                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resourceModal">
+                                        View Alerts
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Analysis -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Regional Outbreak Risk Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle-fill me-2"></i> This risk assessment combines weather patterns, population mobility data, and historical disease patterns to predict outbreak risks with varying confidence levels.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Regional Risk Assessment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Risk Level</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in data.outbreak_predictions %}
+                                <tr>
+                                    <td>{{ item.region }}</td>
+                                    <td>
+                                        {% if item.risk_level == 'high' %}
+                                        <span class="badge bg-danger">High</span>
+                                        {% elif item.risk_level == 'medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="confidence-indicator">
+                                                <div class="indicator confidence-{% if item.confidence > 0.8 %}high{% elif item.confidence > 0.6 %}medium{% else %}low{% endif %}" style="width: {{ item.confidence * 100 }}%;"></div>
+                                            </div>
+                                            <span class="small text-muted">{{ (item.confidence * 100)|int }}% confidence</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Recommendations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Resource Allocation Recommendations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h5>Medical Supplies</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resource</th>
+                                            <th>Current Stock</th>
+                                            <th>Predicted Need</th>
+                                            <th>Recommendation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in data.resource_recommendations %}
+                                        {% if 'current_stock' in item %}
+                                        <tr>
+                                            <td>{{ item.resource }}</td>
+                                            <td>{{ item.current_stock }}</td>
+                                            <td>{{ item.predicted_need }}</td>
+                                            <td>
+                                                {% if item.recommendation > 0 %}
+                                                <span class="badge bg-warning">Acquire {{ item.recommendation }}</span>
+                                                {% else %}
+                                                <span class="badge bg-success">Sufficient</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h5>Personnel</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resource</th>
+                                            <th>Current</th>
+                                            <th>Recommended</th>
+                                            <th>Additional</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in data.resource_recommendations %}
+                                        {% if 'current_staff' in item %}
+                                        <tr>
+                                            <td>{{ item.resource }}</td>
+                                            <td>{{ item.current_staff }}</td>
+                                            <td>{{ item.recommended_staff }}</td>
+                                            <td>
+                                                {% if item.additional_needed > 0 %}
+                                                <span class="badge bg-warning">Need {{ item.additional_needed }}</span>
+                                                {% else %}
+                                                <span class="badge bg-success">Sufficient</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cross-Domain Correlations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Cross-Domain Correlations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="correlation-heatmap" id="correlationHeatmap"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h5>Key Correlations</h5>
+                            <ul class="list-group mb-4">
+                                {% for item in data.correlations %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ item.factor1 }}</strong> ↔️ <strong>{{ item.factor2 }}</strong>
+                                            <div class="text-muted small">{{ item.strength|title }} correlation</div>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">{{ item.correlation }}</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar" style="width: {{ item.correlation * 100 }}%"></div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="alert alert-info">
+                                <i class="bi bi-lightbulb-fill me-2"></i> <strong>Insight:</strong> Temperature drops show a strong correlation with flu cases, allowing us to prepare healthcare resources ahead of cold weather periods.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- What-If Scenario Analysis -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">What-If Scenario Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Modify Parameters</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="scenario-form">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">Temperature Change (°F)</label>
+                                            <input type="range" class="form-range" id="temperature" min="-15" max="15" value="0">
+                                            <div class="d-flex justify-content-between">
+                                                <span>-15°F</span>
+                                                <span id="temperature-value">0°F</span>
+                                                <span>+15°F</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="event-size" class="form-label">Community Event Size</label>
+                                            <input type="range" class="form-range" id="event-size" min="0" max="10000" step="500" value="2000">
+                                            <div class="d-flex justify-content-between">
+                                                <span>0</span>
+                                                <span id="event-value">2000</span>
+                                                <span>10,000</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="vaccination" class="form-label">Vaccination Rate Change (%)</label>
+                                            <input type="range" class="form-range" id="vaccination" min="-20" max="20" step="5" value="0">
+                                            <div class="d-flex justify-content-between">
+                                                <span>-20%</span>
+                                                <span id="vaccination-value">0%</span>
+                                                <span>+20%</span>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Run Scenario</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Scenario Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="scenarioChart"></canvas>
+                                    </div>
+                                    <div class="alert alert-success mt-3">
+                                        <i class="bi bi-graph-up-arrow me-2"></i> <strong>Scenario Impact:</strong> A 10°F temperature decrease combined with a large community event (5,000+ attendees) would result in a predicted 35% increase in respiratory cases.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resource Alert Modal -->
+<div class="modal fade" id="resourceModal" tabindex="-1" aria-labelledby="resourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="resourceModalLabel">Resource Alerts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i> Testing Kits - Low Stock</h5>
+                    <p>Current stock <strong>5,000</strong> units, predicted need <strong>7,500</strong> units.</p>
+                    <p><strong>Recommendation:</strong> Acquire 2,500 additional units within 7 days.</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 66%"></div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i> PPE Sets - Low Stock</h5>
+                    <p>Current stock <strong>2,000</strong> units, predicted need <strong>3,500</strong> units.</p>
+                    <p><strong>Recommendation:</strong> Acquire 1,500 additional units within 10 days.</p>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 57%"></div>
+                    </div>
+                </div>
+                
+                <p class="text-muted">These predictions are based on cross-domain analytics combining weather forecasts, population mobility patterns, and historical outbreak data.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Generate Purchase Orders</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Chart.js initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Risk Chart
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        const riskChart = new Chart(riskCtx, {
+            type: 'bar',
+            data: {
+                labels: ['North County', 'East District', 'West Side', 'South Region'],
+                datasets: [
+                    {
+                        label: 'Risk Score',
+                        data: [85, 65, 35, 60],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Confidence',
+                        data: [88, 76, 91, 82],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Score (0-100)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Scenario Chart
+        const scenarioCtx = document.getElementById('scenarioChart').getContext('2d');
+        const scenarioChart = new Chart(scenarioCtx, {
+            type: 'line',
+            data: {
+                labels: ['Baseline', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [
+                    {
+                        label: 'Base Scenario',
+                        data: [100, 110, 115, 112, 105],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Modified Scenario',
+                        data: [100, 120, 145, 160, 135],
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Case Index (Baseline = 100)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Correlation Heatmap
+        const correlationMatrix = [
+            [1.0, 0.76, 0.42, 0.35],
+            [0.76, 1.0, 0.32, 0.40],
+            [0.42, 0.32, 1.0, 0.68],
+            [0.35, 0.40, 0.68, 1.0]
+        ];
+        
+        const labels = ['Temperature', 'Flu Cases', 'Events', 'Transit Usage'];
+        
+        Plotly.newPlot('correlationHeatmap', [{
+            z: correlationMatrix,
+            x: labels,
+            y: labels,
+            type: 'heatmap',
+            colorscale: 'Blues',
+            showscale: true,
+            zmin: 0,
+            zmax: 1
+        }], {
+            title: 'Cross-Domain Correlation Heatmap',
+            margin: { t: 50, r: 20, b: 80, l: 80 }
+        });
+        
+        // What-If scenario form event handlers
+        const scenarioForm = document.getElementById('scenario-form');
+        const temperatureSlider = document.getElementById('temperature');
+        const eventSlider = document.getElementById('event-size');
+        const vaccinationSlider = document.getElementById('vaccination');
+        
+        const temperatureValue = document.getElementById('temperature-value');
+        const eventValue = document.getElementById('event-value');
+        const vaccinationValue = document.getElementById('vaccination-value');
+        
+        temperatureSlider.addEventListener('input', function() {
+            temperatureValue.textContent = this.value + '°F';
+        });
+        
+        eventSlider.addEventListener('input', function() {
+            eventValue.textContent = this.value;
+        });
+        
+        vaccinationSlider.addEventListener('input', function() {
+            vaccinationValue.textContent = this.value + '%';
+        });
+        
+        scenarioForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate running the scenario
+            const temperature = parseInt(temperatureSlider.value);
+            const eventSize = parseInt(eventSlider.value);
+            const vaccination = parseInt(vaccinationSlider.value);
+            
+            // Update chart data based on inputs
+            // This is a simple simulation
+            const tempFactor = -temperature / 10;  // Temperature change factor (negative = more cases)
+            const eventFactor = eventSize / 2000;  // Event size factor
+            const vaccinationFactor = -vaccination / 50; // Vaccination factor (positive = fewer cases)
+            
+            const totalFactor = 1 + (tempFactor * 0.2 + eventFactor * 0.1 + vaccinationFactor * 0.1);
+            
+            // Update the scenario chart
+            scenarioChart.data.datasets[1].data = [
+                100,
+                Math.round(100 * (1 + totalFactor * 0.2)),
+                Math.round(100 * (1 + totalFactor * 0.45)),
+                Math.round(100 * (1 + totalFactor * 0.6)),
+                Math.round(100 * (1 + totalFactor * 0.35))
+            ];
+            
+            scenarioChart.update();
+            
+            // Update the insight text
+            let tempChangeText = temperature < 0 ? 'decrease' : 'increase';
+            let absTemp = Math.abs(temperature);
+            let caseChangePercent = Math.round(tempFactor * 20 * 100) / 100;
+            
+            const insightText = `A ${absTemp}°F temperature ${tempChangeText} combined with a large community event (${eventSize.toLocaleString()} attendees) would result in a predicted ${Math.abs(Math.round(totalFactor * 60))}% ${totalFactor > 0 ? 'increase' : 'decrease'} in respiratory cases.`;
+            
+            document.querySelector('.alert-success strong').nextSibling.nodeValue = ' ' + insightText;
+        });
+    });
+</script>
+{% endblock %} 

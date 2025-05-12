@@ -3,7 +3,8 @@ from flask_socketio import SocketIO
 import os
 
 # Initialize SocketIO without an app (will be attached in create_app)
-socketio = SocketIO()
+# Set logger to False and engineio_logger to False to avoid debug-related issues
+socketio = SocketIO(logger=False, engineio_logger=False)
 
 def create_app():
     app = Flask(__name__)
@@ -11,6 +12,7 @@ def create_app():
     # Configure the app
     app.config['SECRET_KEY'] = 'REDACTED'
     app.config['TESTING'] = os.environ.get('TESTING', 'False') == 'True'
+    app.config['DEBUG'] = False  # Explicitly set debug to False
     
     # Initialize extensions with app
     socketio.init_app(app, cors_allowed_origins="*")
@@ -53,5 +55,8 @@ def create_app():
     except ImportError:
         # This is fine if the demo is not available
         pass
+    
+    # Import SocketIO event handlers
+    import app.system_integration.socket_events
     
     return app
