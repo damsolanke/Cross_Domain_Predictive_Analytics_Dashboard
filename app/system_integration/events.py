@@ -5,24 +5,29 @@ This module provides functions for emitting events to WebSocket clients
 and handles event-related functionality.
 """
 
-def emit_data_update(data):
+from app import socketio
+
+def emit_data_update(domain, data):
     """
     Emit a data update event to connected clients.
     
     Args:
-        data: The data to emit.
+        domain: Domain name (e.g., 'weather', 'economic', etc.)
+        data: Data to emit
     """
-    # In a real implementation, this would use Socket.IO or similar
-    # to broadcast updates to connected clients
-    pass
+    event_name = f"{domain}_update"
+    socketio.emit(event_name, data)
 
-def emit_alert(alert_data):
+def emit_alert(alert_type, data):
     """
     Emit an alert event to connected clients.
     
     Args:
-        alert_data: The alert data to emit.
+        alert_type: Type of alert (e.g., 'threshold', 'anomaly', etc.)
+        data: Alert data
     """
-    # In a real implementation, this would use Socket.IO or similar
-    # to broadcast alerts to connected clients
-    pass
+    socketio.emit('alert', {
+        'type': alert_type,
+        'data': data,
+        'timestamp': __import__('time').time()
+    })
