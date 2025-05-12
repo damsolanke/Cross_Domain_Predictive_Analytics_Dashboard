@@ -2,4 +2,7 @@ from flask import Blueprint
 
 main = Blueprint('main', __name__)
 
-from . import routes 
+# Register analytics controller
+from . import routes
+from app.main.analytics_controller import analytics
+main.register_blueprint(analytics)

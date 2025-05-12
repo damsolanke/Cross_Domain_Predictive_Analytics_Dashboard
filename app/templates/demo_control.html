@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/system/system-status">System Status</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/demo/control">Demo Control</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1>Demo Data Generator</h1>
+                    <div>
+                        {% if is_generating %}
+                        <span class="badge bg-success status-badge">Generating data</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Stopped</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <p class="lead">Control the demo data generation to simulate real-world scenarios</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Generation Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="generationForm" class="mb-4">
+                            <div class="mb-3">
+                                <label for="interval" class="form-label">Update Interval (seconds)</label>
+                                <input type="number" class="form-control" id="interval" name="interval" value="30" min="5" max="300">
+                            </div>
+                            <div class="mb-3">
+                                <label for="scenario" class="form-label">Scenario</label>
+                                <select class="form-select" id="scenario" name="scenario">
+                                    {% for scenario in scenarios %}
+                                    <option value="{{ scenario }}" {% if scenario == active_scenario %}selected{% endif %}>
+                                        {{ scenario.replace('_', ' ').title() }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="d-flex gap-2">
+                                {% if is_generating %}
+                                <button type="button" id="stopBtn" class="btn btn-danger">Stop Generation</button>
+                                {% else %}
+                                <button type="button" id="startBtn" class="btn btn-primary">Start Generation</button>
+                                {% endif %}
+                                <button type="button" id="generateBtn" class="btn btn-secondary">Generate Once</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Scenario Descriptions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion" id="scenarioAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#baseline">
+                                        Baseline
+                                    </button>
+                                </h2>
+                                <div id="baseline" class="accordion-collapse collapse show" data-bs-parent="#scenarioAccordion">
+                                    <div class="accordion-body">
+                                        Normal conditions with typical patterns across all domains.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#weatherEvent">
+                                        Weather Event
+                                    </button>
+                                </h2>
+                                <div id="weatherEvent" class="accordion-collapse collapse" data-bs-parent="#scenarioAccordion">
+                                    <div class="accordion-body">
+                                        Simulates severe weather conditions that impact transportation and generate social media activity.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#economicVolatility">
+                                        Economic Volatility
+                                    </button>
+                                </h2>
+                                <div id="economicVolatility" class="accordion-collapse collapse" data-bs-parent="#scenarioAccordion">
+                                    <div class="accordion-body">
+                                        Simulates economic instability with higher inflation, market volatility, and interest rate adjustments.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transportationDisruption">
+                                        Transportation Disruption
+                                    </button>
+                                </h2>
+                                <div id="transportationDisruption" class="accordion-collapse collapse" data-bs-parent="#scenarioAccordion">
+                                    <div class="accordion-body">
+                                        Simulates major traffic disruptions with high congestion, incidents, and related social media activity.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#socialMediaTrend">
+                                        Social Media Trend
+                                    </button>
+                                </h2>
+                                <div id="socialMediaTrend" class="accordion-collapse collapse" data-bs-parent="#scenarioAccordion">
+                                    <div class="accordion-body">
+                                        Simulates viral social media activity that correlates with changes in other domains.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Output Log</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="logOutput" class="bg-dark text-light p-3 rounded" style="height: 200px; overflow-y: auto; font-family: monospace;">
+                            --- Demo Data Generator Log ---
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logOutput = document.getElementById('logOutput');
+            
+            // Log helper function
+            function log(message) {
+                const now = new Date();
+                const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                logOutput.appendChild(logEntry);
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+            
+            // Start generation
+            document.getElementById('startBtn')?.addEventListener('click', function() {
+                const interval = document.getElementById('interval').value;
+                const scenario = document.getElementById('scenario').value;
+                
+                log(`Starting data generation with interval ${interval}s using '${scenario}' scenario...`);
+                
+                fetch('/demo/control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'start',
+                        interval: interval,
+                        scenario: scenario
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    log(`Data generation started: ${JSON.stringify(data)}`);
+                    location.reload();
+                })
+                .catch(error => {
+                    log(`Error: ${error}`);
+                });
+            });
+            
+            // Stop generation
+            document.getElementById('stopBtn')?.addEventListener('click', function() {
+                log('Stopping data generation...');
+                
+                fetch('/demo/control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'stop'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    log(`Data generation stopped: ${JSON.stringify(data)}`);
+                    location.reload();
+                })
+                .catch(error => {
+                    log(`Error: ${error}`);
+                });
+            });
+            
+            // Generate once
+            document.getElementById('generateBtn').addEventListener('click', function() {
+                const scenario = document.getElementById('scenario').value;
+                
+                log(`Generating single data update with '${scenario}' scenario...`);
+                
+                fetch('/demo/control', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'generate',
+                        scenario: scenario
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    log(`Data generation complete: ${JSON.stringify(data)}`);
+                })
+                .catch(error => {
+                    log(`Error: ${error}`);
+                });
+            });
+            
+            // Update scenario when dropdown changes
+            document.getElementById('scenario').addEventListener('change', function() {
+                if ({{ 'true' if is_generating else 'false' }}) {
+                    const scenario = this.value;
+                    
+                    log(`Changing active scenario to '${scenario}'...`);
+                    
+                    fetch('/demo/control', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            action: 'scenario',
+                            scenario: scenario
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        log(`Scenario changed: ${JSON.stringify(data)}`);
+                    })
+                    .catch(error => {
+                        log(`Error: ${error}`);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
