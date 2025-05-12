@@ -130,4 +130,181 @@ fig = ConfidenceScoring.create_confidence_radar(
 All visualization components include comprehensive tests in the `tests` directory. Run tests using:
 ```bash
 pytest app/visualizations/tests/
-``` 
+```
+
+# Visualization Component Documentation
+
+## Overview
+The visualization component provides a comprehensive suite of interactive data visualizations for the Cross-Domain Predictive Analytics Dashboard. It includes various visualization types, export capabilities, and real-time updates.
+
+## Available Visualizations
+
+### 1. Correlation Matrix
+- **Purpose**: Shows relationships between different features across domains
+- **Features**:
+  - Interactive heatmap
+  - Color-coded correlation values
+  - Hover tooltips with exact values
+  - Export capabilities
+
+### 2. Prediction vs Actual
+- **Purpose**: Compares predicted values with actual values
+- **Features**:
+  - Line plot with actual and predicted values
+  - Confidence intervals
+  - Interactive zoom and pan
+  - Export capabilities
+
+### 3. Time Series Decomposition
+- **Purpose**: Breaks down time series data into trend, seasonal, and residual components
+- **Features**:
+  - Multiple component visualization
+  - Interactive controls
+  - Export capabilities
+
+### 4. Feature Importance
+- **Purpose**: Shows the relative importance of different features
+- **Features**:
+  - Horizontal bar chart
+  - Color-coded importance scores
+  - Interactive sorting
+  - Export capabilities
+
+### 5. Anomaly Detection
+- **Purpose**: Identifies and visualizes anomalies in the data
+- **Features**:
+  - Scatter plot with highlighted anomalies
+  - Adjustable contamination parameter
+  - Interactive filtering
+  - Export capabilities
+
+### 6. Comparison View
+- **Purpose**: Compares multiple datasets side by side
+- **Features**:
+  - Multiple line plots
+  - Interactive legend
+  - Synchronized zooming
+  - Export capabilities
+
+## Interactive Features
+
+### Time Range Selection
+- Last 24 Hours
+- Last Week
+- Last Month
+- Last 3 Months
+- Last Year
+- Custom Range
+
+### Update Intervals
+- 1 Minute
+- 5 Minutes
+- 15 Minutes
+- 1 Hour
+
+### Export Options
+- CSV format
+- JSON format
+- Single visualization export
+- Batch export of all visualizations
+
+## API Endpoints
+
+### Visualization Endpoints
+- `/visualization/correlation-matrix`
+- `/visualization/prediction-plot`
+- `/visualization/time-series-decomposition`
+- `/visualization/feature-importance`
+- `/visualization/anomaly-detection`
+- `/visualization/comparison-view`
+
+### Export Endpoints
+- `/visualization/export/<format>`
+- `/visualization/batch-export`
+
+## Usage Examples
+
+### Basic Visualization
+```python
+from app.visualizations import visualization
+
+# Create correlation matrix
+data = pd.DataFrame(...)
+correlation_viz = visualization.create_correlation_matrix(data)
+
+# Create prediction plot
+actual_data = pd.Series(...)
+predicted_data = pd.Series(...)
+prediction_viz = visualization.create_prediction_plot(actual_data, predicted_data)
+```
+
+### Export Data
+```python
+# Export single visualization
+response = requests.post('/visualization/export/csv', json={'data': data})
+
+# Batch export
+response = requests.post('/visualization/batch-export', json={
+    'format': 'csv',
+    'visualizations': {
+        'correlation-matrix': correlation_data,
+        'prediction-plot': prediction_data
+    }
+})
+```
+
+## Best Practices
+
+1. **Data Preparation**
+   - Ensure data is properly formatted before visualization
+   - Handle missing values appropriately
+   - Normalize data when necessary
+
+2. **Performance Optimization**
+   - Use appropriate update intervals
+   - Implement data caching when possible
+   - Optimize large datasets before visualization
+
+3. **User Experience**
+   - Provide clear labels and titles
+   - Include interactive tooltips
+   - Enable easy export options
+
+4. **Error Handling**
+   - Implement proper error handling for data processing
+   - Provide meaningful error messages
+   - Include fallback options for failed visualizations
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Visualization Not Updating**
+   - Check update interval settings
+   - Verify data format
+   - Check network connectivity
+
+2. **Export Failures**
+   - Verify data format
+   - Check file permissions
+   - Ensure sufficient memory
+
+3. **Performance Issues**
+   - Reduce update frequency
+   - Optimize data size
+   - Implement data sampling
+
+## Contributing
+
+1. Follow the project's coding standards
+2. Add appropriate tests for new features
+3. Update documentation for changes
+4. Submit pull requests with clear descriptions
+
+## Future Enhancements
+
+1. Additional visualization types
+2. More export formats
+3. Enhanced interactivity
+4. Advanced filtering options
+5. Custom visualization templates 
