@@ -1,53 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">Cross-Domain Predictive Analytics</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nlq">Natural Language Queries</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/system/system-status">System Status</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/demo/control">Demo Control</a>
-                    </li>
-                </ul>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if use_case_message is defined %}
+<!-- Use Case Content -->
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-5 fw-bold mb-3">{{ title }}</h1>
+            <p class="lead mb-4">{{ use_case_message }}</p>
+            <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold">Cross-Domain Predictive Analytics</h1>
+                <p class="lead">Transform disconnected data into actionable intelligence through advanced cross-domain correlation and prediction.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="/dashboard" class="btn btn-light btn-lg px-4 me-md-2">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                    <a href="/nlq" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-chat-text me-1"></i> Try Natural Language Queries
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="{{ url_for('static', filename='img/analytics-hero.svg') }}" alt="Cross-Domain Analytics" class="img-fluid">
             </div>
         </div>
-    </nav>
+    </div>
+</div>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="jumbotron">
-                    <h1 class="display-4">Welcome to the Cross-Domain Predictive Analytics Dashboard</h1>
-                    <p class="lead">Integrating multiple data sources for predictive analytics and actionable insights.</p>
-                    <hr class="my-4">
-                    <p>This project is currently under development.</p>
+<!-- Main Features -->
+<div class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body text-center py-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white mb-3">
+                            <i class="bi bi-diagram-3 fs-1"></i>
+                        </div>
+                        <h3>Cross-Domain Correlation</h3>
+                        <p>Discover hidden relationships between seemingly unrelated datasets such as weather patterns, economic indicators, and social media trends.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body text-center py-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white mb-3">
+                            <i class="bi bi-graph-up-arrow fs-1"></i>
+                        </div>
+                        <h3>Predictive Analytics</h3>
+                        <p>Leverage machine learning models to forecast trends and generate predictions with confidence indicators.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body text-center py-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white mb-3">
+                            <i class="bi bi-chat-left-text fs-1"></i>
+                        </div>
+                        <h3>Natural Language Queries</h3>
+                        <p>Ask questions in plain English to explore data and generate insights across multiple domains.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+<!-- Use Cases -->
+<div class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Explore Use Cases</h2>
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+            <div class="col">
+                <div class="card dashboard-card h-100">
+                    <img src="{{ url_for('static', filename='img/supply-chain-bg.jpg') }}" class="card-img-top" alt="Supply Chain Optimization">
+                    <div class="card-body">
+                        <h3 class="card-title">Supply Chain Optimization</h3>
+                        <p class="card-text">Predict inventory needs by combining weather forecasts, economic indicators, social media trends, and transportation metrics. Avoid stock-outs during high-demand periods and reduce emergency shipping costs.</p>
+                        <a href="/use-cases/supply-chain" class="btn btn-primary">Explore Solution</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card dashboard-card h-100">
+                    <img src="{{ url_for('static', filename='img/public-health-bg.jpg') }}" class="card-img-top" alt="Public Health Response Planning">
+                    <div class="card-body">
+                        <h3 class="card-title">Public Health Response Planning</h3>
+                        <p class="card-text">Optimize healthcare resource allocation by correlating weather data, population mobility patterns, and disease surveillance information. Predict outbreak hotspots and estimate medical supply needs.</p>
+                        <a href="/use-cases/public-health" class="btn btn-primary">Explore Solution</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card dashboard-card h-100">
+                    <img src="{{ url_for('static', filename='img/urban-bg.jpg') }}" class="card-img-top" alt="Urban Infrastructure Management">
+                    <div class="card-body">
+                        <h3 class="card-title">Urban Infrastructure Management</h3>
+                        <p class="card-text">Anticipate infrastructure stress points by analyzing weather predictions, traffic patterns, event calendars, and utility usage data. Forecast potential service disruptions and recommend preventative maintenance.</p>
+                        <a href="/use-cases/urban-infrastructure" class="btn btn-primary">Explore Solution</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card dashboard-card h-100">
+                    <img src="{{ url_for('static', filename='img/financial-bg.jpg') }}" class="card-img-top" alt="Financial Market Strategy">
+                    <div class="card-body">
+                        <h3 class="card-title">Financial Market Strategy</h3>
+                        <p class="card-text">Identify emerging market trends by correlating weather impacts on commodities, social sentiment analysis, economic indicators, and geopolitical events. Generate investment opportunity alerts with confidence metrics.</p>
+                        <a href="/use-cases/financial-market" class="btn btn-primary">Explore Solution</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold">Ready to transform data into foresight?</h2>
+        <p class="lead mb-4">Start exploring the cross-domain correlations that matter to your business.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="/dashboard" class="btn btn-light btn-lg px-4 gap-3">Get Started</a>
+            <a href="/documentation" class="btn btn-outline-light btn-lg px-4">Documentation</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block styles %}
+<style>
+    .feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+    }
+    
+    /* Fix image heights */
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% block title %}Urban Infrastructure Management{% endblock %}
+
+{% block content %}
+<header class="use-case-header use-case-urban">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center">
+                <h1 class="display-4">Urban Infrastructure Management</h1>
+                <p class="lead">Leverage cross-domain analytics to predict infrastructure stress points and optimize maintenance schedules</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Key Insights -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Key Insights</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-primary">88°F</h2>
+                                    <p class="text-muted mb-0">Current Temperature</p>
+                                    <p class="mb-0"><strong>{{ data.weather_forecast.condition }}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-danger">High</h2>
+                                    <p class="text-muted mb-0">Grid Load Risk</p>
+                                    <p class="mb-0"><strong>92% Confidence</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h2 class="display-4 text-warning">60%</h2>
+                                    <p class="text-muted mb-0">Precipitation Chance</p>
+                                    <p class="mb-0"><strong>Thunderstorms</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 2 Critical Alerts
+                                    </div>
+                                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#infrastructureModal">
+                                        View Alerts
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Infrastructure Stress Points -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Infrastructure Stress Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="stressChart"></canvas>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle-fill me-2"></i> This stress analysis combines weather forecasts, traffic patterns, event data, and maintenance history to predict infrastructure stress points with varying confidence levels.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Stress Points</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Risk Level</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in data.stress_points %}
+                                <tr>
+                                    <td>{{ item.location }}</td>
+                                    <td>
+                                        {% if item.risk_level == 'high' %}
+                                        <span class="badge bg-danger">High</span>
+                                        {% elif item.risk_level == 'medium' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Low</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="confidence-indicator">
+                                                <div class="indicator confidence-{% if item.confidence > 0.8 %}high{% elif item.confidence > 0.6 %}medium{% else %}low{% endif %}" style="width: {{ item.confidence * 100 }}%;"></div>
+                                            </div>
+                                            <span class="small text-muted">{{ (item.confidence * 100)|int }}% confidence</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Impact Analysis -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Event Impact Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="chart-container">
+                                <canvas id="eventImpactChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h5>Upcoming Events</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Date</th>
+                                            <th>Predicted Impact</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in data.event_impacts %}
+                                        <tr>
+                                            <td>{{ item.event }}</td>
+                                            <td>{{ item.date }}</td>
+                                            <td>{{ item.predicted_impact }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-lightbulb-fill me-2"></i> <strong>Insight:</strong> The Downtown Festival is expected to create a 65% increase in power usage in the central district, with potential strain on the West Side Power Grid.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cross-Domain Correlations -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Cross-Domain Correlations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="correlation-heatmap" id="correlationHeatmap"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h5>Key Correlations</h5>
+                            <ul class="list-group mb-4">
+                                {% for item in data.correlations %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ item.factor1 }}</strong> ↔️ <strong>{{ item.factor2 }}</strong>
+                                            <div class="text-muted small">{{ item.strength|title }} correlation</div>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">{{ item.correlation }}</span>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar" style="width: {{ item.correlation * 100 }}%"></div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="alert alert-info">
+                                <i class="bi bi-lightbulb-fill me-2"></i> <strong>Insight:</strong> Rainfall intensity shows a strong correlation with storm drain pressure, allowing us to optimize maintenance schedules based on weather forecasts.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- What-If Scenario Analysis -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card dashboard-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">What-If Scenario Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Modify Parameters</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="scenario-form">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">Temperature (°F)</label>
+                                            <input type="range" class="form-range" id="temperature" min="70" max="105" value="88">
+                                            <div class="d-flex justify-content-between">
+                                                <span>70°F</span>
+                                                <span id="temperature-value">88°F</span>
+                                                <span>105°F</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="rainfall" class="form-label">Rainfall Intensity</label>
+                                            <input type="range" class="form-range" id="rainfall" min="0" max="3" step="0.5" value="1.5">
+                                            <div class="d-flex justify-content-between">
+                                                <span>None</span>
+                                                <span id="rainfall-value">Moderate</span>
+                                                <span>Severe</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="attendance" class="form-label">Event Attendance</label>
+                                            <input type="range" class="form-range" id="attendance" min="0" max="50000" step="5000" value="15000">
+                                            <div class="d-flex justify-content-between">
+                                                <span>0</span>
+                                                <span id="attendance-value">15,000</span>
+                                                <span>50,000</span>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Run Scenario</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Scenario Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="scenarioChart"></canvas>
+                                    </div>
+                                    <div class="alert alert-success mt-3">
+                                        <i class="bi bi-graph-up-arrow me-2"></i> <strong>Scenario Impact:</strong> A 5°F temperature increase combined with heavy rainfall would result in a predicted 40% increase in power grid load and 65% increase in storm drain pressure.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Infrastructure Alert Modal -->
+<div class="modal fade" id="infrastructureModal" tabindex="-1" aria-labelledby="infrastructureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="infrastructureModalLabel">Infrastructure Alerts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i> Downtown Bridge - High Risk</h5>
+                    <p><strong>Risk Level:</strong> High (89% confidence)</p>
+                    <p><strong>Recommendation:</strong> Schedule inspection within 7 days.</p>
+                    <p><strong>Contributing Factors:</strong> Recent heavy rainfall, increased traffic volume, age of structure.</p>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i> West Side Power Grid - High Risk</h5>
+                    <p><strong>Risk Level:</strong> High (92% confidence)</p>
+                    <p><strong>Recommendation:</strong> Prepare backup generators and maintenance crews.</p>
+                    <p><strong>Contributing Factors:</strong> Forecasted thunderstorms, high temperature, upcoming Downtown Festival.</p>
+                </div>
+                
+                <p class="text-muted">These predictions are based on cross-domain analytics combining weather forecasts, traffic patterns, event scheduling, and maintenance history.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Generate Work Orders</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Chart.js initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Stress Chart
+        const stressCtx = document.getElementById('stressChart').getContext('2d');
+        const stressChart = new Chart(stressCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Power Grid', 'Transportation', 'Water Systems', 'Telecom', 'Bridges'],
+                datasets: [
+                    {
+                        label: 'Current Stress',
+                        data: [85, 65, 45, 55, 80],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    },
+                    {
+                        label: 'Normal Range',
+                        data: [50, 50, 50, 50, 50],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+        
+        // Event Impact Chart
+        const eventCtx = document.getElementById('eventImpactChart').getContext('2d');
+        const eventChart = new Chart(eventCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Power Usage', 'Traffic', 'Water Usage', 'Connectivity', 'Waste'],
+                datasets: [
+                    {
+                        label: 'Downtown Festival',
+                        data: [65, 80, 45, 70, 55],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Sports Championship',
+                        data: [55, 75, 40, 85, 50],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'State Conference',
+                        data: [45, 55, 35, 60, 30],
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Impact Score (%)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Scenario Chart
+        const scenarioCtx = document.getElementById('scenarioChart').getContext('2d');
+        const scenarioChart = new Chart(scenarioCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Power Grid', 'Storm Drains', 'Traffic Flow', 'Bridge Stress', 'Telecom'],
+                datasets: [
+                    {
+                        label: 'Baseline',
+                        data: [65, 55, 60, 50, 45],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Scenario',
+                        data: [90, 85, 70, 65, 50],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Stress Level (%)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Correlation Heatmap
+        const correlationMatrix = [
+            [1.0, 0.83, 0.42, 0.36],
+            [0.83, 1.0, 0.38, 0.41],
+            [0.42, 0.38, 1.0, 0.81],
+            [0.36, 0.41, 0.81, 1.0]
+        ];
+        
+        const labels = ['Rainfall', 'Storm Drains', 'Temperature', 'Power Grid'];
+        
+        Plotly.newPlot('correlationHeatmap', [{
+            z: correlationMatrix,
+            x: labels,
+            y: labels,
+            type: 'heatmap',
+            colorscale: 'Blues',
+            showscale: true,
+            zmin: 0,
+            zmax: 1
+        }], {
+            title: 'Cross-Domain Correlation Heatmap',
+            margin: { t: 50, r: 20, b: 80, l: 80 }
+        });
+        
+        // What-If scenario form event handlers
+        const scenarioForm = document.getElementById('scenario-form');
+        const temperatureSlider = document.getElementById('temperature');
+        const rainfallSlider = document.getElementById('rainfall');
+        const attendanceSlider = document.getElementById('attendance');
+        
+        const temperatureValue = document.getElementById('temperature-value');
+        const rainfallValue = document.getElementById('rainfall-value');
+        const attendanceValue = document.getElementById('attendance-value');
+        
+        // Get rainfall description based on intensity value
+        function getRainfallDescription(value) {
+            if (value === 0) return 'None';
+            if (value <= 1) return 'Light';
+            if (value <= 2) return 'Moderate';
+            return 'Heavy';
+        }
+        
+        temperatureSlider.addEventListener('input', function() {
+            temperatureValue.textContent = this.value + '°F';
+        });
+        
+        rainfallSlider.addEventListener('input', function() {
+            rainfallValue.textContent = getRainfallDescription(parseFloat(this.value));
+        });
+        
+        attendanceSlider.addEventListener('input', function() {
+            attendanceValue.textContent = parseInt(this.value).toLocaleString();
+        });
+        
+        scenarioForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate running the scenario
+            const temperature = parseInt(temperatureSlider.value);
+            const rainfall = parseFloat(rainfallSlider.value);
+            const attendance = parseInt(attendanceSlider.value);
+            
+            // Update chart data based on inputs
+            // This is a simple simulation
+            const tempFactor = (temperature - 88) / 10;  // Temperature change factor
+            const rainfallFactor = rainfall / 1.5;       // Rainfall factor
+            const attendanceFactor = attendance / 15000; // Attendance factor
+            
+            // Update the scenario chart - simulate effects on different infrastructure
+            scenarioChart.data.datasets[1].data = [
+                // Power Grid - affected by temperature and attendance
+                Math.min(100, 65 + tempFactor * 25 + attendanceFactor * 15),
+                // Storm Drains - affected by rainfall
+                Math.min(100, 55 + rainfallFactor * 30),
+                // Traffic Flow - affected by rainfall and attendance
+                Math.min(100, 60 - rainfallFactor * 10 + attendanceFactor * 20),
+                // Bridge Stress - affected by rainfall and attendance
+                Math.min(100, 50 + rainfallFactor * 15 + attendanceFactor * 5),
+                // Telecom - affected by attendance
+                Math.min(100, 45 + attendanceFactor * 10)
+            ];
+            
+            scenarioChart.update();
+            
+            // Update the insight text based on the scenario
+            const tempChange = Math.abs(temperature - 88);
+            const tempDirection = temperature > 88 ? 'increase' : 'decrease';
+            const rainfallText = getRainfallDescription(rainfall).toLowerCase();
+            
+            const powerChange = Math.round((scenarioChart.data.datasets[1].data[0] - 65) / 65 * 100);
+            const drainChange = Math.round((scenarioChart.data.datasets[1].data[1] - 55) / 55 * 100);
+            
+            const insightText = `A ${tempChange}°F temperature ${tempDirection} combined with ${rainfallText} rainfall would result in a predicted ${powerChange}% increase in power grid load and ${drainChange}% increase in storm drain pressure.`;
+            
+            document.querySelector('.alert-success strong').nextSibling.nodeValue = ' ' + insightText;
+        });
+    });
+</script>
+{% endblock %} 

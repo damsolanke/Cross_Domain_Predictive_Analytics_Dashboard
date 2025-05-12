@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Supply Chain Optimization{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h1 class="display-5 fw-bold mb-3">Supply Chain Optimization</h1>
+            <p class="lead mb-4">Predict inventory needs by combining weather forecasts, economic indicators, social media trends, and transportation metrics.</p>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-10 offset-md-1">
+            <img src="{{ url_for('static', filename='img/supply-chain-bg.jpg') }}" alt="Supply Chain Optimization" class="img-fluid rounded shadow-lg">
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-md-10 offset-md-1">
+            <div class="card dashboard-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">Key Benefits</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-primary">
+                                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                                </div>
+                                <div>
+                                    <h5>Reduce Stockouts by 35%</h5>
+                                    <p>Anticipate demand spikes by correlating weather events, social media trends, and seasonal patterns.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-primary">
+                                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                                </div>
+                                <div>
+                                    <h5>Lower Shipping Costs by 22%</h5>
+                                    <p>Optimize transportation routes based on real-time weather conditions and traffic patterns.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-primary">
+                                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                                </div>
+                                <div>
+                                    <h5>Improve Inventory Accuracy by 28%</h5>
+                                    <p>Fine-tune order quantities through predictive analytics that combine multiple data sources.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 text-primary">
+                                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                                </div>
+                                <div>
+                                    <h5>Increase Customer Satisfaction by 18%</h5>
+                                    <p>Meet delivery expectations consistently through more accurate prediction of logistics challenges.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card dashboard-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">How It Works</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h4>Data Integration</h4>
+                            <p>Our system integrates data from multiple domains:</p>
+                            <ul>
+                                <li>Weather forecasts and historical patterns</li>
+                                <li>Economic indicators like consumer confidence and spending</li>
+                                <li>Transportation metrics including shipping times and costs</li>
+                                <li>Social media trend analysis for consumer sentiment</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Predictive Analytics</h4>
+                            <p>Our advanced machine learning models:</p>
+                            <ul>
+                                <li>Identify correlations between seemingly unrelated data</li>
+                                <li>Generate demand forecasts with confidence intervals</li>
+                                <li>Predict potential shipping delays and disruptions</li>
+                                <li>Recommend optimal inventory levels and reorder points</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h2 class="mb-4">Ready to optimize your supply chain?</h2>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="/dashboard" class="btn btn-primary btn-lg px-4 me-sm-3">Explore Dashboard</a>
+                <a href="/nlq" class="btn btn-outline-primary btn-lg px-4">Try Natural Language Queries</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

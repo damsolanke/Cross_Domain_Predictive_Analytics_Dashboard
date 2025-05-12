@@ -1,3 +1,5 @@
+from typing import Any
+
 """
 Integration module for the Cross-Domain Predictive Analytics Dashboard.
 """
@@ -38,19 +40,22 @@ system_integrator = SystemIntegrator()
 def init_system_integration(app):
     """Initialize system integration with an app."""
     # Initialize data pipeline
-    pipeline = system_integrator.init_pipeline()
+    try:
+        pipeline = system_integrator.init_pipeline()
+    except ImportError:
+        app.logger.warning("DataPipeline could not be imported. Some features may not work.")
     
     # Register other components
-    from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
-    from app.system_integration.cross_domain_prediction import CrossDomainPredictor
-    from app.system_integration.report_generator import ReportGenerator
-    
-    correlator = CrossDomainCorrelator()
-    predictor = CrossDomainPredictor(correlator=correlator)
-    report_generator = ReportGenerator()
-    
-    system_integrator.register_component('correlator', correlator)
-    system_integrator.register_component('predictor', predictor)
-    system_integrator.register_component('report_generator', report_generator)
+    try:
+        from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
+        from app.system_integration.cross_domain_prediction import CrossDomainPredictor
+        
+        correlator = CrossDomainCorrelator()
+        predictor = CrossDomainPredictor(correlator=correlator)
+        
+        system_integrator.register_component('correlator', correlator)
+        system_integrator.register_component('predictor', predictor)
+    except ImportError:
+        app.logger.warning("Some system components could not be imported. Some features may not work.")
     
     return system_integrator

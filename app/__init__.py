@@ -54,4 +54,7 @@ def create_app():
         # This is fine if the demo is not available
         pass
     
+    # Import SocketIO event handlers
+    import app.system_integration.socket_events
+    
     return app
