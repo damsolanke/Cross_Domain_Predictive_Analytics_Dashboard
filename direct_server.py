@@ -118,23 +118,38 @@ def correlation():
 @app.route('/use-cases/supply-chain')
 def supply_chain_use_case():
     """Supply Chain Optimization use case page"""
-    # Create mock data for the template
+    # Create realistic mock data for the template
     mock_data = {
-        'weather_forecast': {'condition': 'Partly Cloudy'},
-        'economic_indicators': {'trend': 'improving'},
-        'social_media_trends': {'sentiment': 'positive'},
+        'weather_forecast': {'condition': 'Heavy Rain Expected'},
+        'economic_indicators': {'trend': 'recovering', 'gdp_growth': 2.3, 'consumer_confidence': 98.5},
+        'social_media_trends': {'sentiment': 'positive', 'trending_topics': ['sustainable packaging', 'same-day delivery']},
         'inventory_insights': [
-            {'product': 'Product A', 'current_stock': 120, 'predicted_demand': 180, 'confidence': 0.87, 'restock_recommendation': 60},
-            {'product': 'Product B', 'current_stock': 75, 'predicted_demand': 50, 'confidence': 0.92, 'restock_recommendation': 0},
-            {'product': 'Product C', 'current_stock': 30, 'predicted_demand': 90, 'confidence': 0.78, 'restock_recommendation': 60},
-            {'product': 'Product D', 'current_stock': 200, 'predicted_demand': 140, 'confidence': 0.85, 'restock_recommendation': 0}
+            {'product': 'Refrigerated Food Storage Containers', 'current_stock': 1250, 'predicted_demand': 1850, 'confidence': 0.91, 'restock_recommendation': 600},
+            {'product': 'Waterproof Outdoor Equipment', 'current_stock': 520, 'predicted_demand': 980, 'confidence': 0.89, 'restock_recommendation': 460},
+            {'product': 'Summer Apparel Collection', 'current_stock': 3200, 'predicted_demand': 2100, 'confidence': 0.87, 'restock_recommendation': 0},
+            {'product': 'Emergency Weather Supplies', 'current_stock': 410, 'predicted_demand': 875, 'confidence': 0.94, 'restock_recommendation': 465},
+            {'product': 'Home Entertainment Systems', 'current_stock': 185, 'predicted_demand': 310, 'confidence': 0.82, 'restock_recommendation': 125}
         ],
         'correlations': [
-            {'factor1': 'Temperature', 'factor2': 'Ice Cream Sales', 'strength': 'strong', 'correlation': 0.87},
-            {'factor1': 'Rainfall', 'factor2': 'Umbrella Sales', 'strength': 'strong', 'correlation': 0.79},
-            {'factor1': 'Temperature', 'factor2': 'Rainfall', 'strength': 'medium', 'correlation': 0.45},
-            {'factor1': 'Ice Cream Sales', 'factor2': 'Umbrella Sales', 'strength': 'weak', 'correlation': 0.32}
-        ]
+            {'factor1': 'Heavy Rainfall', 'factor2': 'Waterproof Equipment Sales', 'strength': 'strong', 'correlation': 0.92},
+            {'factor1': 'Temperature Drop', 'factor2': 'Home Entertainment Demand', 'strength': 'strong', 'correlation': 0.85},
+            {'factor1': 'Public Events Cancellation', 'factor2': 'Food Storage Sales', 'strength': 'medium', 'correlation': 0.68},
+            {'factor1': 'Seasonal Transition', 'factor2': 'Apparel Inventory Turnover', 'strength': 'medium', 'correlation': 0.64},
+            {'factor1': 'Social Media Mentions', 'factor2': 'Emergency Supplies Demand', 'strength': 'strong', 'correlation': 0.79}
+        ],
+        'logistics_data': {
+            'average_shipping_time': 3.2,
+            'shipping_delays': [
+                {'region': 'Northeast', 'delay_hours': 24, 'cause': 'Weather conditions', 'affected_routes': 12},
+                {'region': 'Midwest', 'delay_hours': 6, 'cause': 'Increased volume', 'affected_routes': 8},
+                {'region': 'Southeast', 'delay_hours': 2, 'cause': 'Local congestion', 'affected_routes': 4}
+            ],
+            'warehouse_capacity': [
+                {'location': 'Chicago Distribution Center', 'capacity_used': 0.82, 'items_processed_daily': 12500},
+                {'location': 'Atlanta Fulfillment Center', 'capacity_used': 0.76, 'items_processed_daily': 9800},
+                {'location': 'Phoenix Regional Warehouse', 'capacity_used': 0.92, 'items_processed_daily': 8700}
+            ]
+        }
     }
     
     return render_template('use_cases/supply_chain.html', title='Supply Chain Optimization', data=mock_data)
