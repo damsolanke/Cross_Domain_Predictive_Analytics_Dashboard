@@ -5,6 +5,11 @@ from app.demo.data_generator import demo_generator
 from app.main.analytics_controller import analytics
 from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
 from app.system_integration.cross_domain_prediction import CrossDomainPredictor
+import time
+
+# Cache for dashboard data
+dashboard_data_cache = {}
+dashboard_cache_expires = 30  # seconds
 
 @main.route('/')
 def index():
@@ -71,19 +76,31 @@ def supply_chain():
     # For demo purposes, we'll use mock data
     mock_data = {
         'inventory_insights': [
-            {'product': 'Product A', 'current_stock': 120, 'predicted_demand': 180, 'restock_recommendation': 60, 'confidence': 0.85},
-            {'product': 'Product B', 'current_stock': 75, 'predicted_demand': 50, 'restock_recommendation': 0, 'confidence': 0.92},
-            {'product': 'Product C', 'current_stock': 30, 'predicted_demand': 90, 'restock_recommendation': 60, 'confidence': 0.78},
-            {'product': 'Product D', 'current_stock': 200, 'predicted_demand': 140, 'restock_recommendation': 0, 'confidence': 0.88},
+            {'product': 'Refrigerated Food Storage Containers', 'current_stock': 2500, 'predicted_demand': 3800, 'restock_recommendation': 1300, 'confidence': 0.85},
+            {'product': 'Industrial Packaging Materials', 'current_stock': 5200, 'predicted_demand': 4100, 'restock_recommendation': 0, 'confidence': 0.92},
+            {'product': 'Temperature-Controlled Shipping Units', 'current_stock': 830, 'predicted_demand': 1200, 'restock_recommendation': 370, 'confidence': 0.78},
+            {'product': 'Logistics Management Software Licenses', 'current_stock': 450, 'predicted_demand': 390, 'restock_recommendation': 0, 'confidence': 0.88},
         ],
         'correlations': [
-            {'factor1': 'Temperature', 'factor2': 'Ice Cream Sales', 'correlation': 0.87, 'strength': 'strong'},
-            {'factor1': 'Rainfall', 'factor2': 'Umbrella Sales', 'correlation': 0.79, 'strength': 'strong'},
-            {'factor1': 'Social Media Activity', 'factor2': 'Product Interest', 'correlation': 0.73, 'strength': 'strong'},
+            {'factor1': 'Extreme Heat Events', 'factor2': 'Cold Storage Demand', 'correlation': 0.87, 'strength': 'strong'},
+            {'factor1': 'Seasonal Flooding', 'factor2': 'Transportation Delays', 'correlation': 0.79, 'strength': 'strong'},
+            {'factor1': 'Holiday Season', 'factor2': 'Packaging Material Demand', 'correlation': 0.73, 'strength': 'strong'},
         ],
-        'weather_forecast': {'temperature': 82, 'condition': 'Sunny', 'precipitation': 0},
+        'weather_forecast': {'temperature': 92, 'condition': 'Extreme Heat Warning', 'precipitation': 0},
         'economic_indicators': {'consumer_confidence': 112, 'trend': 'increasing'},
-        'social_media_trends': {'buzz_factor': 87, 'sentiment': 'positive'}
+        'social_media_trends': {'buzz_factor': 87, 'sentiment': 'positive'},
+        'logistics_data': {
+            'shipping_delays': [
+                {'route': 'North-South Corridor', 'delay_hours': 8.5, 'affected_products': 'Refrigerated Goods', 'cause': 'Weather Conditions'},
+                {'route': 'East Port to Central Distribution', 'delay_hours': 3.2, 'affected_products': 'General Merchandise', 'cause': 'Traffic Congestion'},
+                {'route': 'Cross-Country Route 5', 'delay_hours': 12.0, 'affected_products': 'All Categories', 'cause': 'Infrastructure Maintenance'}
+            ],
+            'warehouse_capacity': [
+                {'location': 'North Regional Warehouse', 'capacity_used': 82, 'remaining_capacity': 18, 'optimization_suggestion': 'Redistribute to Southern Facility'},
+                {'location': 'Central Distribution Hub', 'capacity_used': 65, 'remaining_capacity': 35, 'optimization_suggestion': 'No action needed'},
+                {'location': 'East Coast Facility', 'capacity_used': 91, 'remaining_capacity': 9, 'optimization_suggestion': 'Urgent reallocation required'}
+            ]
+        }
     }
     
     return render_template('use_cases/supply_chain.html', title='Supply Chain Optimization', data=mock_data)
@@ -170,6 +187,13 @@ def financial_market():
 @main.route('/api/dashboard/data')
 def dashboard_data():
     """API endpoint for dashboard data"""
+    # Check cache first
+    cache_key = 'dashboard_data'
+    if cache_key in dashboard_data_cache:
+        cached_time, cached_data = dashboard_data_cache[cache_key]
+        if time.time() - cached_time < dashboard_cache_expires:
+            return jsonify(cached_data)
+    
     # Get processed data from the pipeline through the system integrator
     pipeline = system_integrator.data_pipeline
     processed_data = pipeline.get_processed_data(limit=50)
@@ -191,18 +215,30 @@ def dashboard_data():
     # Add system health information
     health = pipeline.check_system_health()
     
-    return jsonify({
+    result = {
         'data': organized_data,
         'health': health,
         'timestamp': pipeline.get_current_timestamp()
-    })
+    }
+    
+    # Cache the result
+    dashboard_data_cache[cache_key] = (time.time(), result)
+    
+    return jsonify(result)
 
 @main.route('/api/dashboard-data')
 def dashboard_data_new():
     """API endpoint to get dashboard data."""
+    # Check cache first
+    cache_key = 'dashboard_data_new'
+    if cache_key in dashboard_data_cache:
+        cached_time, cached_data = dashboard_data_cache[cache_key]
+        if time.time() - cached_time < dashboard_cache_expires:
+            return jsonify(cached_data)
+            
     # In a real application, this would fetch data from the database
     # For demo purposes, we'll return mock data
-    return jsonify({
+    result = {
         'weather': {
             'temperature': 78,
             'condition': 'Partly Cloudy',
@@ -244,4 +280,9 @@ def dashboard_data_new():
                 {'topic': 'Economic News', 'sentiment': 65, 'volume': 6100}
             ]
         }
-    })
+    }
+    
+    # Cache the result
+    dashboard_data_cache[cache_key] = (time.time(), result)
+    
+    return jsonify(result)

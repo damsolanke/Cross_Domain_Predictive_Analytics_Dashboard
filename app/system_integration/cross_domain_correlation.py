@@ -2,6 +2,7 @@
 Cross-domain correlation module.
 """
 import numpy as np
+import time
 from typing import Dict, List, Any, Optional
 
 class CrossDomainCorrelator:
@@ -13,6 +14,9 @@ class CrossDomainCorrelator:
         """Initialize the cross-domain correlator."""
         self.domain_data = {}
         self.correlation_cache = {}
+        self.highest_correlations_cache = {}
+        self.all_correlations_timestamp = 0
+        self.cache_expiry = 60  # Cache expiry in seconds
         self.error = None
         
     def add_domain_data(self, domain: str, data: List[Dict[str, Any]]):
@@ -26,6 +30,8 @@ class CrossDomainCorrelator:
         self.domain_data[domain] = data
         # Invalidate cache when new data is added
         self.correlation_cache = {}
+        self.highest_correlations_cache = {}
+        self.all_correlations_timestamp = 0
         
     def compute_correlation(self, domain1: str, field1: str, domain2: str, field2: str) -> Optional[float]:
         """
@@ -84,6 +90,11 @@ class CrossDomainCorrelator:
         Returns:
             Dictionary mapping correlation keys to values
         """
+        # Return cached correlations if they're still valid
+        current_time = time.time()
+        if self.all_correlations_timestamp > 0 and current_time - self.all_correlations_timestamp < self.cache_expiry:
+            return self.correlation_cache
+            
         result = {}
         
         # Generate all combinations of domains and fields
@@ -105,7 +116,9 @@ class CrossDomainCorrelator:
                         if correlation is not None:
                             key = f"{domain1}.{field1}_{domain2}.{field2}"
                             result[key] = correlation
-                            
+        
+        # Update cache timestamp
+        self.all_correlations_timestamp = current_time
         return result
         
     def get_status(self) -> Dict[str, Any]:
@@ -131,6 +144,12 @@ class CrossDomainCorrelator:
         Returns:
             List of correlation information dictionaries
         """
+        # Check if we have cached results for this limit
+        if limit in self.highest_correlations_cache:
+            cache_time, cached_results = self.highest_correlations_cache[limit]
+            if time.time() - cache_time < self.cache_expiry:
+                return cached_results
+            
         # Compute all correlations if cache is empty
         if not self.correlation_cache:
             self.get_all_correlations()
@@ -157,6 +176,9 @@ class CrossDomainCorrelator:
                 'field2': field2,
                 'strength': self._interpret_correlation(value)
             })
+            
+        # Cache the results
+        self.highest_correlations_cache[limit] = (time.time(), result)
             
         return result
         

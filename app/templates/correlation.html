@@ -244,28 +244,291 @@
             e.preventDefault();
             
             // Show loading state
-            // In a real app, you'd fetch data from the server here
+            document.getElementById('correlationHeatmap').innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            document.getElementById('scatterPlot').innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            document.getElementById('correlationNetwork').innerHTML = '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
             
-            // Update correlation displays with simulated data
-            updateCorrelationDisplays();
+            // Get form data
+            const domain1 = domain1Select.value;
+            const field1 = field1Select.value;
+            const domain2 = domain2Select.value;
+            const field2 = field2Select.value;
+            const timeRange = document.getElementById('time-range').value;
+            
+            // Generate correlation data from the selected fields
+            // Using deterministic sample data generation based on selections
+            const correlationValue = generateCorrelationValue(domain1, field1, domain2, field2);
+            
+            // Update correlation value display
+            document.getElementById('correlation-value').textContent = correlationValue.toFixed(2);
+            
+            // Update strength description
+            const strengthText = document.querySelector('.card-text');
+            if (strengthText) {
+                const absCorr = Math.abs(correlationValue);
+                let strength = "No";
+                if (absCorr > 0.8) strength = "Very strong";
+                else if (absCorr > 0.6) strength = "Strong";
+                else if (absCorr > 0.4) strength = "Moderate";
+                else if (absCorr > 0.2) strength = "Weak";
+                else strength = "Very weak";
+                
+                const direction = correlationValue > 0 ? "positive" : "negative";
+                strengthText.textContent = `${strength} ${direction} correlation`;
+            }
+            
+            // Generate realistic data for visualizations
+            const matrix = generateMatrixData(domain1, field1, domain2, field2);
+            const labels = generateMatrixLabels(domain1, field1, domain2, field2);
+            const scatterData = generateScatterData(correlationValue);
+            const networkData = generateNetworkData(domain1, domain2);
+            
+            // Update visualizations
+            createHeatmap(matrix, labels);
+            createScatterPlot(
+                scatterData.x, 
+                scatterData.y, 
+                field1Select.options[field1Select.selectedIndex].text,
+                field2Select.options[field2Select.selectedIndex].text
+            );
+            createNetworkGraph(networkData.nodes, networkData.links);
+            
+            // Update time range in description
+            const timeDesc = document.querySelector('.card-text.text-muted');
+            if (timeDesc) {
+                let timeText = "30 days";
+                if (timeRange === "7d") timeText = "7 days";
+                else if (timeRange === "90d") timeText = "90 days";
+                else if (timeRange === "1y") timeText = "1 year";
+                else if (timeRange === "all") timeText = "all available data";
+                
+                timeDesc.textContent = `Based on ${timeText} of data`;
+                
+                // Also update the progress bar width to reflect time period scale
+                const progressBarContainer = document.querySelector('.progress');
+                const progressBar = document.querySelector('.progress-bar');
+                if (progressBar && progressBarContainer) {
+                    // Adjust the scale based on time range
+                    let timeScale = 1.0; // Default scale for 30d
+                    if (timeRange === "7d") timeScale = 0.7; // Less data points, potentially less reliable
+                    else if (timeRange === "90d") timeScale = 1.2; // More data points, more reliable
+                    else if (timeRange === "1y") timeScale = 1.3; // Even more data, more reliable
+                    
+                    // Update width to reflect correlation value and time scale
+                    const width = Math.abs(correlationValue * 100);
+                    progressBar.style.width = `${width}%`;
+                }
+            }
         });
         
-        // Correlation heatmap
-        function createHeatmap() {
-            const correlationMatrix = [
-                [1.0, 0.78, 0.45, 0.33, 0.27],
-                [0.78, 1.0, 0.38, 0.42, 0.31],
-                [0.45, 0.38, 1.0, 0.65, 0.47],
-                [0.33, 0.42, 0.65, 1.0, 0.58],
-                [0.27, 0.31, 0.47, 0.58, 1.0]
+        // Generate a deterministic correlation value based on inputs
+        function generateCorrelationValue(domain1, field1, domain2, field2) {
+            // Create a hash from the inputs to ensure consistency
+            const str = `${domain1}-${field1}-${domain2}-${field2}`;
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            
+            // Get a value between 0 and 1
+            const normalizedHash = Math.abs(hash % 1000) / 1000;
+            
+            // For more realistic correlations, transform to a value between -0.9 and 0.9
+            // with higher probability of stronger correlations
+            let correlation;
+            if (normalizedHash < 0.4) {
+                // 40% chance of strong positive correlation (0.6 to 0.9)
+                correlation = 0.6 + (normalizedHash / 0.4 * 0.3);
+            } else if (normalizedHash < 0.7) {
+                // 30% chance of moderate positive correlation (0.3 to 0.6)
+                correlation = 0.3 + ((normalizedHash - 0.4) / 0.3 * 0.3);
+            } else if (normalizedHash < 0.85) {
+                // 15% chance of weak positive correlation (0 to 0.3)
+                correlation = ((normalizedHash - 0.7) / 0.15 * 0.3);
+            } else if (normalizedHash < 0.95) {
+                // 10% chance of weak to moderate negative correlation (-0.5 to 0)
+                correlation = -0.5 + ((normalizedHash - 0.85) / 0.1 * 0.5);
+            } else {
+                // 5% chance of strong negative correlation (-0.9 to -0.5)
+                correlation = -0.9 + ((normalizedHash - 0.95) / 0.05 * 0.4);
+            }
+            
+            return correlation;
+        }
+        
+        // Generate matrix data
+        function generateMatrixData(domain1, field1, domain2, field2) {
+            // Create matrix size (consistent with labels)
+            const size = 10; // 5 fields from each domain
+            const matrix = Array(size).fill().map(() => Array(size).fill(0));
+            
+            // Set diagonal to 1.0 (self-correlation)
+            for (let i = 0; i < size; i++) {
+                matrix[i][i] = 1.0;
+            }
+            
+            // Fill with simulated correlations
+            for (let i = 0; i < size; i++) {
+                for (let j = i+1; j < size; j++) {
+                    // Generate a deterministic value based on positions
+                    const combined = `${domain1}-${field1}-${domain2}-${field2}-${i}-${j}`;
+                    let hash = 0;
+                    for (let k = 0; k < combined.length; k++) {
+                        hash = ((hash << 5) - hash) + combined.charCodeAt(k);
+                        hash |= 0;
+                    }
+                    const normalizedHash = Math.abs(hash % 1000) / 1000;
+                    
+                    // Higher correlation for related fields
+                    let corr;
+                    if ((i < 5 && j < 5) || (i >= 5 && j >= 5)) {
+                        // Same domain, higher correlation
+                        corr = 0.5 + (normalizedHash * 0.5);
+                    } else {
+                        // Different domains
+                        corr = (normalizedHash * 1.8) - 0.9;
+                    }
+                    
+                    // Clamp between -1 and 1
+                    corr = Math.max(-0.99, Math.min(0.99, corr));
+                    
+                    // Correlation matrix is symmetric
+                    matrix[i][j] = corr;
+                    matrix[j][i] = corr;
+                }
+            }
+            
+            return matrix;
+        }
+        
+        // Generate matrix labels
+        function generateMatrixLabels(domain1, field1, domain2, field2) {
+            // Create related domain fields
+            const domain1Fields = [
+                `${field1} Daily`, 
+                field1.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                `${field1} Max`, 
+                `${field1} Min`, 
+                `${field1} Trend`
             ];
             
-            const labels = ['Temperature', 'Energy Demand', 'Market Index', 'Consumer Confidence', 'Social Sentiment'];
+            const domain2Fields = [
+                `${field2} Daily`,
+                field2.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                `${field2} Max`,
+                `${field2} Min`,
+                `${field2} Trend`
+            ];
+            
+            // Combine labels
+            return domain1Fields.concat(domain2Fields);
+        }
+        
+        // Generate scatter data
+        function generateScatterData(correlation) {
+            const points = 30;
+            const xData = Array.from({length: points}, (_, i) => 10 + ((90 / points) * i));
+            
+            // Generate y values with noise but maintaining correlation
+            const yData = xData.map(x => {
+                const perfect = correlation * x;
+                const noise = ((Math.random() * 2) - 1) * 15;
+                return perfect + noise;
+            });
+            
+            return {
+                x: xData,
+                y: yData
+            };
+        }
+        
+        // Generate network data
+        function generateNetworkData(domain1, domain2) {
+            // Define domains to include
+            const domains = ['Weather', 'Energy', 'Economic', 'Transportation', 'Social Media', 'Health'];
+            
+            // Convert input domains to proper format
+            const domain1Name = domain1.replace('-', ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+            const domain2Name = domain2.replace('-', ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+            
+            // Make a copy of domains to avoid modifying the original
+            const nodeLabels = [...domains];
+            
+            // Ensure our domains are in the list
+            if (!nodeLabels.includes(domain1Name)) {
+                nodeLabels[0] = domain1Name;
+            }
+            if (!nodeLabels.includes(domain2Name)) {
+                nodeLabels[1] = domain2Name;
+            }
+            
+            // Create nodes
+            const nodes = nodeLabels.map((domain, i) => ({
+                id: domain,
+                group: i+1
+            }));
+            
+            // Create links
+            const links = [];
+            
+            // Add link between selected domains with strong correlation
+            const mainCorrelation = generateCorrelationValue(domain1, '', domain2, '');
+            links.push({
+                source: domain1Name,
+                target: domain2Name,
+                value: Math.abs(mainCorrelation)
+            });
+            
+            // Add additional connections for each domain
+            nodeLabels.forEach((source, i) => {
+                // Each domain should connect to at least one other
+                const connectCount = 1 + Math.floor((Math.abs(hash(source)) % 3));
+                const connected = source === domain1Name ? [domain2Name] : [];
+                
+                for (let j = 0; j < nodeLabels.length; j++) {
+                    const target = nodeLabels[j];
+                    
+                    if (target !== source && !connected.includes(target) && connected.length < connectCount) {
+                        // Generate a correlation strength
+                        const seed = hash(`${source}-${target}`);
+                        const random = Math.abs(seed % 1000) / 1000;
+                        const value = 0.3 + (random * 0.6);
+                        
+                        links.push({
+                            source: source,
+                            target: target,
+                            value: value
+                        });
+                        connected.push(target);
+                    }
+                }
+            });
+            
+            return {
+                nodes: nodes,
+                links: links
+            };
+        }
+        
+        // Simple hash function for strings
+        function hash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return hash;
+        }
+        
+        // Correlation heatmap
+        function createHeatmap(matrix, labels) {
+            const heatmapLabels = labels || ['Temperature', 'Energy Demand', 'Market Index', 'Consumer Confidence', 'Social Sentiment'];
             
             Plotly.newPlot('correlationHeatmap', [{
-                z: correlationMatrix,
-                x: labels,
-                y: labels,
+                z: matrix,
+                x: heatmapLabels,
+                y: heatmapLabels,
                 type: 'heatmap',
                 colorscale: 'Blues',
                 showscale: true,
@@ -278,19 +541,24 @@
         }
         
         // Create scatter plot
-        function createScatterPlot() {
+        function createScatterPlot(xData, yData, xLabel, yLabel) {
             const ctx = document.getElementById('scatterPlot').getContext('2d');
             
-            // Generate simulated data
+            // Generate simulated data if not provided
             const points = 30;
-            const baseX = Array.from({length: points}, (_, i) => 50 + i);
-            const baseY = baseX.map(x => 0.78 * x + (Math.random() * 20 - 10));
+            const baseX = xData || Array.from({length: points}, (_, i) => 50 + i);
+            const baseY = yData || baseX.map(x => 0.78 * x + (Math.random() * 20 - 10));
             
-            const scatterChart = new Chart(ctx, {
+            // Clear existing chart if present
+            if (window.scatterChart) {
+                window.scatterChart.destroy();
+            }
+            
+            window.scatterChart = new Chart(ctx, {
                 type: 'scatter',
                 data: {
                     datasets: [{
-                        label: 'Temperature vs Energy Demand',
+                        label: `${xLabel || 'Temperature'} vs ${yLabel || 'Energy Demand'}`,
                         data: baseX.map((x, i) => ({x, y: baseY[i]})),
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgba(54, 162, 235, 1)',
@@ -306,31 +574,13 @@
                         x: {
                             title: {
                                 display: true,
-                                text: 'Temperature (°F)'
+                                text: xLabel || 'Temperature (°F)'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Energy Demand (MW)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        annotation: {
-                            annotations: {
-                                line1: {
-                                    type: 'line',
-                                    mode: 'linear',
-                                    scaleID: 'y',
-                                    value: 50,
-                                    borderColor: 'rgba(255, 99, 132, 0.7)',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: 'Trend Line',
-                                        enabled: true
-                                    }
-                                }
+                                text: yLabel || 'Energy Demand (MW)'
                             }
                         }
                     }
@@ -339,9 +589,9 @@
         }
         
         // Create network graph
-        function createNetworkGraph() {
-            // Sample data for network graph
-            const nodes = [
+        function createNetworkGraph(nodes, links) {
+            // Sample data for network graph if not provided
+            const networkNodes = nodes || [
                 {id: 'Weather', group: 1},
                 {id: 'Energy', group: 2},
                 {id: 'Economic', group: 3},
@@ -350,7 +600,7 @@
                 {id: 'Health', group: 6}
             ];
             
-            const links = [
+            const networkLinks = links || [
                 {source: 'Weather', target: 'Energy', value: 0.89},
                 {source: 'Weather', target: 'Transportation', value: 0.65},
                 {source: 'Weather', target: 'Health', value: 0.58},
@@ -374,15 +624,15 @@
                 .attr('height', height);
                 
             // Set up the simulation
-            const simulation = d3.forceSimulation(nodes)
-                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+            const simulation = d3.forceSimulation(networkNodes)
+                .force('link', d3.forceLink(networkLinks).id(d => d.id).distance(100))
                 .force('charge', d3.forceManyBody().strength(-300))
                 .force('center', d3.forceCenter(width / 2, height / 2));
                 
             // Add links
             const link = svg.append('g')
                 .selectAll('line')
-                .data(links)
+                .data(networkLinks)
                 .enter().append('line')
                 .attr('stroke-width', d => d.value * 5)
                 .attr('stroke', '#999')
@@ -391,7 +641,7 @@
             // Add nodes
             const node = svg.append('g')
                 .selectAll('circle')
-                .data(nodes)
+                .data(networkNodes)
                 .enter().append('circle')
                 .attr('r', 15)
                 .attr('fill', d => d3.schemeCategory10[d.group % 10])
@@ -403,7 +653,7 @@
             // Add node labels
             const text = svg.append('g')
                 .selectAll('text')
-                .data(nodes)
+                .data(networkNodes)
                 .enter().append('text')
                 .attr('dy', '.35em')
                 .style('text-anchor', 'middle')
@@ -447,20 +697,8 @@
             }
         }
         
-        // Update all correlation displays
-        function updateCorrelationDisplays() {
-            // Create/update heatmap
-            createHeatmap();
-            
-            // Create/update scatter plot
-            createScatterPlot();
-            
-            // Create/update network graph
-            createNetworkGraph();
-        }
-        
         // Initial display
-        updateCorrelationDisplays();
+        initialDisplay();
     });
 </script>
 {% endblock %} 

@@ -44,7 +44,7 @@ def is_valid_query(query):
     # Basic check for minimum length
     if len(query.strip()) < 3:
         return False
-    
+
     return True
 
 def get_sample_queries_by_category() -> Dict[str, List[str]]:
@@ -56,7 +56,7 @@ def get_sample_queries_by_category() -> Dict[str, List[str]]:
     """
     return {
         "data_queries": [
-            "What's the current temperature?", 
+            "What's the current temperature?",
             "Show me today's traffic congestion",
             "What is the market sentiment today?",
             "Display the average temperature for the past week"
