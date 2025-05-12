@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}Cross-Domain Correlation{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card dashboard-card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Cross-Domain Correlation Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">
+                        Discover non-obvious relationships between seemingly unrelated data domains.
+                        Cross-Domain Correlation Analysis identifies patterns and connections across different datasets,
+                        revealing insights that would remain hidden when data is analyzed in isolation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card dashboard-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Domain Selection</h5>
+                </div>
+                <div class="card-body">
+                    <form id="correlation-form">
+                        <div class="mb-3">
+                            <label for="domain1" class="form-label">First Domain</label>
+                            <select class="form-select" id="domain1">
+                                <option value="weather">Weather</option>
+                                <option value="economic">Economic</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="social-media">Social Media</option>
+                                <option value="health">Public Health</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="field1" class="form-label">First Domain Metric</label>
+                            <select class="form-select" id="field1">
+                                <option value="loading">Select a domain first...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="domain2" class="form-label">Second Domain</label>
+                            <select class="form-select" id="domain2">
+                                <option value="weather">Weather</option>
+                                <option value="economic" selected>Economic</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="social-media">Social Media</option>
+                                <option value="health">Public Health</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="field2" class="form-label">Second Domain Metric</label>
+                            <select class="form-select" id="field2">
+                                <option value="loading">Select a domain first...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="time-range" class="form-label">Time Range</label>
+                            <select class="form-select" id="time-range">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d" selected>Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="1y">Last Year</option>
+                                <option value="all">All Available Data</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Analyze Correlation</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Top Correlations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" id="top-correlations">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Temperature ↔️ Energy Demand</h6>
+                                <span class="badge bg-primary rounded-pill">0.89</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 89%"></div>
+                            </div>
+                            <p class="mb-1 small text-muted">Weather ↔️ Energy</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Social Sentiment ↔️ Stock Prices</h6>
+                                <span class="badge bg-primary rounded-pill">0.72</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 72%"></div>
+                            </div>
+                            <p class="mb-1 small text-muted">Social Media ↔️ Economic</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Traffic Density ↔️ Retail Sales</h6>
+                                <span class="badge bg-primary rounded-pill">0.68</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 68%"></div>
+                            </div>
+                            <p class="mb-1 small text-muted">Transportation ↔️ Economic</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Precipitation ↔️ Public Transit Usage</h6>
+                                <span class="badge bg-primary rounded-pill">0.65</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 65%"></div>
+                            </div>
+                            <p class="mb-1 small text-muted">Weather ↔️ Transportation</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Social Events ↔️ Respiratory Cases</h6>
+                                <span class="badge bg-primary rounded-pill">0.61</span>
+                            </div>
+                            <div class="progress mt-1" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 61%"></div>
+                            </div>
+                            <p class="mb-1 small text-muted">Social Media ↔️ Health</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card dashboard-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Correlation Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="correlation-heatmap" id="correlationHeatmap" style="height: 400px;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Primary Analysis</h5>
+                                    <h2 class="display-4 text-primary" id="correlation-value">0.78</h2>
+                                    <p class="card-text">Strong positive correlation</p>
+                                    <div class="progress mb-3" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 78%"></div>
+                                    </div>
+                                    <p class="mb-0">Temperature (Weather)</p>
+                                    <p class="mb-3">Energy Demand (Energy)</p>
+                                    <p class="card-text text-muted">Based on 90 days of data</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="chart-container">
+                                <canvas id="scatterPlot" height="300"></canvas>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle-fill me-2"></i> The scatter plot shows the relationship between the selected variables with each point representing a day in the selected time period. The trend line indicates the direction and strength of the correlation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Network Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="correlation-network" id="correlationNetwork" style="height: 400px;"></div>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle-fill me-2"></i> This network graph shows relationships between multiple domains. Thicker lines indicate stronger correlations, and node size represents the number of significant correlations.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Domain fields mapping
+        const domainFields = {
+            'weather': ['temperature', 'precipitation', 'humidity', 'wind_speed', 'pressure'],
+            'economic': ['market_index', 'consumer_confidence', 'interest_rate', 'unemployment_rate', 'inflation'],
+            'transportation': ['traffic_volume', 'transit_ridership', 'average_speed', 'congestion_level', 'accident_count'],
+            'social-media': ['sentiment', 'trending_topics', 'engagement_rate', 'mention_volume', 'hashtag_usage'],
+            'health': ['flu_cases', 'hospital_admissions', 'air_quality_index', 'vaccination_rate', 'respiratory_cases']
+        };
+        
+        // Update field options based on domain selection
+        function updateFieldOptions(domainSelect, fieldSelect) {
+            const domain = domainSelect.value;
+            const fields = domainFields[domain] || [];
+            
+            // Clear existing options
+            fieldSelect.innerHTML = '';
+            
+            // Add new options
+            fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field;
+                option.textContent = field.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                fieldSelect.appendChild(option);
+            });
+        }
+        
+        // Initialize field selectors
+        const domain1Select = document.getElementById('domain1');
+        const field1Select = document.getElementById('field1');
+        const domain2Select = document.getElementById('domain2');
+        const field2Select = document.getElementById('field2');
+        
+        domain1Select.addEventListener('change', () => updateFieldOptions(domain1Select, field1Select));
+        domain2Select.addEventListener('change', () => updateFieldOptions(domain2Select, field2Select));
+        
+        // Initialize with default values
+        updateFieldOptions(domain1Select, field1Select);
+        updateFieldOptions(domain2Select, field2Select);
+        
+        // Handle correlation analysis form submission
+        document.getElementById('correlation-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            // In a real app, you'd fetch data from the server here
+            
+            // Update correlation displays with simulated data
+            updateCorrelationDisplays();
+        });
+        
+        // Correlation heatmap
+        function createHeatmap() {
+            const correlationMatrix = [
+                [1.0, 0.78, 0.45, 0.33, 0.27],
+                [0.78, 1.0, 0.38, 0.42, 0.31],
+                [0.45, 0.38, 1.0, 0.65, 0.47],
+                [0.33, 0.42, 0.65, 1.0, 0.58],
+                [0.27, 0.31, 0.47, 0.58, 1.0]
+            ];
+            
+            const labels = ['Temperature', 'Energy Demand', 'Market Index', 'Consumer Confidence', 'Social Sentiment'];
+            
+            Plotly.newPlot('correlationHeatmap', [{
+                z: correlationMatrix,
+                x: labels,
+                y: labels,
+                type: 'heatmap',
+                colorscale: 'Blues',
+                showscale: true,
+                zmin: 0,
+                zmax: 1
+            }], {
+                title: 'Cross-Domain Correlation Heatmap',
+                margin: { t: 50, r: 20, b: 80, l: 80 }
+            });
+        }
+        
+        // Create scatter plot
+        function createScatterPlot() {
+            const ctx = document.getElementById('scatterPlot').getContext('2d');
+            
+            // Generate simulated data
+            const points = 30;
+            const baseX = Array.from({length: points}, (_, i) => 50 + i);
+            const baseY = baseX.map(x => 0.78 * x + (Math.random() * 20 - 10));
+            
+            const scatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Temperature vs Energy Demand',
+                        data: baseX.map((x, i) => ({x, y: baseY[i]})),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Temperature (°F)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Energy Demand (MW)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    mode: 'linear',
+                                    scaleID: 'y',
+                                    value: 50,
+                                    borderColor: 'rgba(255, 99, 132, 0.7)',
+                                    borderWidth: 2,
+                                    label: {
+                                        content: 'Trend Line',
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create network graph
+        function createNetworkGraph() {
+            // Sample data for network graph
+            const nodes = [
+                {id: 'Weather', group: 1},
+                {id: 'Energy', group: 2},
+                {id: 'Economic', group: 3},
+                {id: 'Transportation', group: 4},
+                {id: 'Social Media', group: 5},
+                {id: 'Health', group: 6}
+            ];
+            
+            const links = [
+                {source: 'Weather', target: 'Energy', value: 0.89},
+                {source: 'Weather', target: 'Transportation', value: 0.65},
+                {source: 'Weather', target: 'Health', value: 0.58},
+                {source: 'Energy', target: 'Economic', value: 0.72},
+                {source: 'Economic', target: 'Social Media', value: 0.68},
+                {source: 'Transportation', target: 'Economic', value: 0.61},
+                {source: 'Social Media', target: 'Health', value: 0.51},
+                {source: 'Health', target: 'Transportation', value: 0.47}
+            ];
+            
+            // Set up SVG for D3
+            const width = document.getElementById('correlationNetwork').clientWidth;
+            const height = 400;
+            
+            // Clear previous graph
+            d3.select('#correlationNetwork').html('');
+            
+            const svg = d3.select('#correlationNetwork')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+                
+            // Set up the simulation
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2));
+                
+            // Add links
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter().append('line')
+                .attr('stroke-width', d => d.value * 5)
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6);
+                
+            // Add nodes
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(nodes)
+                .enter().append('circle')
+                .attr('r', 15)
+                .attr('fill', d => d3.schemeCategory10[d.group % 10])
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+                    
+            // Add node labels
+            const text = svg.append('g')
+                .selectAll('text')
+                .data(nodes)
+                .enter().append('text')
+                .attr('dy', '.35em')
+                .style('text-anchor', 'middle')
+                .style('font-size', '10px')
+                .style('font-weight', 'bold')
+                .text(d => d.id);
+                
+            // Update positions on simulation tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                    
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+                    
+                text
+                    .attr('x', d => d.x)
+                    .attr('y', d => d.y);
+            });
+            
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+        
+        // Update all correlation displays
+        function updateCorrelationDisplays() {
+            // Create/update heatmap
+            createHeatmap();
+            
+            // Create/update scatter plot
+            createScatterPlot();
+            
+            // Create/update network graph
+            createNetworkGraph();
+        }
+        
+        // Initial display
+        updateCorrelationDisplays();
+    });
+</script>
+{% endblock %} 

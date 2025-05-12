@@ -27,6 +27,9 @@ class DashboardController {
             console.log('Connected to real-time updates');
             this.setConnectionStatus(true);
             
+            // Reset reconnect delay on successful connection
+            this.reconnectDelay = 0;
+            
             // Subscribe to all update types
             this.socket.emit('subscribe_to_updates', { update_type: 'all' });
         });
@@ -37,6 +40,23 @@ class DashboardController {
             
             // Set up polling as fallback
             this.startPolling();
+            
+            // Try to reconnect
+            this.retryConnection();
+        });
+        
+        this.socket.on('connect_error', (error) => {
+            console.error('Connection error:', error);
+            this.setConnectionStatus(false);
+            
+            // Show error message
+            this.showErrorMessage('Connection error. Using polling for updates.');
+            
+            // Set up polling as fallback
+            this.startPolling();
+            
+            // Try to reconnect
+            this.retryConnection();
         });
 
         this.socket.on('connection_response', (data) => {
@@ -240,6 +260,18 @@ class DashboardController {
         // Request correlation data
         this.socket.emit('get_correlation_data');
         this.socket.emit('get_correlation_insights');
+        
+        // Set a timeout to hide the loading indicator in case the WebSocket connection
+        // or data loading takes too long
+        setTimeout(() => {
+            this.showLoadingIndicator(false);
+            
+            // Check if we're still not connected and show a warning
+            if (!this.socket.connected) {
+                this.showErrorMessage('WebSocket connection failed. Using polling for updates.');
+                this.startPolling();
+            }
+        }, 5000);
     }
 
     /**
@@ -1502,57 +1534,140 @@ class DashboardController {
      * Handle correlation data update
      */
     handleCorrelationDataUpdate(data) {
-        // Store correlation data
-        this.dataCache['cross-domain'] = data;
+        console.log('Processing correlation data update:', data);
         
-        // Update correlation visualizations
+        // Skip if no data
+        if (!data || !data.data) {
+            console.log('No correlation data to process');
+            return;
+        }
+        
+        // Update cross-domain data cache
+        if (!this.dataCache['cross-domain']) {
+            this.dataCache['cross-domain'] = [];
+        }
+        
+        // Add to cache or update existing
+        this.dataCache['cross-domain'].push(data.data);
+        
+        // Keep cache size reasonable
+        if (this.dataCache['cross-domain'].length > 10) {
+            this.dataCache['cross-domain'] = this.dataCache['cross-domain'].slice(-10);
+        }
+        
+        // Update cross-domain visualizations
         this.updateCrossDomainVisualizations();
     }
     
     /**
-     * Handle new correlation insight
+     * Handle correlation insight
      */
     handleCorrelationInsight(insight) {
-        // Add insight to cross-domain data cache
+        console.log('Processing correlation insight:', insight);
+        
+        // Skip if no insight
+        if (!insight || !insight.data) {
+            console.log('No correlation insight to process');
+            return;
+        }
+        
+        // Update cross-domain insights
         if (!this.dataCache['cross-domain']) {
-            this.dataCache['cross-domain'] = { insights: [] };
-        } else if (!this.dataCache['cross-domain'].insights) {
+            this.dataCache['cross-domain'] = [];
+        }
+        
+        // Add insights to dataCache
+        if (!this.dataCache['cross-domain'].insights) {
             this.dataCache['cross-domain'].insights = [];
         }
         
-        this.dataCache['cross-domain'].insights.push(insight);
-        
-        // Update insights visualization
-        const container = document.querySelector('[data-domain="cross-domain"]');
-        if (container) {
-            this.updateCrossDomainInsights(container, [this.dataCache['cross-domain']]);
+        // Add new insights
+        if (Array.isArray(insight.data)) {
+            this.dataCache['cross-domain'].insights = insight.data;
+        } else {
+            this.dataCache['cross-domain'].insights.push(insight.data);
+            
+            // Keep insights at a reasonable size
+            if (this.dataCache['cross-domain'].insights.length > 10) {
+                this.dataCache['cross-domain'].insights = this.dataCache['cross-domain'].insights.slice(-10);
+            }
         }
         
-        // Create alert for significant insights
-        if (insight.correlation_value && Math.abs(insight.correlation_value) > 0.7) {
-            const alertData = {
-                type: 'Correlation Insight',
-                level: 'info',
-                message: insight.description
-            };
-            this.addAlertToDisplay(alertData);
-        }
+        // Update cross-domain visualizations
+        this.updateCrossDomainVisualizations();
     }
     
     /**
      * Handle correlation anomaly
      */
     handleCorrelationAnomaly(anomaly) {
-        // Create alert for anomaly
-        const alertData = {
-            type: 'Correlation Anomaly',
-            level: 'warning',
-            message: anomaly.description
-        };
-        this.addAlertToDisplay(alertData);
+        console.log('Processing correlation anomaly:', anomaly);
         
-        // Play notification sound for anomalies
-        this.playNotificationSound();
+        // Skip if no anomaly
+        if (!anomaly || !anomaly.data) {
+            console.log('No correlation anomaly to process');
+            return;
+        }
+        
+        // Create alert for anomaly
+        this.handleAlertNotification({
+            type: 'correlation_anomaly',
+            level: anomaly.data.severity || 'warning',
+            message: anomaly.data.description || 'Correlation anomaly detected',
+            data: anomaly.data
+        });
+        
+        // Update cross-domain data
+        if (!this.dataCache['cross-domain']) {
+            this.dataCache['cross-domain'] = [];
+        }
+        
+        // Add anomaly to dataCache
+        if (!this.dataCache['cross-domain'].anomalies) {
+            this.dataCache['cross-domain'].anomalies = [];
+        }
+        
+        this.dataCache['cross-domain'].anomalies.push(anomaly.data);
+        
+        // Keep anomalies at a reasonable size
+        if (this.dataCache['cross-domain'].anomalies.length > 10) {
+            this.dataCache['cross-domain'].anomalies = this.dataCache['cross-domain'].anomalies.slice(-10);
+        }
+        
+        // Update cross-domain visualizations
+        this.updateCrossDomainVisualizations();
+    }
+
+    /**
+     * Retry WebSocket connection with exponential backoff
+     */
+    retryConnection() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+        }
+        
+        // Start with 1 second, then double each time, up to 30 seconds
+        if (!this.reconnectDelay) {
+            this.reconnectDelay = 1000;
+        } else {
+            this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
+        }
+        
+        console.log(`Attempting to reconnect in ${this.reconnectDelay/1000} seconds...`);
+        
+        this.reconnectTimer = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            
+            // Force disconnect and reconnect
+            if (this.socket) {
+                this.socket.disconnect();
+                this.socket.connect();
+            } else {
+                // If socket doesn't exist for some reason, create a new one
+                this.socket = io('/system-updates');
+                this.initializeEventHandlers();
+            }
+        }, this.reconnectDelay);
     }
 }
 
