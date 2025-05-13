@@ -71,30 +71,165 @@ def supply_chain():
     # Get the correlator component
     correlator = system_integrator.get_component('correlator')
     predictor = system_integrator.get_component('predictor')
-    
-    # In a real application, we'd load actual data
-    # For demo purposes, we'll use mock data
-    mock_data = {
-        'inventory_insights': [
+
+    # Get the default data
+    mock_data = _get_supply_chain_data()
+
+    return render_template('use_cases/supply_chain.html', title='Supply Chain Optimization', data=mock_data)
+
+@main.route('/use-cases/supply-chain/data')
+def supply_chain_data():
+    """API endpoint for supply chain data that respects timeframe."""
+    time_range = request.args.get('timeRange', '1d')
+
+    # Get data based on timeframe
+    mock_data = _get_supply_chain_data(time_range)
+
+    # Return as JSON
+    return jsonify(mock_data)
+
+def _get_supply_chain_data(time_range='1d'):
+    """
+    Generate supply chain data based on the selected time range.
+    This function simulates different data for different time ranges.
+
+    Args:
+        time_range (str): The time range selected ('1d', '7d', '30d', '90d', '180d', '365d')
+
+    Returns:
+        dict: Supply chain data customized for the specified time range
+    """
+    # Base metrics that will be adjusted based on time range
+    base_temperature = 92
+    base_confidence = 112
+    base_buzz = 87
+    base_shipping_time = 3.8
+
+    # Adjust metrics based on time range
+    if time_range == '1d':
+        # Default values for 1 day view (baseline)
+        condition = 'Extreme Heat Warning'
+        consumer_confidence = base_confidence
+        buzz_factor = base_buzz
+        shipping_time = base_shipping_time
+        sentiment = 'positive'
+        correlation_modifier = 0.0
+
+    elif time_range == '7d':
+        # Week view - slightly different conditions
+        condition = 'Heat Advisory'
+        consumer_confidence = base_confidence - 5
+        buzz_factor = base_buzz - 10
+        shipping_time = base_shipping_time + 0.6
+        sentiment = 'neutral'
+        correlation_modifier = -0.05
+
+    elif time_range == '30d':
+        # Month view - more significant differences
+        condition = 'Variable Weather Patterns'
+        consumer_confidence = base_confidence - 10
+        buzz_factor = base_buzz - 15
+        shipping_time = base_shipping_time + 1.2
+        sentiment = 'cautious'
+        correlation_modifier = -0.1
+
+    elif time_range == '90d':
+        # Quarter view
+        condition = 'Seasonal Pattern Shift'
+        consumer_confidence = base_confidence + 8
+        buzz_factor = base_buzz + 5
+        shipping_time = base_shipping_time - 0.4
+        sentiment = 'optimistic'
+        correlation_modifier = 0.08
+
+    elif time_range == '180d':
+        # Half year view
+        condition = 'Multiple Weather Events'
+        consumer_confidence = base_confidence + 15
+        buzz_factor = base_buzz + 10
+        shipping_time = base_shipping_time - 0.8
+        sentiment = 'very positive'
+        correlation_modifier = 0.15
+
+    elif time_range == '365d':
+        # Full year view
+        condition = 'Yearly Climate Pattern'
+        consumer_confidence = base_confidence + 20
+        buzz_factor = base_buzz - 5
+        shipping_time = base_shipping_time - 0.2
+        sentiment = 'mixed'
+        correlation_modifier = 0.05
+
+    # Adjust temperature based on timeframe
+    adjusted_temperature = base_temperature
+    if time_range in ['90d', '180d', '365d']:
+        adjusted_temperature = int(base_temperature * 0.85)  # Cooler for longer timeframes (seasonal averaging)
+
+    # Generate shipping delays based on timeframe
+    shipping_delays = []
+
+    # Default delays for shorter timeframes
+    if time_range in ['1d', '7d']:
+        shipping_delays = [
+            {'route': 'North-South Corridor', 'delay_hours': 8.5, 'affected_products': 'Refrigerated Goods', 'cause': 'Weather Conditions'},
+            {'route': 'East Port to Central Distribution', 'delay_hours': 3.2, 'affected_products': 'General Merchandise', 'cause': 'Traffic Congestion'},
+            {'route': 'Cross-Country Route 5', 'delay_hours': 12.0, 'affected_products': 'All Categories', 'cause': 'Infrastructure Maintenance'}
+        ]
+    # Mid-term delays
+    elif time_range in ['30d', '90d']:
+        shipping_delays = [
+            {'route': 'North-South Corridor', 'delay_hours': 5.3, 'affected_products': 'Refrigerated Goods', 'cause': 'Weather Conditions'},
+            {'route': 'International Shipping Lane', 'delay_hours': 36.0, 'affected_products': 'Import Products', 'cause': 'Port Congestion'},
+            {'route': 'Cross-Country Route 5', 'delay_hours': 8.0, 'affected_products': 'All Categories', 'cause': 'Infrastructure Maintenance'}
+        ]
+    # Long-term patterns
+    else:
+        shipping_delays = [
+            {'route': 'International Shipping Lane', 'delay_hours': 48.0, 'affected_products': 'Import Products', 'cause': 'Seasonal Congestion'},
+            {'route': 'Southern Route', 'delay_hours': 16.5, 'affected_products': 'Agricultural Products', 'cause': 'Seasonal Weather'},
+            {'route': 'Cross-Country Route 5', 'delay_hours': 24.0, 'affected_products': 'All Categories', 'cause': 'Yearly Maintenance'}
+        ]
+
+    # Adjust correlation data based on timeframe
+    correlations = [
+        {'factor1': 'Extreme Heat Events', 'factor2': 'Cold Storage Demand', 'correlation': 0.87 + correlation_modifier, 'strength': 'strong'},
+        {'factor1': 'Seasonal Flooding', 'factor2': 'Transportation Delays', 'correlation': 0.79 + correlation_modifier, 'strength': 'strong'},
+        {'factor1': 'Holiday Season', 'factor2': 'Packaging Material Demand', 'correlation': 0.73 + correlation_modifier, 'strength': 'strong'},
+    ]
+
+    # Adjust inventory insights based on timeframe
+    if time_range in ['1d', '7d']:
+        inventory_insights = [
             {'product': 'Refrigerated Food Storage Containers', 'current_stock': 2500, 'predicted_demand': 3800, 'restock_recommendation': 1300, 'confidence': 0.85},
             {'product': 'Industrial Packaging Materials', 'current_stock': 5200, 'predicted_demand': 4100, 'restock_recommendation': 0, 'confidence': 0.92},
             {'product': 'Temperature-Controlled Shipping Units', 'current_stock': 830, 'predicted_demand': 1200, 'restock_recommendation': 370, 'confidence': 0.78},
             {'product': 'Logistics Management Software Licenses', 'current_stock': 450, 'predicted_demand': 390, 'restock_recommendation': 0, 'confidence': 0.88},
-        ],
-        'correlations': [
-            {'factor1': 'Extreme Heat Events', 'factor2': 'Cold Storage Demand', 'correlation': 0.87, 'strength': 'strong'},
-            {'factor1': 'Seasonal Flooding', 'factor2': 'Transportation Delays', 'correlation': 0.79, 'strength': 'strong'},
-            {'factor1': 'Holiday Season', 'factor2': 'Packaging Material Demand', 'correlation': 0.73, 'strength': 'strong'},
-        ],
-        'weather_forecast': {'temperature': 92, 'condition': 'Extreme Heat Warning', 'precipitation': 0},
-        'economic_indicators': {'consumer_confidence': 112, 'trend': 'increasing'},
-        'social_media_trends': {'buzz_factor': 87, 'sentiment': 'positive'},
+        ]
+    elif time_range in ['30d', '90d']:
+        inventory_insights = [
+            {'product': 'Refrigerated Food Storage Containers', 'current_stock': 2500, 'predicted_demand': 3200, 'restock_recommendation': 700, 'confidence': 0.82},
+            {'product': 'Industrial Packaging Materials', 'current_stock': 5200, 'predicted_demand': 6500, 'restock_recommendation': 1300, 'confidence': 0.88},
+            {'product': 'Sustainable Packaging Solutions', 'current_stock': 3400, 'predicted_demand': 4200, 'restock_recommendation': 800, 'confidence': 0.76},
+            {'product': 'Emergency Power Generators', 'current_stock': 120, 'predicted_demand': 210, 'restock_recommendation': 90, 'confidence': 0.88},
+        ]
+    else:
+        inventory_insights = [
+            {'product': 'Sustainable Packaging Solutions', 'current_stock': 3400, 'predicted_demand': 8500, 'restock_recommendation': 5100, 'confidence': 0.92},
+            {'product': 'Industrial Packaging Materials', 'current_stock': 5200, 'predicted_demand': 12000, 'restock_recommendation': 6800, 'confidence': 0.85},
+            {'product': 'Emergency Power Generators', 'current_stock': 120, 'predicted_demand': 450, 'restock_recommendation': 330, 'confidence': 0.79},
+            {'product': 'Temperature-Controlled Shipping Units', 'current_stock': 830, 'predicted_demand': 1900, 'restock_recommendation': 1070, 'confidence': 0.81},
+        ]
+
+    # Complete data structure
+    data = {
+        'inventory_insights': inventory_insights,
+        'correlations': correlations,
+        'weather_forecast': {'temperature': adjusted_temperature, 'condition': condition, 'precipitation': 0},
+        'economic_indicators': {'consumer_confidence': consumer_confidence, 'trend': 'increasing' if consumer_confidence > base_confidence else 'decreasing'},
+        'social_media_trends': {'buzz_factor': buzz_factor, 'sentiment': sentiment},
         'logistics_data': {
-            'shipping_delays': [
-                {'route': 'North-South Corridor', 'delay_hours': 8.5, 'affected_products': 'Refrigerated Goods', 'cause': 'Weather Conditions'},
-                {'route': 'East Port to Central Distribution', 'delay_hours': 3.2, 'affected_products': 'General Merchandise', 'cause': 'Traffic Congestion'},
-                {'route': 'Cross-Country Route 5', 'delay_hours': 12.0, 'affected_products': 'All Categories', 'cause': 'Infrastructure Maintenance'}
-            ],
+            'average_shipping_time': shipping_time,
+            'shipping_delays': shipping_delays,
             'warehouse_capacity': [
                 {'location': 'North Regional Warehouse', 'capacity_used': 82, 'remaining_capacity': 18, 'optimization_suggestion': 'Redistribute to Southern Facility'},
                 {'location': 'Central Distribution Hub', 'capacity_used': 65, 'remaining_capacity': 35, 'optimization_suggestion': 'No action needed'},
@@ -102,8 +237,8 @@ def supply_chain():
             ]
         }
     }
-    
-    return render_template('use_cases/supply_chain.html', title='Supply Chain Optimization', data=mock_data)
+
+    return data
 
 @main.route('/use-cases/public-health')
 def public_health():
