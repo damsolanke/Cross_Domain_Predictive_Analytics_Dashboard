@@ -6,12 +6,11 @@ An advanced web-based data analytics platform that integrates multiple domain-sp
 
 ## Team Members
 
-- **Damola Solanke** - Project Lead & Integration Architect
-- **Ade Omolekan** - System Integration & Real-Time Analytics
-- **Rujeko Nyawaranda** - Frontend Development
-- **Emmanuel Adeboye** - Data Visualization
-- **Julie Chen** - API Integration & Data Processing
-- **Chao Wang** - Machine Learning & Predictive Modeling
+- **Ade Solanke** - Project Lead & System Integration
+- **Chaozheng Zhang** - Machine Learning & Predictive Modeling
+- **Emmanuel Jonathan** - Data Visualization
+- **Julie Peter** - API Integration & Data Processing
+- **Rujeko Macheka** - Frontend Development
 
 ## Project Overview
 
@@ -571,6 +570,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- **Team Members**: Damola Solanke, Ade Omolekan, Rujeko Nyawaranda, Emmanuel Adeboye, Julie Chen, and Chao Wang
+- **Team Members**: Ade Solanke, Chaozheng Zhang, Emmanuel Jonathan, Julie Peter, and Rujeko Macheka
 - Faculty advisor: Dr. Sharma Rajinder
 - Dallas Baptist University Department of Computer Science
