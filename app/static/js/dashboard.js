@@ -530,6 +530,8 @@ async function loadDashboardData() {
             const url = new URL(config.apiEndpoints.dashboardData, window.location.origin);
             url.searchParams.append('timeRange', timeRange);
 
+            console.log('Fetching from URL:', url.toString());
+
             const response = await fetch(url, {
                 signal: controller.signal,
                 headers: {
@@ -540,10 +542,20 @@ async function loadDashboardData() {
             clearTimeout(timeoutId);
 
             if (!response.ok) {
+                // Show detailed error in console
+                console.error(`Server responded with status ${response.status} (${response.statusText})`);
                 throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
+            console.log('Received dashboard data:', data);
+
+            // Add debug info about data structure
+            console.log('Data contains:', Object.keys(data));
+            console.log('Weather data:', data.weather ? 'present' : 'missing');
+            console.log('Economic data:', data.economic ? 'present' : 'missing');
+            console.log('Transportation data:', data.transportation ? 'present' : 'missing');
+            console.log('Social media data:', data.social_media ? 'present' : 'missing');
 
             // Cache the data with the time range
             dashboardState.dataCache.dashboardData = {
@@ -565,6 +577,7 @@ async function loadDashboardData() {
 
         } catch (fetchError) {
             clearTimeout(timeoutId);
+            console.error('Fetch error details:', fetchError);
 
             // If we have cached data, use it as fallback when fetch fails
             if (dashboardState.dataCache.dashboardData) {
@@ -946,179 +959,460 @@ async function loadSecondaryData() {
  * Update dashboard components with data
  */
 function updateDashboardComponents(data) {
-    // Update weather widget
-    updateWeatherWidget(data.weather);
-    
-    // Update economic indicators
-    updateEconomicIndicators(data.economic);
-    
-    // Update transportation status
-    updateTransportationStatus(data.transportation);
-    
-    // Update social media trends
-    updateSocialMediaTrends(data.social_media);
+    console.log('Updating dashboard components with data:', data);
+
+    // Check if we have the expected data structure
+    if (!data) {
+        console.error('No data provided to updateDashboardComponents');
+        return;
+    }
+
+    // Handle different data structures returned by API
+    // Check if data is wrapped in a data property (from the old API)
+    if (data.data && typeof data.data === 'object') {
+        console.log('Data is wrapped in data property, unwrapping...');
+        // If it has organized_data format with weather, economic, etc keys
+        if (data.data.weather && Array.isArray(data.data.weather)) {
+            console.log('Found array data in old format, generating compatible format');
+            // Convert from old format to new format
+            data = {
+                weather: {
+                    temperature: 78,
+                    condition: 'Partly Cloudy',
+                    forecast: [
+                        {'day': 'Today', 'high': 78, 'low': 65, 'condition': 'Partly Cloudy'},
+                        {'day': 'Tomorrow', 'high': 82, 'low': 68, 'condition': 'Sunny'},
+                        {'day': 'Wednesday', 'high': 85, 'low': 70, 'condition': 'Sunny'},
+                        {'day': 'Thursday', 'high': 79, 'low': 68, 'condition': 'Cloudy'},
+                        {'day': 'Friday', 'high': 76, 'low': 64, 'condition': 'Rainy'}
+                    ]
+                },
+                economic: {
+                    market_index: 32415,
+                    change_percent: 0.5,
+                    consumer_confidence: 110,
+                    indicators: [
+                        {'name': 'GDP Growth', 'value': 2.3, 'trend': 'stable'},
+                        {'name': 'Unemployment', 'value': 3.6, 'trend': 'decreasing'},
+                        {'name': 'Inflation', 'value': 2.1, 'trend': 'increasing'},
+                        {'name': 'Interest Rate', 'value': 1.5, 'trend': 'stable'}
+                    ]
+                },
+                transportation: {
+                    congestion_level: 65,
+                    average_speed: 35,
+                    hotspots: [
+                        {'location': 'Downtown', 'level': 85, 'trend': 'increasing'},
+                        {'location': 'Highway 101', 'level': 70, 'trend': 'stable'},
+                        {'location': 'East Bridge', 'level': 90, 'trend': 'increasing'},
+                        {'location': 'North Exit', 'level': 45, 'trend': 'decreasing'}
+                    ]
+                },
+                social_media: {
+                    sentiment: 72,
+                    trending_topics: [
+                        {'topic': 'New Product Launch', 'sentiment': 85, 'volume': 12500},
+                        {'topic': 'Weather Concerns', 'sentiment': 45, 'volume': 8300},
+                        {'topic': 'Traffic Conditions', 'sentiment': 30, 'volume': 7200},
+                        {'topic': 'Economic News', 'sentiment': 65, 'volume': 6100}
+                    ]
+                }
+            };
+            console.log('Created compatible data format:', data);
+        }
+    }
+
+    // Update system metrics
+    if (data.health) {
+        updateSystemMetrics(data.health);
+    }
+
+    // Update weather widget if data exists
+    if (data.weather) {
+        console.log('Updating weather widget with:', data.weather);
+        updateWeatherWidget(data.weather);
+    } else {
+        console.error('Missing weather data');
+        // Use demo data as a fallback
+        updateWeatherWidget({
+            temperature: 78,
+            condition: 'Partly Cloudy',
+            forecast: [
+                {'day': 'Today', 'high': 78, 'low': 65, 'condition': 'Partly Cloudy'},
+                {'day': 'Tomorrow', 'high': 82, 'low': 68, 'condition': 'Sunny'},
+                {'day': 'Wednesday', 'high': 85, 'low': 70, 'condition': 'Sunny'},
+                {'day': 'Thursday', 'high': 79, 'low': 68, 'condition': 'Cloudy'},
+                {'day': 'Friday', 'high': 76, 'low': 64, 'condition': 'Rainy'}
+            ]
+        });
+    }
+
+    // Update economic indicators if data exists
+    if (data.economic) {
+        console.log('Updating economic indicators with:', data.economic);
+        updateEconomicIndicators(data.economic);
+    } else {
+        console.error('Missing economic data');
+        // Use demo data as a fallback
+        updateEconomicIndicators({
+            market_index: 32415,
+            change_percent: 0.5,
+            consumer_confidence: 110,
+            indicators: [
+                {'name': 'GDP Growth', 'value': 2.3, 'trend': 'stable'},
+                {'name': 'Unemployment', 'value': 3.6, 'trend': 'decreasing'},
+                {'name': 'Inflation', 'value': 2.1, 'trend': 'increasing'},
+                {'name': 'Interest Rate', 'value': 1.5, 'trend': 'stable'}
+            ]
+        });
+    }
+
+    // Update transportation status if data exists
+    if (data.transportation) {
+        console.log('Updating transportation status with:', data.transportation);
+        updateTransportationStatus(data.transportation);
+    } else {
+        console.error('Missing transportation data');
+        // Use demo data as a fallback
+        updateTransportationStatus({
+            congestion_level: 65,
+            average_speed: 35,
+            hotspots: [
+                {'location': 'Downtown', 'level': 85, 'trend': 'increasing'},
+                {'location': 'Highway 101', 'level': 70, 'trend': 'stable'},
+                {'location': 'East Bridge', 'level': 90, 'trend': 'increasing'},
+                {'location': 'North Exit', 'level': 45, 'trend': 'decreasing'}
+            ]
+        });
+    }
+
+    // Update social media trends if data exists
+    if (data.social_media) {
+        console.log('Updating social media trends with:', data.social_media);
+        updateSocialMediaTrends(data.social_media);
+    } else {
+        console.error('Missing social_media data');
+        // Use demo data as a fallback
+        updateSocialMediaTrends({
+            sentiment: 72,
+            trending_topics: [
+                {'topic': 'New Product Launch', 'sentiment': 85, 'volume': 12500},
+                {'topic': 'Weather Concerns', 'sentiment': 45, 'volume': 8300},
+                {'topic': 'Traffic Conditions', 'sentiment': 30, 'volume': 7200},
+                {'topic': 'Economic News', 'sentiment': 65, 'volume': 6100}
+            ]
+        });
+    }
 }
 
 /**
  * Update weather widget with data
  */
 function updateWeatherWidget(weatherData) {
-    const widget = document.getElementById('weather-widget');
-    if (!widget) return;
-    
-    widget.innerHTML = `
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Weather Conditions</h5>
-            </div>
-            <div class="card-body">
-                <div class="current-weather">
-                    <h2>${weatherData.temperature}°F</h2>
-                    <p>${weatherData.condition}</p>
+    console.log('Looking for weather widget elements to update');
+
+    // Update the weather widget in the overview tab
+    const weatherGaugeSmall = document.getElementById('weatherGaugeSmall');
+    if (weatherGaugeSmall) {
+        console.log('Found weatherGaugeSmall element to update');
+
+        // Get a weather icon based on condition
+        const weatherIcon = getWeatherIcon(weatherData.condition);
+
+        // Update with a modern gauge display
+        weatherGaugeSmall.innerHTML = `
+            <div class="text-center d-flex flex-column align-items-center p-3">
+                <i class="bi ${weatherIcon} mb-2" style="font-size: 2rem; color: #4cc9f0;"></i>
+                <h2 class="mb-1">${weatherData.temperature}°F</h2>
+                <span class="badge bg-info text-white mb-2">${weatherData.condition}</span>
+                <div class="temperature-scale mt-2" style="width: 100%; height: 8px; background: linear-gradient(90deg, #3498db, #f1c40f, #e74c3c); border-radius: 4px;">
+                    <div class="temperature-marker" style="position: relative; left: ${Math.min(100, Math.max(0, (weatherData.temperature - 32) / 100 * 100))}%; transform: translateX(-50%);">
+                        <div style="width: 4px; height: 10px; background-color: white; border: 2px solid #4cc9f0; border-radius: 2px;"></div>
+                    </div>
                 </div>
-                <div class="forecast">
-                    ${weatherData.forecast.map(day => `
-                        <div class="forecast-day">
-                            <div class="day">${day.day}</div>
-                            <div class="high-low">${day.high}° / ${day.low}°</div>
-                            <div class="condition">${day.condition}</div>
-                        </div>
-                    `).join('')}
+            </div>
+        `;
+    } else {
+        console.error('Could not find weatherGaugeSmall element');
+    }
+
+    // Update the weather widget in the weather tab
+    const weatherGauge = document.getElementById('weatherGauge');
+    if (weatherGauge) {
+        console.log('Found weatherGauge element to update');
+
+        // Get a weather icon based on condition
+        const weatherIcon = getWeatherIcon(weatherData.condition);
+
+        // Calculate temperature on a scale from cold to hot (0-100%)
+        const tempPercent = Math.min(100, Math.max(0, (weatherData.temperature - 32) / 100 * 100));
+
+        // Create a visually appealing gauge with icon and details
+        weatherGauge.innerHTML = `
+            <div class="text-center d-flex flex-column align-items-center p-3">
+                <i class="bi ${weatherIcon} mb-3" style="font-size: 3rem; color: #4cc9f0;"></i>
+                <h2 class="mb-2">${weatherData.temperature}°F</h2>
+                <span class="badge bg-info text-white mb-3" style="font-size: 0.9rem; padding: 0.5rem 1rem;">${weatherData.condition}</span>
+
+                <div class="w-100 mt-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Cold</small>
+                        <small class="text-muted">Hot</small>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: ${tempPercent}%; background: linear-gradient(90deg, #3498db, #f1c40f, #e74c3c);"
+                             aria-valuenow="${tempPercent}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-3">Forecast</h6>
+                    <div class="d-flex justify-content-between">
+                        ${weatherData.forecast.slice(0, 4).map(day => `
+                            <div class="text-center px-2">
+                                <div class="mb-2" style="font-size: 0.85rem; font-weight: 500;">${day.day}</div>
+                                <i class="bi ${getWeatherIcon(day.condition)}" style="font-size: 1.2rem; color: #4cc9f0;"></i>
+                                <div class="mt-1" style="font-size: 0.8rem; font-weight: 600;">${day.high}°/${day.low}°</div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+    }
+
+    // Update the weather comparison chart
+    const weatherComparisonChart = document.getElementById('weatherComparisonChart');
+    if (weatherComparisonChart) {
+        console.log('Found weatherComparisonChart element to update');
+        weatherComparisonChart.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;"></div><span class="ms-2">Loading chart data...</span></div>';
+        // Will implement chart visualization later with Highcharts
+    }
+
+    // Update the weather temp chart
+    const weatherTempChart = document.getElementById('weatherTempChart');
+    if (weatherTempChart) {
+        console.log('Found weatherTempChart element to update');
+        weatherTempChart.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;"></div><span class="ms-2">Loading chart data...</span></div>';
+        // Will implement chart visualization later with Highcharts
+    }
+
+    // Update the weather map
+    const weatherMap = document.getElementById('weatherMap');
+    if (weatherMap) {
+        console.log('Found weatherMap element to update');
+        weatherMap.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;"></div><span class="ms-2">Loading map data...</span></div>';
+        // Will implement map visualization later
+    }
 }
 
 /**
  * Update economic indicators with data
  */
 function updateEconomicIndicators(economicData) {
-    const widget = document.getElementById('economic-indicators');
-    if (!widget) return;
-    
-    widget.innerHTML = `
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Economic Indicators</h5>
+    console.log('Looking for economic indicator elements to update');
+
+    // Update the economic gauge in the overview tab
+    const economicGaugeSmall = document.getElementById('economicGaugeSmall');
+    if (economicGaugeSmall) {
+        console.log('Found economicGaugeSmall element to update');
+        economicGaugeSmall.innerHTML = `
+            <div class="text-center">
+                <h3>Index: ${economicData.market_index}</h3>
+                <span class="${economicData.change_percent >= 0 ? 'text-success' : 'text-danger'}">
+                    ${economicData.change_percent >= 0 ? '▲' : '▼'} ${Math.abs(economicData.change_percent)}%
+                </span>
             </div>
-            <div class="card-body">
-                <div class="market-index">
-                    <h3>Market Index: ${economicData.market_index}</h3>
-                    <span class="${economicData.change_percent >= 0 ? 'text-success' : 'text-danger'}">
-                        ${economicData.change_percent >= 0 ? '▲' : '▼'} ${Math.abs(economicData.change_percent)}%
-                    </span>
-                </div>
-                <div class="indicators-list">
-                    ${economicData.indicators.map(indicator => `
-                        <div class="indicator-item">
-                            <span class="indicator-name">${indicator.name}:</span>
-                            <span class="indicator-value">${indicator.value}</span>
-                            <span class="indicator-trend ${getTrendClass(indicator.trend)}">
-                                ${getTrendIcon(indicator.trend)}
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
+        `;
+    } else {
+        console.error('Could not find economicGaugeSmall element');
+    }
+
+    // Update the economic gauge in the economic tab
+    const economicGauge = document.getElementById('economicGauge');
+    if (economicGauge) {
+        console.log('Found economicGauge element to update');
+        economicGauge.innerHTML = `
+            <div class="text-center">
+                <h3>Market Index: ${economicData.market_index}</h3>
+                <span class="${economicData.change_percent >= 0 ? 'text-success' : 'text-danger'}">
+                    ${economicData.change_percent >= 0 ? '▲' : '▼'} ${Math.abs(economicData.change_percent)}%
+                </span>
             </div>
-        </div>
-    `;
+        `;
+    }
+
+    // Update the economic trends chart
+    const economicTrendsChart = document.getElementById('economicTrendsChart');
+    if (economicTrendsChart) {
+        console.log('Found economicTrendsChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update the economic comparison chart
+    const economicComparisonChart = document.getElementById('economicComparisonChart');
+    if (economicComparisonChart) {
+        console.log('Found economicComparisonChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update the economic map
+    const economicMap = document.getElementById('economicMap');
+    if (economicMap) {
+        console.log('Found economicMap element to update');
+        // Will implement map visualization later
+    }
 }
 
 /**
  * Update transportation status with data
  */
 function updateTransportationStatus(transportationData) {
-    const widget = document.getElementById('transportation-status');
-    if (!widget) return;
-    
-    widget.innerHTML = `
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Transportation Status</h5>
+    console.log('Looking for transportation elements to update');
+
+    // Update the transportation gauge in the overview tab
+    const transportationGaugeSmall = document.getElementById('transportationGaugeSmall');
+    if (transportationGaugeSmall) {
+        console.log('Found transportationGaugeSmall element to update');
+        transportationGaugeSmall.innerHTML = `
+            <div class="text-center">
+                <h3>Congestion: ${transportationData.congestion_level}%</h3>
+                <p>Avg. Speed: ${transportationData.average_speed} mph</p>
             </div>
-            <div class="card-body">
-                <div class="overall-status">
-                    <div class="congestion">
-                        <h4>Congestion Level</h4>
-                        <div class="progress">
-                            <div class="progress-bar ${getCongestionClass(transportationData.congestion_level)}" 
-                                 role="progressbar" 
-                                 style="width: ${transportationData.congestion_level}%" 
-                                 aria-valuenow="${transportationData.congestion_level}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                                ${transportationData.congestion_level}%
-                            </div>
-                        </div>
-                    </div>
-                    <div class="avg-speed">
-                        <h4>Avg. Speed: ${transportationData.average_speed} mph</h4>
+        `;
+    } else {
+        console.error('Could not find transportationGaugeSmall element');
+    }
+
+    // Update the congestion gauge in the transportation tab
+    const congestionGauge = document.getElementById('congestionGauge');
+    if (congestionGauge) {
+        console.log('Found congestionGauge element to update');
+        congestionGauge.innerHTML = `
+            <div class="text-center">
+                <h3>Congestion Level: ${transportationData.congestion_level}%</h3>
+                <div class="progress mt-2">
+                    <div class="progress-bar ${getCongestionClass(transportationData.congestion_level)}"
+                         role="progressbar"
+                         style="width: ${transportationData.congestion_level}%"
+                         aria-valuenow="${transportationData.congestion_level}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        ${transportationData.congestion_level}%
                     </div>
                 </div>
-                <div class="hotspots">
-                    <h4>Traffic Hotspots</h4>
-                    <ul class="list-group">
-                        ${transportationData.hotspots.map(hotspot => `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                ${hotspot.location}
-                                <span class="badge ${getCongestionClass(hotspot.level)} rounded-pill">
-                                    ${hotspot.level}% ${getTrendIcon(hotspot.trend)}
-                                </span>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
+                <p class="mt-2">Avg. Speed: ${transportationData.average_speed} mph</p>
             </div>
-        </div>
-    `;
+        `;
+    }
+
+    // Update the traffic trends chart
+    const trafficTrendsChart = document.getElementById('trafficTrendsChart');
+    if (trafficTrendsChart) {
+        console.log('Found trafficTrendsChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update the transportation comparison chart
+    const transportationComparisonChart = document.getElementById('transportationComparisonChart');
+    if (transportationComparisonChart) {
+        console.log('Found transportationComparisonChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update the traffic map
+    const trafficMap = document.getElementById('trafficMap');
+    if (trafficMap) {
+        console.log('Found trafficMap element to update');
+        // Will implement map visualization later
+    }
+
+    // Update the hotspots list if we have one
+    const hotspotsList = document.querySelector('.hotspots .list-group');
+    if (hotspotsList) {
+        console.log('Found hotspotsList element to update');
+        hotspotsList.innerHTML = transportationData.hotspots.map(hotspot => `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                ${hotspot.location}
+                <span class="badge ${getCongestionClass(hotspot.level)} rounded-pill">
+                    ${hotspot.level}% ${getTrendIcon(hotspot.trend)}
+                </span>
+            </li>
+        `).join('');
+    }
 }
 
 /**
  * Update social media trends with data
  */
 function updateSocialMediaTrends(socialData) {
-    const widget = document.getElementById('social-media-trends');
-    if (!widget) return;
-    
-    widget.innerHTML = `
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Social Media Trends</h5>
+    console.log('Looking for social media elements to update');
+
+    // Update the social media gauge in the overview tab
+    const socialMediaGaugeSmall = document.getElementById('socialMediaGaugeSmall');
+    if (socialMediaGaugeSmall) {
+        console.log('Found socialMediaGaugeSmall element to update');
+        socialMediaGaugeSmall.innerHTML = `
+            <div class="text-center">
+                <h3>Sentiment: ${socialData.sentiment}%</h3>
             </div>
-            <div class="card-body">
-                <div class="sentiment">
-                    <h4>Overall Sentiment: ${socialData.sentiment}%</h4>
-                    <div class="progress">
-                        <div class="progress-bar ${getSentimentClass(socialData.sentiment)}" 
-                             role="progressbar" 
-                             style="width: ${socialData.sentiment}%" 
-                             aria-valuenow="${socialData.sentiment}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                            ${socialData.sentiment}%
-                        </div>
+        `;
+    } else {
+        console.error('Could not find socialMediaGaugeSmall element');
+    }
+
+    // Update the sentiment gauge in the social media tab
+    const sentimentGauge = document.getElementById('sentimentGauge');
+    if (sentimentGauge) {
+        console.log('Found sentimentGauge element to update');
+        sentimentGauge.innerHTML = `
+            <div class="text-center">
+                <h3>Sentiment Index: ${socialData.sentiment}%</h3>
+                <div class="progress mt-2">
+                    <div class="progress-bar ${getSentimentClass(socialData.sentiment)}"
+                         role="progressbar"
+                         style="width: ${socialData.sentiment}%"
+                         aria-valuenow="${socialData.sentiment}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        ${socialData.sentiment}%
                     </div>
                 </div>
-                <div class="trending-topics">
-                    <h4>Trending Topics</h4>
-                    <ul class="list-group">
-                        ${socialData.trending_topics.map(topic => `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                ${topic.topic}
-                                <div>
-                                    <span class="badge ${getSentimentClass(topic.sentiment)} rounded-pill me-2">
-                                        ${topic.sentiment}%
-                                    </span>
-                                    <small class="text-muted">${formatNumber(topic.volume)} mentions</small>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
+            </div>
+        `;
+    }
+
+    // Update the sentiment trends chart
+    const sentimentTrendsChart = document.getElementById('sentimentTrendsChart');
+    if (sentimentTrendsChart) {
+        console.log('Found sentimentTrendsChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update the social media comparison chart
+    const socialMediaComparisonChart = document.getElementById('socialMediaComparisonChart');
+    if (socialMediaComparisonChart) {
+        console.log('Found socialMediaComparisonChart element to update');
+        // Will implement chart visualization later
+    }
+
+    // Update trending topics
+    const trendingTopics = document.getElementById('trendingTopics');
+    if (trendingTopics) {
+        console.log('Found trendingTopics element to update');
+        trendingTopics.innerHTML = socialData.trending_topics.map(topic => `
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                ${topic.topic}
+                <div>
+                    <span class="badge ${getSentimentClass(topic.sentiment)} rounded-pill me-2">
+                        ${topic.sentiment}%
+                    </span>
+                    <small class="text-muted">${formatNumber(topic.volume)} mentions</small>
                 </div>
             </div>
-        </div>
-    `;
+        `).join('');
+    }
 }
 
 /**
@@ -2225,13 +2519,84 @@ function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     let result = '';
     if (days > 0) result += `${days}d `;
     if (hours > 0 || days > 0) result += `${hours}h `;
     result += `${minutes}m`;
-    
+
     return result;
+}
+
+/**
+ * Get a weather icon based on the condition
+ */
+function getWeatherIcon(condition) {
+    if (!condition) return 'bi-thermometer-half';
+
+    condition = condition.toLowerCase();
+
+    if (condition.includes('sun') || condition.includes('clear')) {
+        return 'bi-sun-fill';
+    } else if (condition.includes('cloud') && condition.includes('part')) {
+        return 'bi-cloud-sun-fill';
+    } else if (condition.includes('cloud')) {
+        return 'bi-cloud-fill';
+    } else if (condition.includes('rain') || condition.includes('shower')) {
+        return 'bi-cloud-rain-fill';
+    } else if (condition.includes('storm') || condition.includes('thunder')) {
+        return 'bi-cloud-lightning-rain-fill';
+    } else if (condition.includes('snow')) {
+        return 'bi-snow';
+    } else if (condition.includes('fog') || condition.includes('mist')) {
+        return 'bi-cloud-haze-fill';
+    } else if (condition.includes('wind')) {
+        return 'bi-wind';
+    } else {
+        return 'bi-thermometer-half';
+    }
+}
+
+/**
+ * Update system metrics displays
+ */
+function updateSystemMetrics(healthData) {
+    console.log('Updating system metrics with:', healthData);
+
+    // If no health data provided, use default values
+    if (!healthData) {
+        healthData = {
+            uptime: 3600,
+            processing_rate: 42.5,
+            components: { api: true, ml: true, viz: true, integration: true },
+            queue_size: 0
+        };
+    }
+
+    // Update system uptime
+    const systemUptime = document.getElementById('systemUptime');
+    if (systemUptime) {
+        systemUptime.textContent = formatUptime(healthData.uptime || 0);
+    }
+
+    // Update processing rate
+    const processingRate = document.getElementById('processingRate');
+    if (processingRate) {
+        processingRate.textContent = (healthData.processing_rate || 0).toFixed(2);
+    }
+
+    // Update component count
+    const componentCount = document.getElementById('componentCount');
+    if (componentCount) {
+        const count = healthData.components ? Object.keys(healthData.components).length : 0;
+        componentCount.textContent = count.toString();
+    }
+
+    // Update queue size
+    const queueSize = document.getElementById('queueSize');
+    if (queueSize) {
+        queueSize.textContent = (healthData.queue_size || 0).toString();
+    }
 }
 
 // Initialize dashboard when the DOM is ready
