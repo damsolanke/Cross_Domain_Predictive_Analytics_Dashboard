@@ -2,7 +2,16 @@
 
 An advanced web-based data analytics platform that integrates multiple domain-specific data sources and applies machine learning models to deliver predictive analytics, cross-domain correlations, and actionable insights across different domains.
 
-![Dashboard Overview](https://via.placeholder.com/1200x600?text=Cross-Domain+Predictive+Analytics+Dashboard)
+![Cross-Domain Analytics Dashboard](https://via.placeholder.com/1200x600?text=Cross-Domain+Predictive+Analytics+Dashboard)
+
+## Team Members
+
+- **Damola Solanke** - Project Lead & Integration Architect
+- **Ade Omolekan** - System Integration & Real-Time Analytics
+- **Rujeko Nyawaranda** - Frontend Development
+- **Emmanuel Adeboye** - Data Visualization
+- **Julie Chen** - API Integration & Data Processing
+- **Chao Wang** - Machine Learning & Predictive Modeling
 
 ## Project Overview
 
@@ -49,10 +58,10 @@ The Cross-Domain Predictive Analytics Dashboard integrates data from various dom
 - **Gunicorn** - WSGI server (production)
 
 ### External Services
-- **Weather APIs** (OpenWeatherMap, NOAA)
-- **Economic Data APIs** (Alpha Vantage, FRED)
-- **Social Media APIs** (Twitter API, Reddit API)
-- **Transportation Data Sources** (Various open data portals)
+- **Weather API**: OpenWeatherMap API
+- **Economic Data API**: Alpha Vantage API
+- **News/Trends API**: News API
+- **Transportation Data APIs**: TomTom Traffic API, TransitLand API, OpenStreetMap
 
 ## Key Features
 
@@ -355,9 +364,18 @@ The NLQ system allows users to ask questions in plain English and receive visual
    python setup.py
    ```
 
-5. Configure API keys for data sources (if needed):
-   - Create a `config.json` file based on the provided template
-   - Add your API keys for each external data source
+5. Configure API keys for external services (optional but recommended for real data):
+   - Set environment variables for your API keys:
+     ```
+     export OPENWEATHER_API_KEY=your_openweathermap_api_key
+     export ECONOMIC_API_KEY=your_alphavantage_api_key
+     export SOCIAL_MEDIA_API_KEY=your_newsapi_key
+     export TRANSPORTATION_API_KEY=your_tomtom_api_key
+     ```
+   - Alternatively, create a `.env` file in the project root with these keys
+   - See `docs/api_configuration_guide.md` for detailed instructions on obtaining free API keys
+
+   Note: If no API keys are provided, the system will use simulated data with realistic patterns.
 
 ## Running the Application
 
@@ -532,7 +550,27 @@ The dashboard includes several performance optimizations:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+## Recent Updates
+
+### API Integration (May 2024)
+- Integrated all data connectors with real public APIs:
+  - Weather data from OpenWeatherMap API
+  - Economic data from Alpha Vantage API
+  - News and trends from News API
+  - Transportation data from TomTom Traffic API and TransitLand
+- Implemented robust error handling and fallback to simulated data when API requests fail
+- Added multi-level caching to optimize API usage and improve performance
+- Created comprehensive documentation for API configuration
+
+### UI Improvements (May 2024)
+- Fixed the system status page 404 error
+- Improved timeframe selection to properly update all visualizations
+- Enhanced error handling for socket connections
+- Implemented proper data refresh on timeframe changes for all use cases
+- Added better feedback for data loading and API connections
+
 ## Acknowledgments
 
-- All team members who contributed to this project
-- Faculty advisors and mentors who provided guidance
+- **Team Members**: Damola Solanke, Ade Omolekan, Rujeko Nyawaranda, Emmanuel Adeboye, Julie Chen, and Chao Wang
+- Faculty advisor: Dr. Sharma Rajinder
+- Dallas Baptist University Department of Computer Science
