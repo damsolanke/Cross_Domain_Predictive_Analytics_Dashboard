@@ -126,6 +126,9 @@
                                 <option value="1d" selected>Last 24 Hours</option>
                                 <option value="7d">Last 7 Days</option>
                                 <option value="30d">Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="180d">Last 180 Days</option>
+                                <option value="365d">Last Year</option>
                             </select>
                         </div>
                     </div>
@@ -477,24 +480,101 @@
                             
                             <!-- Cross-Domain Tab -->
                             <div class="tab-pane" id="crossDomainTab" data-tab-content data-domain="cross-domain">
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <!-- Analysis Controls -->
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                                    <div>
+                                                        <h5 class="mb-0">Cross-Domain Correlation Analysis</h5>
+                                                    </div>
+                                                    <div class="d-flex align-items-center flex-wrap">
+                                                        <div class="form-group me-3 mb-0">
+                                                            <label for="correlation-strength-filter" class="me-2">Correlation Strength:</label>
+                                                            <select class="form-select form-select-sm" id="correlation-strength-filter" style="width: 140px;">
+                                                                <option value="all">All</option>
+                                                                <option value="strong" selected>Strong (>0.7)</option>
+                                                                <option value="moderate">Moderate (0.4-0.7)</option>
+                                                                <option value="weak">Weak (<0.4)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group me-3 mb-0">
+                                                            <label for="correlation-domain-filter" class="me-2">Domain:</label>
+                                                            <select class="form-select form-select-sm" id="correlation-domain-filter" style="width: 140px;">
+                                                                <option value="all" selected>All Domains</option>
+                                                                <option value="weather">Weather</option>
+                                                                <option value="economic">Economic</option>
+                                                                <option value="transportation">Transportation</option>
+                                                                <option value="social-media">Social Media</option>
+                                                            </select>
+                                                        </div>
+                                                        <button id="correlation-analysis-refresh" class="btn btn-primary btn-sm">
+                                                            <i class="bi bi-arrow-repeat me-1"></i> Refresh Analysis
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-8">
                                         <!-- Correlation Heatmap -->
                                         <div class="card mb-4">
+                                            <div class="card-header">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h5 class="card-title mb-0">Cross-Domain Correlation Heatmap</h5>
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary correlation-view-toggle active" data-view="heatmap">
+                                                            <i class="bi bi-grid-3x3"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary correlation-view-toggle" data-view="table">
+                                                            <i class="bi bi-table"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Cross-Domain Correlation Heatmap</h5>
                                                 <div class="chart-container">
                                                     <div id="correlation-heatmap" data-chart="correlation-heatmap"></div>
+                                                    <div id="correlation-table" style="display: none;" class="table-responsive">
+                                                        <table class="table table-sm table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Domain 1</th>
+                                                                    <th>Metric 1</th>
+                                                                    <th>Domain 2</th>
+                                                                    <th>Metric 2</th>
+                                                                    <th>Correlation</th>
+                                                                    <th>Strength</th>
+                                                                    <th>Confidence</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="correlation-table-body">
+                                                                <!-- Populated dynamically -->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Correlation Network -->
                                         <div class="card">
+                                            <div class="card-header">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <h5 class="card-title mb-0">Correlation Network</h5>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="animated-network-toggle" checked>
+                                                        <label class="form-check-label" for="animated-network-toggle">Animated</label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Correlation Network</h5>
                                                 <div class="chart-container">
-                                                    <div id="correlation-network" data-chart="correlation-network"></div>
+                                                    <div id="correlation-network" data-chart="correlation-network" style="height: 400px;"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -502,28 +582,70 @@
                                     <div class="col-md-4">
                                         <!-- Cross-Domain Insights -->
                                         <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Key Insights</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Correlation Insights</h5>
                                                 <div id="correlation-insights" data-content="insights">
                                                     <div class="alert alert-info">
-                                                        No correlation insights available yet. As more data becomes available, insights will be displayed here.
+                                                        Loading correlation insights...
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
+                                        <!-- Temporal Analysis -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Temporal Analysis</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group mb-3">
+                                                    <label for="temporal-correlation-pair">Select Correlation Pair:</label>
+                                                    <select class="form-select" id="temporal-correlation-pair">
+                                                        <option value="weather_temperature-transportation_congestion">Weather (Temperature) vs Transportation (Congestion)</option>
+                                                        <option value="economic_market-social_sentiment">Economic (Market) vs Social Media (Sentiment)</option>
+                                                        <option value="weather_precipitation-transportation_accidents">Weather (Precipitation) vs Transportation (Accidents)</option>
+                                                        <option value="economic_volatility-social_volume">Economic (Volatility) vs Social Media (Volume)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="chart-container">
+                                                    <div id="temporal-correlation-chart" data-chart="line"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Correlation Settings -->
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="card-title">Correlation Settings</h5>
+                                                <h5 class="card-title mb-0">Analysis Settings</h5>
                                             </div>
                                             <div class="card-body">
                                                 <form id="correlation-settings-form">
                                                     <div class="form-group mb-3">
-                                                        <label for="correlation-time-window">Time Window (hours)</label>
-                                                        <input type="number" class="form-control" id="correlation-time-window" min="1" max="168" value="24">
-                                                        <small class="form-text text-muted">Set the time window for correlation analysis (1-168 hours).</small>
+                                                        <label for="correlation-time-window">Data Resolution</label>
+                                                        <select class="form-select" id="correlation-time-resolution">
+                                                            <option value="hourly">Hourly</option>
+                                                            <option value="daily" selected>Daily</option>
+                                                            <option value="weekly">Weekly</option>
+                                                            <option value="monthly">Monthly</option>
+                                                        </select>
+                                                        <small class="form-text text-muted">Data resolution for long time periods.</small>
                                                     </div>
+
+                                                    <div class="form-group mb-3">
+                                                        <label for="correlation-lag-window">Lag Window (days)</label>
+                                                        <input type="number" class="form-control" id="correlation-lag-window" min="0" max="30" value="3">
+                                                        <small class="form-text text-muted">Check for delayed correlations up to this many days.</small>
+                                                    </div>
+
+                                                    <div class="form-check mb-3">
+                                                        <input class="form-check-input" type="checkbox" id="correlation-auto-refresh" checked>
+                                                        <label class="form-check-label" for="correlation-auto-refresh">
+                                                            Auto-refresh analysis
+                                                        </label>
+                                                    </div>
+
                                                     <button type="submit" class="btn btn-primary">Apply Settings</button>
                                                 </form>
                                             </div>
