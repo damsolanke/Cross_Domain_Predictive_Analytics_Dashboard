@@ -81,8 +81,9 @@ Date: May 2025
 
 {% block scripts %}
 {{ super() }}
-<!-- Add Chart.js for visualizations -->
+<!-- Add visualization libraries -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!-- Use the main NLQ JavaScript file -->
 <script src="{{ url_for('static', filename='js/nlq.js') }}"></script>
 <script>

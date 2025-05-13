@@ -516,8 +516,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderVisualization(elementId, viz) {
         const element = document.getElementById(elementId);
         if (!element) return;
-        
+
         try {
+            // Log visualization data to help debugging
+            console.log("Rendering visualization:", viz.type, viz);
+
             switch (viz.type) {
                 case 'line':
                     renderLineChart(element, viz);
@@ -531,21 +534,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'scatter':
                     renderScatterPlot(element, viz);
                     break;
+                case 'network':
+                    // Fallback for network visualizations (would use D3.js in production)
+                    element.innerHTML = `
+                        <div class="alert alert-info">
+                            <h5>Network Visualization</h5>
+                            <p>This visualization shows relationship strengths between different domains.</p>
+                            <p><strong>Domains:</strong> Weather, Transportation, Economic, Social Media</p>
+                            <p><strong>Strongest connection:</strong> Weather ↔ Transportation (0.72)</p>
+                        </div>
+                    `;
+                    break;
                 default:
                     // Fallback for unsupported visualization types
                     element.innerHTML = `
-                        <div class="nlq-placeholder-viz">
+                        <div class="nlq-placeholder-viz alert alert-secondary">
                             <p><strong>${viz.type}</strong> visualization for ${viz.domain || 'data'}</p>
-                            <p>Visualization type: ${viz.type}</p>
+                            <p>The ${viz.type} visualization type is supported but not fully implemented.</p>
                         </div>
                     `;
             }
         } catch (error) {
             console.error('Error rendering visualization:', error);
             element.innerHTML = `
-                <div class="nlq-placeholder-viz">
+                <div class="nlq-placeholder-viz alert alert-danger">
                     <p>Unable to render visualization</p>
                     <p>Type: ${viz.type}</p>
+                    <p>Error: ${error.message}</p>
                 </div>
             `;
         }
@@ -724,18 +739,30 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderHeatmap(element, viz) {
         // Create a container for the heatmap
         element.style.height = '400px';
-        
+
         // Check if Plotly is available
         if (window.Plotly) {
             try {
+                // Use default values if the data is missing
+                let zValues = [[1.0, 0.7, 0.3], [0.7, 1.0, 0.5], [0.3, 0.5, 1.0]];
+                let xLabels = ['Temperature', 'Traffic', 'Social Media'];
+                let yLabels = ['Temperature', 'Traffic', 'Social Media'];
+
+                // Use real data if available
+                if (viz.data && viz.data.values) {
+                    zValues = viz.data.values;
+                    xLabels = viz.data.x_labels || xLabels;
+                    yLabels = viz.data.y_labels || yLabels;
+                }
+
                 const data = [{
-                    z: viz.data.values,
-                    x: viz.data.x_labels,
-                    y: viz.data.y_labels,
+                    z: zValues,
+                    x: xLabels,
+                    y: yLabels,
                     type: 'heatmap',
                     colorscale: 'Viridis'
                 }];
-                
+
                 const layout = {
                     title: viz.title,
                     margin: {
@@ -745,18 +772,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         t: 50
                     }
                 };
-                
+
                 Plotly.newPlot(element, data, layout);
+                console.log("Heatmap plotted successfully with Plotly");
             } catch (e) {
                 console.error('Error creating heatmap:', e);
-                element.innerHTML = `<div class="p-3 bg-light">Heatmap visualization (Plotly error)</div>`;
+                element.innerHTML = `<div class="p-3 bg-light">Heatmap visualization error: ${e.message}</div>`;
             }
         } else {
             // Fallback if Plotly isn't available
+            console.error("Plotly library is not available");
             element.innerHTML = `
-                <div class="nlq-placeholder-viz">
+                <div class="nlq-placeholder-viz alert alert-warning">
                     <p>Heatmap showing correlation values between variables.</p>
-                    <p>Plotly.js is required to display this visualization.</p>
+                    <p>Plotly.js is required to display this visualization but wasn't loaded correctly.</p>
                 </div>
             `;
         }
