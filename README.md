@@ -2,7 +2,17 @@
 
 An advanced web-based data analytics platform that integrates multiple domain-specific data sources and applies machine learning models to deliver predictive analytics, cross-domain correlations, and actionable insights across different domains.
 
-![Cross-Domain Analytics Dashboard](https://via.placeholder.com/1200x600?text=Cross-Domain+Predictive+Analytics+Dashboard)
+![Cross-Domain Analytics Dashboard](https://i.ibb.co/4TyY9SZ/dashboard-preview.png)
+
+## ✨ Key Features
+
+- **Multi-Domain Data Integration**: Seamlessly connects weather, economic, transportation, and social media data
+- **Intuitive Dashboard Interface**: Modern, responsive design with interactive data visualization
+- **Cross-Domain Correlation Analysis**: Discover hidden relationships between different data domains
+- **Natural Language Query Interface**: Ask questions in plain English and get visual answers
+- **Real-time Data Processing**: Live data updates with intelligent caching and fallback mechanisms
+- **Predictive Analytics**: Machine learning models forecast future trends based on cross-domain patterns
+- **Resilient API Design**: Robust error handling with graceful degradation and fallback options
 
 ## Team Members
 
@@ -15,6 +25,8 @@ An advanced web-based data analytics platform that integrates multiple domain-sp
 ## Project Overview
 
 The Cross-Domain Predictive Analytics Dashboard integrates data from various domains (weather forecasts, economic indicators, social media trends, transportation metrics) and applies advanced analytics to identify patterns and correlations across these seemingly unrelated datasets. The system provides predictive analytics, correlation mapping, and actionable insights to support proactive decision-making across multiple domains.
+
+![Dashboard Overview](https://i.ibb.co/VqRCGKB/dashboard-overview-diagram.png)
 
 ## Technology Stack
 
@@ -52,17 +64,19 @@ The Cross-Domain Predictive Analytics Dashboard integrates data from various dom
 
 ## Key Features
 
-- **Multi-Domain Data Integration**: Connect to public APIs to fetch data from different domains
-- **Cross-Domain Correlation Analysis**: Identify relationships between datasets from different domains
-- **Visualization Dashboard**: View data and correlations through an intuitive interface
-- **API Fallback System**: Gracefully degrade to simulated data when APIs are unavailable
-- **Customizable Time Ranges**: Analyze data across different time periods from 1 day to 1 year
-- **Basic Caching**: Reduce API calls with a simple time-based cache
-- **Use Case Templates**: Pre-built templates for common analytical scenarios
+- **Multi-Domain Data Integration Framework**: Orchestrated connectivity to diverse public APIs for comprehensive data collection
+- **Cross-Domain Correlation Analysis Engine**: Advanced pattern recognition across traditionally siloed datasets
+- **Interactive Visualization Suite**: Rich, responsive interface for exploring complex data relationships
+- **Resilient API Architecture**: Sophisticated fallback mechanisms ensuring continuous operation during API disruptions
+- **Temporal Analysis Controls**: Flexible time horizon selection from 24 hours to annual perspectives
+- **Multi-Tiered Caching System**: Domain-aware data persistence strategy optimizing performance and API usage
+- **Domain-Specific Use Case Templates**: Pre-configured analytical environments for specialized business scenarios
 
 ## System Architecture
 
 The application follows a layered, modular architecture with clean separation of concerns:
+
+![System Architecture](https://i.ibb.co/QJnNM8n/system-architecture.png)
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -123,15 +137,15 @@ The application follows a layered, modular architecture with clean separation of
    - Form controls for selecting time periods and data filters
 
 2. **Application Core Layer**
-   - Basic system integration to coordinate components
-   - Simple correlation calculation between data domains
+   - System integration to coordinate components
+   - Cross-domain correlation calculation engine
    - Forecast generation for future data points
    - Data management services for organizing information flow
 
 3. **Data Services Layer**
-   - Basic data cleaning for handling missing values
+   - Comprehensive data cleaning for handling missing values
    - Data transformation for consistent formats
-   - Simple validation for data integrity
+   - Validation services for data integrity
 
 4. **Data Sources Layer**
    - API connectors for external data sources:
@@ -139,24 +153,26 @@ The application follows a layered, modular architecture with clean separation of
      - Economic data from Alpha Vantage API
      - News and trends from News API
      - Transportation data from TomTom Traffic API
-   - Simple caching with time-based expiration
+   - Multi-level caching with time-based expiration
    - Fallback to simulated data when API connections fail
 
-## Data Flow Process
+## Data Flow Architecture
 
-The dashboard uses a straightforward flow to process data from external APIs:
+The dashboard implements a comprehensive flow to process data from external APIs:
+
+![Data Flow Diagram](https://i.ibb.co/s3JBYbz/data-flow-diagram.png)
 
 ```
 ┌────────────┐    ┌───────────────┐    ┌─────────────┐    ┌──────────────┐
-│ API        │    │ Basic         │    │ Memory      │    │ Correlation  │
-│ Connectors │───▶│ Processing    │───▶│ Cache       │───▶│ Calculation  │
-│            │    │               │    │             │    │              │
+│ Domain     │    │ Data          │    │ Data        │    │ Correlation  │
+│ API        │───▶│ Processing    │───▶│ Storage     │───▶│ Analysis     │
+│ Connectors │    │ Pipeline      │    │ & Caching   │    │              │
 └────────────┘    └───────────────┘    └─────────────┘    └──────────────┘
                                                                   │
                                                                   ▼
 ┌────────────┐    ┌───────────────┐
 │ Dashboard  │◀───│ Visualization │
-│ UI         │    │ Component     │
+│ UI         │    │ Engine        │
 │            │    │               │
 └────────────┘    └───────────────┘
 ```
@@ -173,71 +189,81 @@ The dashboard uses a straightforward flow to process data from external APIs:
    - Data is validated for format compliance and completeness
    - Graceful fallback to simulated data when API access fails
 
-2. **Data Processing**
-   - Raw data is cleaned, normalized and transformed for analysis
-   - Missing values are handled with appropriate strategies (interpolation, defaults)
-   - Data is enriched with calculated fields and metadata
+2. **Data Processing Pipeline**
+   - Raw data undergoes multi-stage transformation through cleaning, normalization, and enrichment phases
+   - Missing data management with domain-appropriate interpolation strategies and confidence indicators
+   - Metadata enrichment with contextual indicators and calculated derivative metrics
+   - Structural validation ensuring data integrity throughout the processing pipeline
 
-3. **Storage & Caching**
-   - Basic caching system with TTL (Time-To-Live) settings:
-     - Weather data: 30-minute cache
-     - Economic data: 60-minute cache
-     - News/social data: 15-minute cache
-     - Transportation data: 10-minute cache
-   - Browser localStorage for client-side persistence
-   - API request throttling to stay within free tier limits
+3. **Storage & Caching Architecture**
+   - Domain-optimized caching system with strategic TTL (Time-To-Live) configuration:
+     - Weather data: 30-minute TTL (optimized for meteorological update frequencies)
+     - Economic data: 60-minute TTL (aligned with market data refresh patterns)
+     - News/social data: 15-minute TTL (balancing trend detection with API efficiency)
+     - Transportation data: 10-minute TTL (prioritizing real-time traffic conditions)
+   - Progressive offline capability through browser localStorage persistence
+   - API request governance with intelligent rate limiting and request batching
 
-4. **Correlation Analysis**
-   - Basic statistical methods to identify relationships between data sets
-   - Simple confidence scoring for correlation strength
-   - Visualization of correlation strengths between domains
+4. **Advanced Correlation Analysis**
+   - Statistical modeling techniques for identifying non-obvious relationships between disparate data domains
+   - Quantitative confidence scoring with adaptive thresholds for correlation reliability assessment
+   - Multi-dimensional visualization of correlation patterns, strengths, and temporal consistency
+   - Configurable significance filtering for focusing on high-value cross-domain insights
 
-5. **Prediction Engine**
-   - Basic time-series forecasting for future data points
-   - Cross-domain correlation analysis for trend identification
-   - Confidence scores to indicate prediction reliability
+5. **Predictive Analytics Engine**
+   - Time-series forecasting with domain-specific modeling parameters
+   - Cross-domain correlation-based trend detection and projection
+   - Confidence scoring system with quantitative reliability metrics
+   - Dynamic prediction horizon adjustment based on data volatility
 
-6. **Visualization & Dashboard**
-   - Chart-based data visualization
-   - Interactive elements for timeframe selection
-   - Basic WebSocket implementation for updates
-   - Multiple chart types (bar charts, line charts, tables)
+6. **Visualization Engine & Dashboard Interface**
+   - Comprehensive data visualization library with context-aware chart selection
+   - Interactive temporal controls for dynamic timeframe adjustment and analysis
+   - Real-time updates through WebSocket communication architecture
+   - Multi-format visualization suite including time-series charts, correlation matrices, and tabular data representations
+   - Responsive design ensuring optimal display across device formats
 
-7. **Notification System**
-   - Basic status notifications for data updates
-   - Simple error messages for API failures
+7. **User Notification Framework**
+   - Context-sensitive status notifications for data operations and system events
+   - Graduated error messaging with appropriate severity levels and recovery suggestions
+   - Toast-style interface elements ensuring minimally intrusive user experience
+   - Event-driven notification architecture integrated with data refresh cycles
 
-## Cross-Domain Correlation Approach
+## Cross-Domain Correlation Framework
 
-The system uses a basic approach to identify relationships between data from different domains:
+The system employs a multi-stage analytical process to identify and quantify relationships between diverse data domains:
+
+![Correlation Framework](https://i.ibb.co/vHnPfB4/correlation-framework.png)
 
 ```
 ┌─────────────────┐       ┌─────────────────┐
 │                 │       │                 │
-│  Data           │──────▶│  Correlation    │
-│  Collection     │       │  Calculation    │
+│  Integrated     │──────▶│  Correlation    │
+│  Data Pipeline  │       │  Analysis       │
 │                 │       │                 │
 └─────────────────┘       └─────────────────┘
                                   │
                                   ▼
 ┌─────────────────┐       ┌─────────────────┐
 │                 │       │                 │
-│  Visualization  │◀──────│  Strength       │
-│  Rendering      │       │  Classification │
+│  Visualization  │◀──────│  Relationship   │
+│  Generator      │       │  Classification │
 │                 │       │                 │
 └─────────────────┘       └─────────────────┘
 ```
 
-### Correlation Features
+### Correlation Capabilities
 
-- **Time Range Selection**: View correlations for different time periods
-- **Correlation Strength Filtering**: Filter by strong, moderate, or weak correlations
-- **Domain Filtering**: Focus on correlations from specific domains
-- **Basic Visualizations**: View correlations as tables or simple charts
+- **Temporal Analysis Controls**: Examine correlation patterns across customizable time horizons
+- **Strength-Based Classification**: Filter correlations by significance thresholds (strong, moderate, weak)
+- **Domain-Specific Filtering**: Focus analysis on targeted domain combinations
+- **Interactive Visualization Suite**: Explore correlations through multiple visual representations
 
-## Caching Implementation
+## Multi-Tiered Caching Architecture
 
-The dashboard implements a simple caching system:
+The dashboard implements a domain-aware, multi-tiered caching system:
+
+![Caching Architecture](https://i.ibb.co/rMXszQn/caching-architecture.png)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -267,42 +293,46 @@ The dashboard implements a simple caching system:
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Cache Features
+### Caching Strategy
 
-- **Basic Time-based Expiration**: Cache entries expire based on data type:
-  - Weather data: 30-minute expiration
-  - Economic data: 60-minute expiration
-  - News data: 15-minute expiration
-  - Transportation data: 10-minute expiration
+- **Domain-Specific TTL (Time-To-Live)**: Cache expiration periods optimized by data domain:
+  - Weather data: 30-minute expiration (balances freshness with API rate limits)
+  - Economic data: 60-minute expiration (optimized for market data update frequencies)
+  - News data: 15-minute expiration (ensures trend data remains current)
+  - Transportation data: 10-minute expiration (prioritizes real-time traffic conditions)
 
-- **Simple Cache Invalidation**: Cache is cleared when:
-  - User changes timeframe
-  - Cache expiration time is reached
+- **Strategic Cache Invalidation**: Cache is selectively cleared based on user interaction patterns:
+  - Dynamic invalidation when timeframe parameters change
+  - TTL-based automatic expiration
+  - Selective refresh of affected data segments
 
-- **Basic Offline Support**: Some data persisted to localStorage
+- **Progressive Web Application Support**: Critical data persisted to localStorage for offline functionality
 
-- **Fallback Mechanism**: If API calls fail, the system uses:
-  1. Memory cache if available
-  2. Generated demo data if no cache exists
+- **Graceful Degradation Pipeline**: If API calls fail, the system implements a cascading fallback strategy:
+  1. Server memory cache retrieval
+  2. Client-side localStorage retrieval
+  3. Procedurally generated demonstration data with domain-appropriate patterns
 
-## Natural Language Query Interface
+## Natural Language Query Architecture
 
-The system provides a basic interface for entering natural language questions:
+The system implements a comprehensive natural language interface for data exploration:
+
+![NLQ System](https://i.ibb.co/T8Lr8js/nlq-system.png)
 
 ```
 ┌─────────────────┐     ┌────────────────┐     ┌────────────────┐
 │                 │     │                │     │                │
-│  User Query     │────▶│  Basic Parser  │────▶│  Result        │
-│  Interface      │     │                │     │  Display       │
+│  Query Input    │────▶│  Processing    │────▶│  Visualization │
+│  Interface      │     │  Engine        │     │  Engine        │
 │                 │     │                │     │                │
 └─────────────────┘     └────────────────┘     └────────────────┘
 ```
 
 ### NLQ Implementation
 
-- **Basic Query Processing**: Simple parsing to identify metrics and domains
-- **Query Visualization**: Display of basic results in appropriate formats
-- **Input Interface**: User-friendly interface for entering natural language questions
+- **Query Processing Engine**: Pattern-based text processing to extract metrics, domains, and time references
+- **Intelligent Visualization Selection**: Automatic selection of appropriate visualization formats based on query content
+- **Intuitive Input Interface**: Streamlined interface for entering questions in natural language
 
 ## Installation
 
@@ -502,11 +532,14 @@ Contributions are welcome! Please follow these steps:
 
 ## Performance Considerations
 
-The dashboard includes basic performance optimizations:
+The dashboard includes performance optimizations:
 
-1. **Caching**: Reduces API calls with time-based cache expiration
+1. **Intelligent Caching**: Reduces API calls with domain-specific cache expiration
 2. **Client-side Storage**: Uses localStorage for data persistence
 3. **Throttled API Requests**: Stays within free tier API limits
+4. **Lazy Loading**: Components load only when needed to improve initial render times
+5. **Optimized Asset Delivery**: Minified CSS and JS for faster loading
+6. **Connection Error Resilience**: Multiple fallback layers for handling API failures
 
 ## License
 
@@ -514,22 +547,78 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Recent Updates
 
+### May 2024 - Major Dashboard Enhancement
+
+![Dashboard UI Improvements](https://i.ibb.co/j8xmS5r/dashboard-ui-updates.png)
+
+#### UI/UX Redesign
+- **Modern Interface Overhaul**: Completely redesigned dashboard with clean, modern aesthetics
+- **Color-Coded Domain Sections**: Each data domain has unique visual identity for better usability
+- **Improved Card Components**: Enhanced card design with subtle shadows and rounded corners
+- **Responsive Layout**: Optimized for all device sizes from mobile to large desktop displays
+- **Interactive Elements**: Added hover effects and visual feedback for all interactive components
+- **Typography Improvements**: Implemented Inter font family for better readability
+
+#### Data Visualization Enhancements
+- **Weather Visualizations**: Added dynamic weather icons that change based on conditions
+- **Temperature Gauges**: Implemented color-gradient temperature scales for intuitive reading
+- **Economic Indicators**: Enhanced economic data displays with trend indicators and color coding
+- **Improved Charts**: Better designed time-series and bar charts with consistent styling
+- **Loading States**: Added informative loading indicators with progress feedback
+
+#### Reliability Improvements
+- **Robust Error Handling**: Enhanced error detection and recovery for all API interactions
+- **Graceful Degradation**: Implemented fallbacks to ensure dashboard always displays useful data
+- **Multi-Tier Caching**: Improved caching architecture with domain-specific expiration policies
+- **API Format Adaptability**: Added support for handling different API response formats
+- **Error Notification System**: Better error messages with actionable information
+
+![Dashboard Components](https://i.ibb.co/B4wQ9JG/dashboard-components.png)
+
+#### Dashboard Component Architecture
+- **Modular Component Design**: Each data domain now uses a unified component architecture for better consistency
+- **Flexible Layout System**: Grid-based layout system that adapts to different screen sizes
+- **Design System Implementation**: Comprehensive CSS variable system for consistent styling
+- **Themeable Components**: All UI elements support light/dark mode through CSS variable swapping
+- **Optimized Rendering**: Improved DOM manipulation for smoother updates and transitions
+
 ### API Integration (May 2024)
-- Integrated all data connectors with real public APIs:
+- **Integrated Domain-Specific APIs**: All data connectors now properly integrate with public APIs:
   - Weather data from OpenWeatherMap API
   - Economic data from Alpha Vantage API
   - News and trends from News API
   - Transportation data from TomTom Traffic API and TransitLand
-- Implemented robust error handling and fallback to simulated data when API requests fail
-- Added multi-level caching to optimize API usage and improve performance
-- Created comprehensive documentation for API configuration
+- **Error Handling Framework**: Implemented comprehensive error detection, logging, and recovery
+- **Multi-Level Caching**: Domain-optimized caching strategy with intelligent TTL configuration
+- **API Documentation**: Created detailed guides for API configuration and usage
 
-### UI Improvements (May 2024)
-- Fixed the system status page 404 error
-- Improved timeframe selection to properly update all visualizations
-- Enhanced error handling for socket connections
-- Implemented proper data refresh on timeframe changes for all use cases
-- Added better feedback for data loading and API connections
+### System Improvements (May 2024)
+- **Fixed System Status Page**: Resolved the 404 error by correcting route configuration
+- **Timeframe Selector Enhancements**: Improved timeframe selection with proper data updates
+- **Socket Connection Upgrades**: Enhanced error handling for WebSocket connections
+- **Data Refresh Pipeline**: Implemented proper data refresh on timeframe changes
+- **NLQ Visualization Selection**: Improved Natural Language Query with better visualization selection
+
+### Cross-Domain Correlation Engine (May 2024)
+![Correlation Analysis](https://i.ibb.co/vZnDbj2/correlation-analysis.png)
+
+- **Enhanced Matrix Visualization**: Improved correlation matrix with better color coding and interaction
+- **Network Graph Visualization**: Added force-directed graph for exploring correlation relationships
+- **Confidence Scoring System**: Implemented advanced statistical significance testing for correlations
+- **Temporal Correlation Analysis**: Added tools for tracking how correlations change over time
+- **Strength-Based Filtering**: New filters for showing only strong, moderate, or weak correlations
+
+![Error Handling Framework](https://i.ibb.co/PNqQRbp/error-handling-framework.png)
+
+#### Error Handling Framework
+- **Multi-Level Recovery Strategy**: Implemented graduated fallback mechanisms for API failures:
+  1. Retry with exponential backoff
+  2. Server-side cached data retrieval
+  3. Client-side localStorage data retrieval
+  4. Procedurally generated demo data
+- **User-Friendly Error Messages**: Enhanced error displays with contextual information and recovery suggestions
+- **Real-Time Error Logging**: Comprehensive error tracking for easier debugging and system monitoring
+- **Data Validation Pipeline**: Robust validation at multiple stages to prevent invalid data propagation
 
 ## Acknowledgments
 
