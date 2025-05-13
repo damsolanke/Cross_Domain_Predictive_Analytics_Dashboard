@@ -22,39 +22,27 @@ The Cross-Domain Predictive Analytics Dashboard integrates data from various dom
 - **HTML5/CSS3/JavaScript** - Core web technologies
 - **Bootstrap 5** - Responsive UI framework
 - **Chart.js** - Interactive data visualization
-- **D3.js** - Advanced custom visualizations 
-- **Plotly.js** - Scientific and statistical charts
 - **Socket.IO Client** - Real-time communications
-- **jQuery** - DOM manipulation and Ajax requests
 - **localStorage API** - Client-side data persistence
 
 ### Backend
 - **Python 3.9+** - Core programming language
 - **Flask** - Web framework
 - **Flask-SocketIO** - WebSocket implementation
-- **SQLAlchemy** - ORM for database operations
 - **Pandas** - Data manipulation and analysis
 - **NumPy** - Numerical computing
-- **SciPy** - Statistical analysis
 - **scikit-learn** - Machine learning algorithms
-- **TensorFlow/Keras** - Deep learning for time series prediction
-- **NLTK/spaCy** - Natural language processing
-- **Redis** - In-memory data store for caching
-- **Celery** - Task queue for background processing
+- **Requests** - HTTP library for API calls
+- **python-dotenv** - Environment variable management for API keys
 
 ### Data Storage
-- **SQLite** - Development database
-- **PostgreSQL** - Production database
-- **MongoDB** - Unstructured data storage
-- **Redis** - Caching and session management
+- **In-memory storage** - Dictionary-based data caching in Python
+- **File system storage** - JSON file storage for persistent data
+- **Browser localStorage** - Client-side data persistence for offline capability
 
 ### DevOps & Infrastructure
-- **Docker** - Containerization
 - **Git** - Version control
-- **GitHub Actions** - CI/CD pipeline
 - **Pytest** - Testing framework
-- **Nginx** - Web server (production)
-- **Gunicorn** - WSGI server (production)
 
 ### External Services
 - **Weather API**: OpenWeatherMap API
