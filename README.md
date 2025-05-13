@@ -150,9 +150,14 @@ The application follows a layered, modular architecture with clean separation of
    - Transformation Services to normalize and prepare data for analysis
 
 4. **Data Sources Layer**
-   - Domain-specific API connectors with rate limiting and authentication
+   - Domain-specific API connectors with rate limiting and authentication:
+     - Weather data from OpenWeatherMap API
+     - Economic data from Alpha Vantage API
+     - News and trends from News API
+     - Transportation data from TomTom Traffic API, TransitLand API, and OpenStreetMap
    - Multi-level caching system with configurable expiration times
    - Local storage for offline support and performance optimization
+   - Intelligent fallback to simulated data when API connections fail
 
 ## Data Flow and Processing
 
@@ -176,9 +181,14 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
 ### Process Steps
 
 1. **Data Collection**
-   - Domain-specific API connectors fetch data from external sources
+   - Domain-specific API connectors fetch data from external public APIs:
+     - OpenWeatherMap API for weather data (current conditions and forecasts)
+     - Alpha Vantage API for economic indicators and financial markets data
+     - News API for trending topics and sentiment analysis
+     - TomTom Traffic API and TransitLand API for transportation metrics
    - API calls are optimized with rate limiting and batching where possible
    - Data is validated for format compliance and completeness
+   - Graceful fallback to simulated data when API access fails
 
 2. **Data Processing**
    - Raw data is cleaned, normalized and transformed for analysis
@@ -186,9 +196,14 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
    - Data is enriched with calculated fields and metadata
 
 3. **Storage & Caching**
-   - Multi-tiered caching system with configurable expiration times based on data type
+   - Multi-tiered caching system with configurable expiration times based on data type and source:
+     - Weather data: 30-minute TTL (Time-To-Live)
+     - Economic data: 60-minute TTL
+     - News/social data: 15-minute TTL
+     - Transportation data: 10-minute TTL
    - Intelligent caching with localStorage persistence for offline access
    - Cache size management to prevent memory issues while maintaining performance
+   - API-specific rate limiting management to stay within free tier constraints
 
 4. **Correlation Analysis**
    - Pearson and Spearman correlation methods applied to identify relationships
