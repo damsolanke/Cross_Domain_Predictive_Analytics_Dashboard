@@ -172,8 +172,12 @@ function setupEventHandlers() {
             dashboardState.settings.timeRange = this.value;
             saveDashboardSettings();
 
-            // Reload dashboard data with new time range
+            // Force reload all timeframe-dependent data
+            dashboardState.dataCache = {}; // Clear all caches to force reload
+
+            // Reload dashboard and correlation data
             loadDashboardData();
+            loadCorrelationData(true); // Force correlation data refresh too
         });
     }
 
@@ -1634,6 +1638,8 @@ function updateTemporalCorrelationChart() {
     const chartContainer = document.getElementById('temporal-correlation-chart');
     if (!chartContainer) return;
 
+    console.log('Updating temporal correlation chart');
+
     // Get the selected correlation pair
     const correlationPairSelect = document.getElementById('temporal-correlation-pair');
     const selectedPair = correlationPairSelect ? correlationPairSelect.value : 'weather_temperature-transportation_congestion';
@@ -1646,6 +1652,8 @@ function updateTemporalCorrelationChart() {
     // Generate demo data for the temporal chart
     const timeRangeSelector = document.getElementById('timeRangeSelector');
     const timeRange = timeRangeSelector ? timeRangeSelector.value : '1d';
+
+    console.log(`Temporal correlation chart using time range: ${timeRange}`);
 
     // Determine number of data points based on time range
     let dataPoints = 24;
