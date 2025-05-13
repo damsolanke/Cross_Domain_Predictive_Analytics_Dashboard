@@ -117,51 +117,48 @@ The application follows a layered, modular architecture with clean separation of
 ### Architectural Components
 
 1. **User Interface Layer**
-   - Responsive web interface built with Flask templates, HTML5, CSS3, and modern JavaScript
-   - Real-time dashboard components with dynamic updates
-   - Natural Language Query interface for intuitive data exploration
-   - Interactive visualization components supporting various chart types
+   - Web interface built with Flask templates, HTML5, CSS3, and JavaScript
+   - Dashboard components with Chart.js visualizations
+   - Simple query interface for data exploration
+   - Form controls for selecting time periods and data filters
 
 2. **Application Core Layer**
-   - System Integration module for coordinating all components
-   - Correlation Engine for identifying cross-domain relationships
-   - Prediction Engine using machine learning models for forecasting
-   - Natural Language Processing for understanding user queries
-   - Alert System for monitoring and notifying based on thresholds
-   - Data Pipeline for managing data flow through the system
+   - Basic system integration to coordinate components
+   - Simple correlation calculation between data domains
+   - Forecast generation for future data points
+   - Data management services for organizing information flow
 
 3. **Data Services Layer**
-   - Data Cleaning services to handle missing values and outliers
-   - Validation Services to ensure data integrity and quality
-   - Transformation Services to normalize and prepare data for analysis
+   - Basic data cleaning for handling missing values
+   - Data transformation for consistent formats
+   - Simple validation for data integrity
 
 4. **Data Sources Layer**
-   - Domain-specific API connectors with rate limiting and authentication:
+   - API connectors for external data sources:
      - Weather data from OpenWeatherMap API
      - Economic data from Alpha Vantage API
      - News and trends from News API
-     - Transportation data from TomTom Traffic API, TransitLand API, and OpenStreetMap
-   - Multi-level caching system with configurable expiration times
-   - Local storage for offline support and performance optimization
-   - Intelligent fallback to simulated data when API connections fail
+     - Transportation data from TomTom Traffic API
+   - Simple caching with time-based expiration
+   - Fallback to simulated data when API connections fail
 
-## Data Flow and Processing
+## Data Flow Process
 
-The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture to process incoming data from various domains:
+The dashboard uses a straightforward flow to process data from external APIs:
 
 ```
 ┌────────────┐    ┌───────────────┐    ┌─────────────┐    ┌──────────────┐
-│ Domain     │    │ Data          │    │ Data        │    │ Correlation  │
-│ API        │───▶│ Processing    │───▶│ Storage     │───▶│ Analysis     │
-│ Connectors │    │ Pipeline      │    │ & Caching   │    │              │
+│ API        │    │ Basic         │    │ Memory      │    │ Correlation  │
+│ Connectors │───▶│ Processing    │───▶│ Cache       │───▶│ Calculation  │
+│            │    │               │    │             │    │              │
 └────────────┘    └───────────────┘    └─────────────┘    └──────────────┘
                                                                   │
                                                                   ▼
-┌────────────┐    ┌───────────────┐    ┌─────────────┐    ┌──────────────┐
-│ Dashboard  │    │ Visualization │    │ Prediction  │    │ Alert        │
-│ UI         │◀───│ Engine        │◀───│ Engine      │◀───│ System       │
-│            │    │               │    │             │    │              │
-└────────────┘    └───────────────┘    └─────────────┘    └──────────────┘
+┌────────────┐    ┌───────────────┐
+│ Dashboard  │◀───│ Visualization │
+│ UI         │    │ Component     │
+│            │    │               │
+└────────────┘    └───────────────┘
 ```
 
 ### Process Steps
@@ -191,10 +188,9 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
    - API request throttling to stay within free tier limits
 
 4. **Correlation Analysis**
-   - Pearson and Spearman correlation methods applied to identify relationships
-   - Lag analysis to detect time-delayed correlations between domains
-   - Seasonal pattern detection and adjustment
-   - Confidence scoring to measure reliability of detected correlations
+   - Basic statistical methods to identify relationships between data sets
+   - Simple confidence scoring for correlation strength
+   - Visualization of correlation strengths between domains
 
 5. **Prediction Engine**
    - Basic time-series forecasting for future data points
@@ -202,58 +198,46 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
    - Confidence scores to indicate prediction reliability
 
 6. **Visualization & Dashboard**
-   - Dynamic rendering based on data characteristics
-   - Interactive elements for data exploration
-   - Real-time updates via WebSocket connections
-   - Multiple visualization formats (heatmaps, networks, time-series, etc.)
+   - Chart-based data visualization
+   - Interactive elements for timeframe selection
+   - Basic WebSocket implementation for updates
+   - Multiple chart types (bar charts, line charts, tables)
 
-7. **Alert System**
-   - Threshold-based alerting with configurable rules
-   - Anomaly detection for unusual patterns
-   - User-defined alert priorities and notification methods
+7. **Notification System**
+   - Basic status notifications for data updates
+   - Simple error messages for API failures
 
-## Cross-Domain Correlation System
+## Cross-Domain Correlation Approach
 
-The correlation system is a key component that analyzes relationships between data from different domains:
+The system uses a basic approach to identify relationships between data from different domains:
 
 ```
-┌───────────────────────┐        ┌──────────────────────┐
-│                       │        │                      │
-│   Time-Series         │───────▶│   Correlation        │
-│   Alignment           │        │   Calculation        │
-│                       │        │                      │
-└───────────────────────┘        └──────────────────────┘
-                                           │
-                                           ▼
-┌───────────────────────┐        ┌──────────────────────┐
-│                       │        │                      │
-│   Lag Detection       │◀──────▶│   Significance       │
-│   Analysis            │        │   Testing            │
-│                       │        │                      │
-└───────────────────────┘        └──────────────────────┘
-                                           │
-                                           ▼
-┌───────────────────────┐        ┌──────────────────────┐
-│                       │        │                      │
-│   Visualization       │◀──────▶│   Insight            │
-│   Rendering           │        │   Generation         │
-│                       │        │                      │
-└───────────────────────┘        └──────────────────────┘
+┌─────────────────┐       ┌─────────────────┐
+│                 │       │                 │
+│  Data           │──────▶│  Correlation    │
+│  Collection     │       │  Calculation    │
+│                 │       │                 │
+└─────────────────┘       └─────────────────┘
+                                  │
+                                  ▼
+┌─────────────────┐       ┌─────────────────┐
+│                 │       │                 │
+│  Visualization  │◀──────│  Strength       │
+│  Rendering      │       │  Classification │
+│                 │       │                 │
+└─────────────────┘       └─────────────────┘
 ```
 
-### Key Correlation Features
+### Correlation Features
 
-- **Multi-resolution Analysis**: Analyze correlations at different time resolutions (hourly, daily, weekly, monthly)
-- **Lag Window Analysis**: Detect time-delayed correlations with configurable lag windows
-- **Correlation Strength Filtering**: Focus on strong, moderate, or weak correlations as needed
-- **Domain-specific Filtering**: Isolate correlations involving specific domains
-- **Historical Correlation Trending**: Track how correlations change over time
-- **Visualization Options**: View correlations as heatmaps, network graphs, or tabular data
-- **Confidence Scoring**: Each correlation includes a confidence score based on data quality and volume
+- **Time Range Selection**: View correlations for different time periods
+- **Correlation Strength Filtering**: Filter by strong, moderate, or weak correlations
+- **Domain Filtering**: Focus on correlations from specific domains
+- **Basic Visualizations**: View correlations as tables or simple charts
 
-## Caching Architecture
+## Caching Implementation
 
-The dashboard implements a sophisticated multi-tiered caching system for optimal performance:
+The dashboard implements a simple caching system:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -261,8 +245,8 @@ The dashboard implements a sophisticated multi-tiered caching system for optimal
 │                                                         │
 │  ┌─────────────────┐        ┌───────────────────────┐  │
 │  │                 │        │                       │  │
-│  │  Memory Cache   │◀──────▶│  localStorage Cache   │  │
-│  │  (Short-term)   │        │  (Persistent)         │  │
+│  │  Variable Cache │◀──────▶│  localStorage Cache   │  │
+│  │  (In-memory)    │        │  (Browser Storage)    │  │
 │  │                 │        │                       │  │
 │  └─────────────────┘        └───────────────────────┘  │
 │                                                         │
@@ -273,58 +257,43 @@ The dashboard implements a sophisticated multi-tiered caching system for optimal
 ┌─────────────────────────────────────────────────────────┐
 │                      Server Side                        │
 │                                                         │
-│  ┌─────────────────┐        ┌───────────────────────┐  │
-│  │                 │        │                       │  │
-│  │  Memory Cache   │◀──────▶│  Database Cache       │  │
-│  │  (Short-term)   │        │  (Long-term)          │  │
-│  │                 │        │                       │  │
-│  └─────────────────┘        └───────────────────────┘  │
+│  ┌─────────────────┐                                    │
+│  │                 │                                    │
+│  │  Dictionary     │                                    │
+│  │  Cache          │                                    │
+│  │                 │                                    │
+│  └─────────────────┘                                    │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
 
 ### Cache Features
 
-- **Time-based Expiration**: Different expiration times based on time range and data type
-  - Short time ranges (1h, 6h): 15-30 seconds
-  - Medium time ranges (1d, 7d): 1-5 minutes
-  - Long time ranges (30d, 90d): 15-30 minutes
-  - Very long time ranges (180d, 365d): 1-2 hours
+- **Basic Time-based Expiration**: Cache entries expire based on data type:
+  - Weather data: 30-minute expiration
+  - Economic data: 60-minute expiration
+  - News data: 15-minute expiration
+  - Transportation data: 10-minute expiration
 
-- **Intelligent Cache Invalidation**: Cache is selectively invalidated when:
-  - User changes view parameters
-  - New data is received that affects existing cached results
-  - Server indicates data is stale
+- **Simple Cache Invalidation**: Cache is cleared when:
+  - User changes timeframe
+  - Cache expiration time is reached
 
-- **Offline Support**: Critical data is persisted to localStorage with:
-  - Size management to prevent browser storage limits
-  - Age-based pruning for older cache items
-  - Metadata to verify cache validity
+- **Basic Offline Support**: Some data persisted to localStorage
 
-- **Progressive Loading**: UI shows immediately with cached data while fresh data loads in background
+- **Fallback Mechanism**: If API calls fail, the system uses:
+  1. Memory cache if available
+  2. Generated demo data if no cache exists
 
-- **Fallback System**: If API calls fail, the system falls back to:
-  1. In-memory cache
-  2. localStorage cache
-  3. Generated demo data if no cache exists
+## Natural Language Query Interface
 
-## Natural Language Query System
-
-The NLQ system allows users to ask questions in plain English and receive visualized answers:
+The system provides a basic interface for entering natural language questions:
 
 ```
 ┌─────────────────┐     ┌────────────────┐     ┌────────────────┐
 │                 │     │                │     │                │
-│  User Query     │────▶│  NLQ Parser    │────▶│  Intent        │
-│  Interface      │     │                │     │  Classification│
-│                 │     │                │     │                │
-└─────────────────┘     └────────────────┘     └────────────────┘
-                                                       │
-                                                       ▼
-┌─────────────────┐     ┌────────────────┐     ┌────────────────┐
-│                 │     │                │     │                │
-│  Visualization  │◀────│  Query         │◀────│  Domain & Field│
-│  Selection      │     │  Execution     │     │  Extraction    │
+│  User Query     │────▶│  Basic Parser  │────▶│  Result        │
+│  Interface      │     │                │     │  Display       │
 │                 │     │                │     │                │
 └─────────────────┘     └────────────────┘     └────────────────┘
 ```
