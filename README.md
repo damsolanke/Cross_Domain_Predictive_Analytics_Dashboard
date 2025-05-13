@@ -8,6 +8,52 @@ An advanced web-based data analytics platform that integrates multiple domain-sp
 
 The Cross-Domain Predictive Analytics Dashboard integrates data from various domains (weather forecasts, economic indicators, social media trends, transportation metrics) and applies advanced analytics to identify patterns and correlations across these seemingly unrelated datasets. The system provides predictive analytics, correlation mapping, and actionable insights to support proactive decision-making across multiple domains.
 
+## Technology Stack
+
+### Frontend
+- **HTML5/CSS3/JavaScript** - Core web technologies
+- **Bootstrap 5** - Responsive UI framework
+- **Chart.js** - Interactive data visualization
+- **D3.js** - Advanced custom visualizations 
+- **Plotly.js** - Scientific and statistical charts
+- **Socket.IO Client** - Real-time communications
+- **jQuery** - DOM manipulation and Ajax requests
+- **localStorage API** - Client-side data persistence
+
+### Backend
+- **Python 3.9+** - Core programming language
+- **Flask** - Web framework
+- **Flask-SocketIO** - WebSocket implementation
+- **SQLAlchemy** - ORM for database operations
+- **Pandas** - Data manipulation and analysis
+- **NumPy** - Numerical computing
+- **SciPy** - Statistical analysis
+- **scikit-learn** - Machine learning algorithms
+- **TensorFlow/Keras** - Deep learning for time series prediction
+- **NLTK/spaCy** - Natural language processing
+- **Redis** - In-memory data store for caching
+- **Celery** - Task queue for background processing
+
+### Data Storage
+- **SQLite** - Development database
+- **PostgreSQL** - Production database
+- **MongoDB** - Unstructured data storage
+- **Redis** - Caching and session management
+
+### DevOps & Infrastructure
+- **Docker** - Containerization
+- **Git** - Version control
+- **GitHub Actions** - CI/CD pipeline
+- **Pytest** - Testing framework
+- **Nginx** - Web server (production)
+- **Gunicorn** - WSGI server (production)
+
+### External Services
+- **Weather APIs** (OpenWeatherMap, NOAA)
+- **Economic Data APIs** (Alpha Vantage, FRED)
+- **Social Media APIs** (Twitter API, Reddit API)
+- **Transportation Data Sources** (Various open data portals)
+
 ## Key Features
 
 - **Multi-Domain Data Integration**: Seamlessly connect to diverse public APIs to fetch real-time data across different domains
