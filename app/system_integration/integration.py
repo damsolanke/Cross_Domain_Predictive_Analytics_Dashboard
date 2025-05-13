@@ -49,10 +49,10 @@ def init_system_integration(app):
     try:
         from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
         from app.system_integration.cross_domain_prediction import CrossDomainPredictor
-        
+
         correlator = CrossDomainCorrelator()
         predictor = CrossDomainPredictor(correlator=correlator)
-        
+
         system_integrator.register_component('correlator', correlator)
         system_integrator.register_component('predictor', predictor)
     except ImportError:
