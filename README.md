@@ -52,15 +52,13 @@ The Cross-Domain Predictive Analytics Dashboard integrates data from various dom
 
 ## Key Features
 
-- **Multi-Domain Data Integration**: Seamlessly connect to diverse public APIs to fetch real-time data across different domains
-- **Advanced Predictive Modeling**: Implement machine learning algorithms to analyze historical patterns and generate forecasts
-- **Cross-Domain Correlation Analysis**: Discover and visualize non-obvious correlations between datasets from different domains
-- **Real-Time Analytics**: Process and visualize data updates in real-time through WebSocket connections
-- **Natural Language Queries (NLQ)**: Ask questions in plain English to explore the data and get visualized answers
-- **Customizable Dashboard**: Tailor the dashboard to focus on specific domains or metrics
-- **Year-Long Data Analysis**: Analyze correlations and trends across time ranges from hours to a full year
-- **Intelligent Caching**: Optimize performance with multi-tiered caching system and local storage persistence
-- **Adaptive Visualizations**: Dynamic visualization components that adapt to different data types and patterns
+- **Multi-Domain Data Integration**: Connect to public APIs to fetch data from different domains
+- **Cross-Domain Correlation Analysis**: Identify relationships between datasets from different domains
+- **Visualization Dashboard**: View data and correlations through an intuitive interface
+- **API Fallback System**: Gracefully degrade to simulated data when APIs are unavailable
+- **Customizable Time Ranges**: Analyze data across different time periods from 1 day to 1 year
+- **Basic Caching**: Reduce API calls with a simple time-based cache
+- **Use Case Templates**: Pre-built templates for common analytical scenarios
 
 ## System Architecture
 
@@ -184,14 +182,13 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
    - Data is enriched with calculated fields and metadata
 
 3. **Storage & Caching**
-   - Multi-tiered caching system with configurable expiration times based on data type and source:
-     - Weather data: 30-minute TTL (Time-To-Live)
-     - Economic data: 60-minute TTL
-     - News/social data: 15-minute TTL
-     - Transportation data: 10-minute TTL
-   - Intelligent caching with localStorage persistence for offline access
-   - Cache size management to prevent memory issues while maintaining performance
-   - API-specific rate limiting management to stay within free tier constraints
+   - Basic caching system with TTL (Time-To-Live) settings:
+     - Weather data: 30-minute cache
+     - Economic data: 60-minute cache
+     - News/social data: 15-minute cache
+     - Transportation data: 10-minute cache
+   - Browser localStorage for client-side persistence
+   - API request throttling to stay within free tier limits
 
 4. **Correlation Analysis**
    - Pearson and Spearman correlation methods applied to identify relationships
@@ -200,10 +197,9 @@ The Cross-Domain Analytics Dashboard uses a sophisticated data flow architecture
    - Confidence scoring to measure reliability of detected correlations
 
 5. **Prediction Engine**
-   - Time-series forecasting using ARIMA, LSTM, and ensemble models
-   - Cross-domain factor analysis to improve prediction accuracy
-   - Automated hyperparameter tuning for model optimization
-   - Confidence intervals calculated for all predictions
+   - Basic time-series forecasting for future data points
+   - Cross-domain correlation analysis for trend identification
+   - Confidence scores to indicate prediction reliability
 
 6. **Visualization & Dashboard**
    - Dynamic rendering based on data characteristics
@@ -333,14 +329,11 @@ The NLQ system allows users to ask questions in plain English and receive visual
 └─────────────────┘     └────────────────┘     └────────────────┘
 ```
 
-### NLQ Features
+### NLQ Implementation
 
-- **Query Understanding**: Parse natural language to identify query intent, domains, and metrics
-- **Intelligent Fallbacks**: Client-side processing if server-side NLQ fails
-- **Context Awareness**: Maintain context for follow-up questions
-- **Visualization Matching**: Automatically select appropriate visualization for the query
-- **Query Suggestions**: Offer relevant query suggestions based on available data
-- **History Tracking**: Save and recall previous queries
+- **Basic Query Processing**: Simple parsing to identify metrics and domains
+- **Query Visualization**: Display of basic results in appropriate formats
+- **Input Interface**: User-friendly interface for entering natural language questions
 
 ## Installation
 
@@ -538,15 +531,13 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Performance Optimization
+## Performance Considerations
 
-The dashboard includes several performance optimizations:
+The dashboard includes basic performance optimizations:
 
-1. **Lazy Loading**: Components are loaded as needed rather than all at once
-2. **Multi-tiered Caching**: Reduces API calls and database queries
-3. **Parallel Data Fetching**: Multiple data sources are queried simultaneously
-4. **Client-side Processing**: Reduces server load for simple operations
-5. **Data Compression**: Minimizes network transfer sizes
+1. **Caching**: Reduces API calls with time-based cache expiration
+2. **Client-side Storage**: Uses localStorage for data persistence
+3. **Throttled API Requests**: Stays within free tier API limits
 
 ## License
 
