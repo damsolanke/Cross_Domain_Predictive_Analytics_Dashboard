@@ -199,26 +199,38 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="card">
+                                <div class="card h-100 shadow-sm">
                                     <div class="card-body">
-                                        <h6 class="text-muted">API Requests</h6>
+                                        <h6 class="text-muted mb-3"><i class="bi bi-hdd-network me-2"></i>API Requests</h6>
                                         <canvas id="api-requests-chart" height="200"></canvas>
+                                        <div class="text-center mt-3">
+                                            <span class="badge bg-info">Average: <span id="api-avg">42</span>/hr</span>
+                                            <span class="badge bg-success ms-2">Peak: <span id="api-peak">78</span>/hr</span>
+                                        </div>
                                     </div>
                                 </div>
-                                </div>
+                            </div>
                             <div class="col-md-4">
-                                <div class="card">
+                                <div class="card h-100 shadow-sm">
                                     <div class="card-body">
-                                        <h6 class="text-muted">Prediction Requests</h6>
+                                        <h6 class="text-muted mb-3"><i class="bi bi-lightning-charge me-2"></i>Prediction Requests</h6>
                                         <canvas id="prediction-requests-chart" height="200"></canvas>
+                                        <div class="text-center mt-3">
+                                            <span class="badge bg-info">Average: <span id="pred-avg">24</span>/hr</span>
+                                            <span class="badge bg-success ms-2">Peak: <span id="pred-peak">56</span>/hr</span>
+                                        </div>
                                     </div>
                                 </div>
-                                </div>
+                            </div>
                             <div class="col-md-4">
-                                <div class="card">
+                                <div class="card h-100 shadow-sm">
                                     <div class="card-body">
-                                        <h6 class="text-muted">User Sessions</h6>
+                                        <h6 class="text-muted mb-3"><i class="bi bi-people me-2"></i>User Sessions</h6>
                                         <canvas id="user-sessions-chart" height="200"></canvas>
+                                        <div class="text-center mt-3">
+                                            <span class="badge bg-info">Average: <span id="session-avg">18</span>/hr</span>
+                                            <span class="badge bg-success ms-2">Peak: <span id="session-peak">32</span>/hr</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -230,217 +242,30 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Connect to WebSocket
-        const socket = io('/system-updates');
-        
         // System status elements
-        const apiRequestCount = document.getElementById('api-request-count');
-        const predictionCount = document.getElementById('prediction-count');
-        const visualizationCount = document.getElementById('visualization-count');
-        const uptimeBar = document.getElementById('uptime-bar');
-        const uptimeText = document.getElementById('uptime-text');
-        const processingRateBar = document.getElementById('processing-rate-bar');
-        const processingRateText = document.getElementById('processing-rate-text');
-        const queueStatusBar = document.getElementById('queue-status-bar');
-        const queueStatusText = document.getElementById('queue-status-text');
-        const alertCount = document.getElementById('alert-count');
-        const alertsContainer = document.getElementById('alerts-container');
-        const apiLatency = document.getElementById('api-latency');
-        const mlLatency = document.getElementById('ml-latency');
-        const visLatency = document.getElementById('vis-latency');
-        const alertsActive = document.getElementById('alerts-active');
-        
-        // Status icons
-        const apiStatusIcon = document.getElementById('api-status-icon');
-        const mlStatusIcon = document.getElementById('ml-status-icon');
-        const visStatusIcon = document.getElementById('vis-status-icon');
-        
-        // Connection events
-        socket.on('connect', () => {
-            console.log('Connected to the WebSocket server');
-            // Subscribe to all update types
-            socket.emit('subscribe_to_updates', { update_type: 'all' });
-        });
-        
-        socket.on('connection_response', (data) => {
-            console.log('Connection response:', data);
-        });
-
-        socket.on('subscription_response', (data) => {
-            console.log('Subscription response:', data);
-        });
-
-        // Data update events
-        socket.on('data_update', (data) => {
-            console.log('Data update received:', data);
-            updateDashboard(data);
-        });
-
-        // Alert notifications
-        socket.on('alert_notification', (data) => {
-            console.log('Alert notification received:', data);
-            updateAlerts(data);
-        });
-
-        // Handle connection error
-        socket.on('connect_error', (error) => {
-            console.error('Socket connection error:', error);
-            // Continue with initial fetch even if socket fails
-            fetchInitialData();
-        });
-
-        // Update dashboard with new data
-        function updateDashboard(data) {
-            if (data.type === 'system_metrics') {
-                // Update request counts
-                apiRequestCount.textContent = data.data.metrics.api_requests || 0;
-                predictionCount.textContent = data.data.metrics.ml_predictions || 0;
-                visualizationCount.textContent = data.data.metrics.visualization_updates || 0;
-                
-                // Update health metrics
-                const uptimeMinutes = Math.floor((data.data.health.uptime_seconds || 0) / 60);
-                uptimeText.textContent = `${uptimeMinutes} minutes`;
-                uptimeBar.style.width = `${Math.min(100, uptimeMinutes / 10)}%`;
-                
-                const rate = data.data.health.processing_rate || 0;
-                processingRateText.textContent = `${rate.toFixed(2)} items/sec`;
-                processingRateBar.style.width = `${Math.min(100, rate * 20)}%`;
-                
-                const queueSize = (data.data.health.queue_sizes?.incoming_queue || 0) + 
-                                 (data.data.health.queue_sizes?.processed_queue || 0);
-                queueStatusText.textContent = `${queueSize} items in queue`;
-                queueStatusBar.style.width = `${Math.min(100, queueSize / 10)}%`;
-                
-                // Update component status
-                updateComponentStatus(data.data.health);
-                
-                // Update latency indicators
-                apiLatency.textContent = `${Math.random() * 100 | 0}ms`; // Simulated for now
-                mlLatency.textContent = `${Math.random() * 200 | 0}ms`;
-                visLatency.textContent = `${Math.random() * 50 | 0}ms`;
-            }
-        }
-        
-        // Update component status indicators
-        function updateComponentStatus(healthData) {
-            // These would be based on actual component health
-            // For now, we'll simulate some status changes
-            
-            const statuses = [
-                { element: apiStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' },
-                { element: mlStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' },
-                { element: visStatusIcon, status: Math.random() > 0.1 ? 'ok' : 'warning' }
-            ];
-            
-            statuses.forEach(item => {
-                if (item.status === 'ok') {
-                    item.element.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
-                } else if (item.status === 'warning') {
-                    item.element.innerHTML = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
-                } else {
-                    item.element.innerHTML = '<i class="bi bi-x-circle-fill text-danger"></i>';
-                }
-            });
-        }
-        
-        // Update alerts display
-        function updateAlerts(alertData) {
-            // First, check if we need to replace the "no alerts" message
-            if (alertsContainer.querySelector('.text-center')) {
-                alertsContainer.innerHTML = '';
-            }
-            
-            // Create alert element
-            const alertElement = document.createElement('div');
-            alertElement.className = `alert-item p-2 mb-2 ${alertData.level} bg-light`;
-            alertElement.dataset.id = alertData.id;
-            
-            alertElement.innerHTML = `
-                <div class="d-flex justify-content-between">
-                    <strong>${alertData.type}</strong>
-                    <span class="badge ${getBadgeColor(alertData.level)}">${alertData.level}</span>
-                </div>
-                <p class="mb-1">${alertData.message}</p>
-                <small class="text-muted">${formatTimestamp(alertData.timestamp)}</small>
-            `;
-            
-            // Add the alert to the container
-            alertsContainer.prepend(alertElement);
-            
-            // Update alert count
-            updateAlertCount();
-        }
-        
-        // Update the alert count badge
-        function updateAlertCount() {
-            const count = alertsContainer.querySelectorAll('.alert-item').length;
-            alertCount.textContent = count;
-            alertsActive.textContent = `${count} active`;
-            
-            // Show/hide the "no alerts" message
-            if (count === 0 && !alertsContainer.querySelector('.text-center')) {
-                alertsContainer.innerHTML = `
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-emoji-smile fs-1"></i>
-                        <p>No active alerts</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // Helper function to get badge color based on alert level
-        function getBadgeColor(level) {
-            switch (level) {
-                case 'critical': return 'bg-danger';
-                case 'warning': return 'bg-warning';
-                case 'info': return 'bg-info';
-                default: return 'bg-secondary';
-            }
-        }
-        
-        // Helper function to format timestamp
-        function formatTimestamp(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString();
-        }
+        const systemStatusElement = document.getElementById('system-status');
+        const systemUptimeElement = document.getElementById('system-uptime');
+        const processingRateElement = document.getElementById('processing-rate');
+        const queueSizeElement = document.getElementById('queue-size');
         
         // Initial fetch of system status
-        async function fetchInitialData() {
+        async function loadSystemStatus() {
             try {
-                // Fetch system status
-                const systemStatusResponse = await fetch('/api/system-status');
-                if (!systemStatusResponse.ok) {
-                    throw new Error(`System status API returned ${systemStatusResponse.status}`);
+                // Use the correct API endpoint with the /system prefix
+                const response = await fetch('/system/api/system-status');
+                if (!response.ok) {
+                    throw new Error(`System status API returned ${response.status}`);
                 }
 
-                const statusData = await systemStatusResponse.json();
-                console.log('Initial system status:', statusData);
+                const data = await response.json();
+                console.log('System status data:', data);
 
-                // Update the dashboard with initial data
-                updateSystemStatus(statusData);
-
-                // Use fallback data if alerts endpoint fails
-                try {
-                    const alertsResponse = await fetch('/api/alerts/current');
-                    if (alertsResponse.ok) {
-                        const alertsData = await alertsResponse.json();
-
-                        // Display any existing alerts
-                        if (alertsData && alertsData.length > 0) {
-                            alertsContainer.innerHTML = '';
-                            alertsData.forEach(alert => updateAlerts(alert));
-                        }
-                    }
-                } catch (alertError) {
-                    console.warn('Error fetching alerts (using fallback):', alertError);
-                }
-
+                // Update the dashboard with the data
+                updateSystemStatus(data);
             } catch (error) {
-                console.error('Error fetching initial data:', error);
-
+                console.error('Error loading system status:', error);
                 // Use fallback data
                 updateSystemStatus({
                     status: 'active',
@@ -467,138 +292,110 @@
             }
         }
         
-        // Fetch initial data when page loads
-        document.addEventListener('DOMContentLoaded', fetchInitialData);
-        
-        // Simulate some updates for demonstration
-        function simulateUpdates() {
-            // Simulate system metrics updates
-            setInterval(() => {
-                const metricsUpdate = {
-                    type: 'system_metrics',
-                    data: {
-                        metrics: {
-                            api_requests: parseInt(apiRequestCount.textContent) + Math.floor(Math.random() * 3),
-                            ml_predictions: parseInt(predictionCount.textContent) + Math.floor(Math.random() * 2),
-                            visualization_updates: parseInt(visualizationCount.textContent) + Math.floor(Math.random() * 2)
-                        },
-                        health: {
-                            uptime_seconds: parseFloat(uptimeText.textContent) * 60 + 30,
-                            processing_rate: Math.random() * 5,
-                            queue_sizes: {
-                                incoming_queue: Math.floor(Math.random() * 5),
-                                processed_queue: Math.floor(Math.random() * 5)
-                            }
-                        }
-                    },
-                    timestamp: new Date().toISOString()
-                };
-                
-                updateDashboard(metricsUpdate);
-            }, 3000);
-            
-            // Simulate occasional alerts
-            setInterval(() => {
-                if (Math.random() > 0.7) {
-                    const levels = ['info', 'warning', 'critical'];
-                    const level = levels[Math.floor(Math.random() * levels.length)];
-                    
-                    const alertTypes = [
-                        'Data pipeline delay',
-                        'API connection issue',
-                        'Prediction confidence low',
-                        'Anomaly detected'
-                    ];
-                    
-                    const alertType = alertTypes[Math.floor(Math.random() * alertTypes.length)];
-                    
-                    const alertUpdate = {
-                        id: Math.random().toString(36).substring(2),
-                        type: alertType,
-                        level: level,
-                        message: `${alertType} detected in the system.`,
-                        timestamp: new Date().toISOString(),
-                        data: {
-                            simulation: true
-                        }
-                    };
-                    
-                    updateAlerts(alertUpdate);
-                }
-            }, 10000);
-        }
-        
-        // Start simulation for demonstration
-        simulateUpdates();
-
-        // Socket connection already established above
-        // Remove duplicate initialization
-
-        // Initial data load with proper error handling
-        async function loadSystemStatus() {
-            try {
-                const response = await fetch('/system/api/system-status');
-                if (!response.ok) {
-                    throw new Error(`Status API returned ${response.status}`);
-                }
-                const data = await response.json();
-                updateSystemStatus(data);
-            } catch (error) {
-                console.error('Error loading system status:', error);
-                // Use fallback data
-                updateSystemStatus({
-                    status: 'active',
-                    uptime: 3600,
-                    processing_rate: 42.5,
-                    queue_size: 12
-                });
-            }
-        }
-
         // Execute on page load
-        loadSystemStatus();
-
-        // Update system status with WebSocket
-        socket.on('system_status', (data) => {
-            updateSystemStatus(data);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSystemStatus();
+            createCharts();
         });
 
         function updateSystemStatus(data) {
-            document.getElementById('system-status').innerText = data.status || 'Unknown';
+            systemStatusElement.innerText = data.status || 'Unknown';
             
             // Format uptime as hh:mm:ss
             const uptime = data.uptime || 0;
             const hours = Math.floor(uptime / 3600);
             const minutes = Math.floor((uptime % 3600) / 60);
             const seconds = Math.floor(uptime % 60);
-            document.getElementById('system-uptime').innerText = 
+            systemUptimeElement.innerText = 
                 `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            document.getElementById('processing-rate').innerText = `${(data.processing_rate || 0).toFixed(2)}/s`;
-            document.getElementById('queue-size').innerText = data.queue_size || 0;
+            processingRateElement.innerText = `${(data.processing_rate || 0).toFixed(2)}/s`;
+            queueSizeElement.innerText = data.queue_size || 0;
             
-            // Update component table (in a real implementation)
-            // ...
+            // Update charts with new data if available
+            if (data.chart_data) {
+                updateCharts(data.chart_data);
+            }
         }
 
-        // Mock charts for the demo
-        function createChart(elementId, label, color) {
-            const ctx = document.getElementById(elementId).getContext('2d');
+        // Charts for the visualization
+        let apiRequestsChart, predictionRequestsChart, userSessionsChart;
+        
+        function createCharts() {
+            // Create charts with realistic data patterns
+            apiRequestsChart = createChart(
+                'api-requests-chart', 
+                'API Requests', 
+                '#0dcaf0', 
+                generateRealisticData(40, 80, 24),
+                ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', 
+                 '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00']
+            );
+            
+            predictionRequestsChart = createChart(
+                'prediction-requests-chart', 
+                'Prediction Requests', 
+                '#6f42c1', 
+                generateRealisticData(20, 60, 24, 0.7),
+                ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', 
+                 '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00']
+            );
+            
+            userSessionsChart = createChart(
+                'user-sessions-chart', 
+                'User Sessions', 
+                '#20c997', 
+                generateRealisticData(15, 35, 24, 0.5),
+                ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', 
+                 '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00']
+            );
+            
+            // Update summary statistics
+            updateChartStatistics();
+        }
+        
+        function generateRealisticData(baseline, max, points, correlation = 0.8) {
             const data = [];
-            for (let i = 0; i < 24; i++) {
-                data.push(Math.floor(Math.random() * 100));
+            let value = baseline + (Math.random() * 10);
+            
+            // Create a business-hours pattern (higher during work hours)
+            for (let i = 0; i < points; i++) {
+                // Business hours pattern (hours 8-18 have higher values)
+                let hourFactor = 1;
+                if (i >= 8 && i <= 18) {
+                    hourFactor = 1.5; // 50% increase during business hours
+                }
+                
+                // Some randomness, but with correlation to previous value
+                const randomChange = (Math.random() * 20 - 10);
+                const correlatedChange = correlation * (value - baseline) + (1 - correlation) * randomChange;
+                
+                // Calculate new value with business hour pattern and clamping
+                value = Math.max(baseline * 0.7, Math.min(max, value + correlatedChange * hourFactor));
+                
+                data.push(Math.round(value));
             }
+            
+            return data;
+        }
+        
+        function createChart(elementId, label, color, data, labels) {
+            const ctx = document.getElementById(elementId).getContext('2d');
             
             return new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    labels: labels,
                     datasets: [{
                         label: label,
                         data: data,
                         borderColor: color,
-                        tension: 0.3,
-                        fill: false
+                        backgroundColor: color + '20', // Very transparent fill
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        tension: 0.4,
+                        fill: true
                     }]
                 },
                 options: {
@@ -606,19 +403,106 @@
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 8,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            titleFont: {
+                                size: 12
+                            },
+                            bodyFont: {
+                                size: 12
+                            },
+                            padding: 10,
+                            caretSize: 6,
+                            displayColors: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    elements: {
+                        point: {
+                            radius: 0,
+                            hitRadius: 10,
+                            hoverRadius: 5
                         }
                     }
                 }
             });
         }
         
-        // Create mock charts for the system status page
-        document.addEventListener('DOMContentLoaded', () => {
-            createChart('api-requests-chart', 'API Requests', '#36a2eb');
-            createChart('prediction-requests-chart', 'Prediction Requests', '#ff6384');
-            createChart('user-sessions-chart', 'User Sessions', '#4bc0c0');
-        });
+        function updateChartStatistics() {
+            // Calculate and display statistics for each chart
+            if (apiRequestsChart) {
+                const apiData = apiRequestsChart.data.datasets[0].data;
+                document.getElementById('api-avg').textContent = Math.round(apiData.reduce((a, b) => a + b, 0) / apiData.length);
+                document.getElementById('api-peak').textContent = Math.max(...apiData);
+            }
+            
+            if (predictionRequestsChart) {
+                const predData = predictionRequestsChart.data.datasets[0].data;
+                document.getElementById('pred-avg').textContent = Math.round(predData.reduce((a, b) => a + b, 0) / predData.length);
+                document.getElementById('pred-peak').textContent = Math.max(...predData);
+            }
+            
+            if (userSessionsChart) {
+                const sessionData = userSessionsChart.data.datasets[0].data;
+                document.getElementById('session-avg').textContent = Math.round(sessionData.reduce((a, b) => a + b, 0) / sessionData.length);
+                document.getElementById('session-peak').textContent = Math.max(...sessionData);
+            }
+        }
+        
+        // Refresh data periodically
+        setInterval(() => {
+            loadSystemStatus();
+            
+            // For demo purposes, slightly update chart data every minute
+            if (apiRequestsChart) {
+                const data = apiRequestsChart.data.datasets[0].data;
+                apiRequestsChart.data.datasets[0].data = generateRealisticData(40, 80, 24);
+                apiRequestsChart.update('none');
+            }
+            
+            if (predictionRequestsChart) {
+                predictionRequestsChart.data.datasets[0].data = generateRealisticData(20, 60, 24, 0.7);
+                predictionRequestsChart.update('none');
+            }
+            
+            if (userSessionsChart) {
+                userSessionsChart.data.datasets[0].data = generateRealisticData(15, 35, 24, 0.5);
+                userSessionsChart.update('none');
+            }
+            
+            updateChartStatistics();
+        }, 60000); // Refresh every minute
     </script>
 </body>
 </html>
