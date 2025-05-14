@@ -7,6 +7,7 @@ from . import api
 from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
 import numpy as np
 import random
+import datetime
 
 # Initialize correlation analyzer
 correlator = CrossDomainCorrelator()
@@ -42,6 +43,163 @@ def system_status():
         "processing_rate": 42.5,
         "queue_size": 12
     })
+
+@api.route('/analytics/reports/correlation')
+def analytics_reports_correlation():
+    """Generate correlation analysis report."""
+    format_type = request.args.get('format', 'html')
+    days = int(request.args.get('days', '7'))
+    
+    # Generate a mock correlation report
+    report_data = {
+        "title": "Cross-Domain Correlation Analysis Report",
+        "generated_at": datetime.datetime.now().isoformat(),
+        "time_range": f"Last {days} days",
+        "correlations": [
+            {
+                "domain1": "Weather",
+                "field1": "Temperature",
+                "domain2": "Energy",
+                "field2": "Consumption",
+                "correlation": 0.78,
+                "significance": "high",
+                "description": "Strong positive correlation between temperature and energy consumption."
+            },
+            {
+                "domain1": "Weather",
+                "field1": "Precipitation",
+                "domain2": "Transportation",
+                "field2": "Traffic Delay",
+                "correlation": 0.65,
+                "significance": "medium",
+                "description": "Moderate positive correlation between precipitation and traffic delays."
+            },
+            {
+                "domain1": "Economic",
+                "field1": "Market Index",
+                "domain2": "Social Media",
+                "field2": "Sentiment",
+                "correlation": 0.48,
+                "significance": "medium",
+                "description": "Moderate positive correlation between market performance and social sentiment."
+            }
+        ],
+        "insights": [
+            "Weather factors show the strongest correlation with energy usage patterns",
+            "Transportation metrics are moderately influenced by weather conditions",
+            "Economic indicators have weaker but still significant correlations with social sentiment"
+        ],
+        "recommendations": [
+            "Consider integrated forecasting models for energy demand based on weather predictions",
+            "Develop predictive traffic management systems incorporating weather forecast data",
+            "Monitor social media sentiment as a potential early indicator for economic trends"
+        ]
+    }
+    
+    if format_type == 'json':
+        return jsonify(report_data)
+    elif format_type == 'md':
+        # Generate a simple markdown report
+        markdown = f"""# {report_data['title']}
+
+Generated: {report_data['generated_at']}
+Time Range: {report_data['time_range']}
+
+## Top Correlations
+
+"""
+        for corr in report_data['correlations']:
+            markdown += f"### {corr['domain1']} ({corr['field1']}) × {corr['domain2']} ({corr['field2']})\n\n"
+            markdown += f"**Correlation Coefficient:** {corr['correlation']}\n\n"
+            markdown += f"**Significance:** {corr['significance']}\n\n"
+            markdown += f"**Description:** {corr['description']}\n\n"
+        
+        markdown += "## Key Insights\n\n"
+        for insight in report_data['insights']:
+            markdown += f"* {insight}\n"
+        
+        markdown += "\n## Recommendations\n\n"
+        for rec in report_data['recommendations']:
+            markdown += f"* {rec}\n"
+            
+        return markdown
+    else:
+        # For HTML format, you would typically render a template
+        # Since we're just adding a quick mock, we'll return HTML directly
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{report_data['title']}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .correlation {{ margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }}
+                .high {{ border-left: 5px solid #28a745; }}
+                .medium {{ border-left: 5px solid #ffc107; }}
+                .low {{ border-left: 5px solid #6c757d; }}
+                h1, h2, h3 {{ color: #333; }}
+            </style>
+        </head>
+        <body>
+            <h1>{report_data['title']}</h1>
+            <p><strong>Generated:</strong> {report_data['generated_at']}</p>
+            <p><strong>Time Range:</strong> {report_data['time_range']}</p>
+            
+            <h2>Top Correlations</h2>
+        """
+        
+        for corr in report_data['correlations']:
+            html += f"""
+            <div class="correlation {corr['significance']}">
+                <h3>{corr['domain1']} ({corr['field1']}) × {corr['domain2']} ({corr['field2']})</h3>
+                <p><strong>Correlation Coefficient:</strong> {corr['correlation']}</p>
+                <p><strong>Significance:</strong> {corr['significance']}</p>
+                <p><strong>Description:</strong> {corr['description']}</p>
+            </div>
+            """
+        
+        html += "<h2>Key Insights</h2><ul>"
+        for insight in report_data['insights']:
+            html += f"<li>{insight}</li>"
+        html += "</ul>"
+        
+        html += "<h2>Recommendations</h2><ul>"
+        for rec in report_data['recommendations']:
+            html += f"<li>{rec}</li>"
+        html += "</ul>"
+        
+        html += "</body></html>"
+        return html
+
+@api.route('/analytics/reports/list')
+def analytics_reports_list():
+    """Return a list of available reports."""
+    # Generate mock report list
+    reports = [
+        {
+            "name": "Correlation Analysis Report",
+            "path": "/api/analytics/reports/correlation?format=html&days=7",
+            "format": "html",
+            "size": 15240,
+            "created": (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat()
+        },
+        {
+            "name": "Weather Insights Report",
+            "path": "/api/analytics/reports/insights?format=html&days=7&domain=weather",
+            "format": "html",
+            "size": 12480,
+            "created": (datetime.datetime.now() - datetime.timedelta(hours=5)).isoformat()
+        },
+        {
+            "name": "Prediction Performance Report",
+            "path": "/api/analytics/reports/prediction?format=json&days=30",
+            "format": "json",
+            "size": 8920,
+            "created": (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
+        }
+    ]
+    
+    return jsonify(reports)
 
 @api.route('/correlation/analyze', methods=['POST'])
 def analyze_correlation():

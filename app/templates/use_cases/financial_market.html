@@ -2,64 +2,369 @@
 
 {% block title %}Financial Market Strategy{% endblock %}
 
+{% block styles %}
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --secondary-color: #64748b;
+        --accent-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+        --success-color: #10b981;
+        --light-bg: #f8fafc;
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s ease;
+    }
+    
+    .dashboard-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    .hero-section {
+        position: relative;
+        padding: 5rem 0 3rem;
+        background-color: var(--light-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("{{ url_for('static', filename='img/financial-bg.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        z-index: 0;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.5px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        font-weight: 400;
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .card-modern {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .card-header-modern {
+        background-color: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .card-title-modern {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--primary-dark);
+    }
+    
+    .insights-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .time-selector {
+        background-color: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        min-width: 180px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .confidence-indicator {
+        height: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.3rem;
+    }
+    
+    .indicator {
+        height: 100%;
+        border-radius: 4px;
+    }
+    
+    .confidence-high {
+        background-color: var(--success-color);
+    }
+    
+    .confidence-medium {
+        background-color: var(--warning-color);
+    }
+    
+    .confidence-low {
+        background-color: var(--info-color);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<header class="use-case-header use-case-financial">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8 mx-auto text-center">
-                <h1 class="display-4">Financial Market Strategy</h1>
-                <p class="lead">Leverage cross-domain analytics to predict market trends and optimize investment strategies</p>
+<!-- Add Plotly.js for interactive visualizations -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Financial Market Strategy</h1>
+            <p class="hero-subtitle">Leverage cross-domain analytics to predict market trends and optimize investment strategies by analyzing weather impacts, economic indicators, and social media sentiment.</p>
+            <div class="d-flex justify-content-center align-items-center">
+                <select id="timeRangeSelect" class="time-selector">
+                    <option value="1d">Last 24 Hours</option>
+                    <option value="7d" selected>Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="180d">Last 180 Days</option>
+                    <option value="365d">Last Year</option>
+                </select>
             </div>
         </div>
     </div>
-</header>
-
-<div class="container">
-    <!-- Key Insights -->
-    <div class="row mb-5">
+    
+    <!-- Main Dashboard Content -->
+    <div class="row g-4">
+        <!-- Domain-specific Cards Section -->
         <div class="col-12">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Key Insights</h4>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fs-3 fw-bold m-0">Cross-Domain Analytics</h2>
+                <span class="badge bg-primary rounded-pill px-3 py-2">Updated Just Now</span>
+            </div>
+        </div>
+        
+        <!-- Economic Indicators Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-graph-up me-2 text-success"></i>
+                        Economic Indicators
+                    </h3>
+                    <span class="badge bg-success rounded-pill">Positive</span>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <h2 class="display-4 text-primary">2.3%</h2>
-                                    <p class="text-muted mb-0">GDP Growth</p>
-                                    <p class="mb-0"><strong>{{ data.economic_indicators.trend|title }}</strong></p>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">GDP Growth</span>
+                            <span class="d-block fs-3 fw-bold text-dark">2.3%</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Market Trend</span>
+                            <span class="d-block fs-4 fw-bold text-success">
+                                <i class="bi bi-arrow-up-right me-1"></i>
+                                Upward
+                            </span>
+                        </div>
+                    </div>
+                    <div class="alert alert-success mt-3 d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Insight:</strong> Economic indicators suggest continued growth across sectors.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Index Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-currency-dollar me-2 text-primary"></i>
+                        Market Index
+                    </h3>
+                    <span class="badge bg-primary rounded-pill">Rising</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Current Value</span>
+                            <span class="d-block fs-3 fw-bold text-dark">32,415</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Daily Change</span>
+                            <span class="d-block fs-2 fw-bold text-success">+0.5%</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-primary mt-3 d-flex align-items-center">
+                        <i class="bi bi-arrow-up-right-circle-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Trend:</strong> Market gains supported by tech sector strength.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Social Sentiment Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-chat-square-text me-2 text-info"></i>
+                        Social Sentiment
+                    </h3>
+                    <span class="badge bg-info rounded-pill">Informative</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Overall Sentiment</span>
+                            <span class="d-block fs-3 fw-bold text-dark">Positive</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Sentiment Score</span>
+                            <div class="progress mt-2" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     style="width: 72%;" 
+                                     aria-valuenow="72" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
                                 </div>
                             </div>
+                            <span class="small text-secondary mt-1 d-block">72/100</span>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <h2 class="display-4 text-success">+0.5%</h2>
-                                    <p class="text-muted mb-0">Market Index</p>
-                                    <p class="mb-0"><strong>32,415 points</strong></p>
-                                </div>
+                    </div>
+                    <div class="alert alert-info mt-3 d-flex align-items-center">
+                        <i class="bi bi-chat-quote-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Insight:</strong> Social media indicates growing confidence in tech sector.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Investment Opportunities Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-bullseye me-2 text-warning"></i>
+                        Opportunities
+                    </h3>
+                    <span class="badge bg-warning rounded-pill">3 Alerts</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Technology Sector</span>
+                            <span class="d-block fs-3 fw-bold text-dark">BUY</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Energy Sector</span>
+                            <span class="d-block fs-4 fw-bold text-danger">
+                                <i class="bi bi-arrow-down me-1"></i>
+                                SELL
+                            </span>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 d-flex align-items-center">
+                        <i class="bi bi-lightbulb-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Alert:</strong> 3 high-confidence investment opportunities detected.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Market Trend Predictions Section -->
+    <div class="col-12 mt-5">
+        <div class="card-modern">
+            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                <h3 class="card-title-modern">
+                    <i class="bi bi-graph-up-arrow me-2 text-primary"></i>
+                    Market Trend Predictions
+                </h3>
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" id="toggleMarketView">
+                    <i class="bi bi-grid-3x3 me-1"></i> Toggle View
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div id="marketTrendsChart" class="bg-light rounded border mb-3" style="height: 400px;"></div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-header bg-primary text-white rounded-top">
+                                <h5 class="mb-0 fw-bold">Market Insights</h5>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <h2 class="display-4 text-info">{{ data.social_sentiment.overall|title }}</h2>
-                                    <p class="text-muted mb-0">Social Sentiment</p>
-                                    <p class="mb-0"><strong>{{ data.social_sentiment.trend|title }}</strong></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <div class="alert alert-warning mb-3">
-                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 3 Opportunity Alerts
+                            <div class="card-body">
+                                <div class="p-3 mb-3 bg-white rounded-3 shadow-sm border-start border-5 border-success">
+                                    <h5 class="fs-6 fw-bold">Technology Sector</h5>
+                                    <p class="small mb-2">Strong upward trend with <strong>85%</strong> confidence. Social media sentiment and economic indicators suggest continued growth.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-success me-2 rounded-pill">Upward</span>
+                                        <small class="text-muted">Confidence: 85%</small>
                                     </div>
-                                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#opportunityModal">
-                                        View Alerts
-                                    </button>
+                                </div>
+                                
+                                <div class="p-3 mb-3 bg-white rounded-3 shadow-sm border-start border-5 border-danger">
+                                    <h5 class="fs-6 fw-bold">Energy Commodities</h5>
+                                    <p class="small mb-2">Downward trend with <strong>78%</strong> confidence. Weather patterns and renewable energy adoption are contributing factors.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger me-2 rounded-pill">Downward</span>
+                                        <small class="text-muted">Confidence: 78%</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 bg-white rounded-3 shadow-sm border-start border-5 border-warning">
+                                    <h5 class="fs-6 fw-bold">Consumer Goods</h5>
+                                    <p class="small mb-2">Stable with slight upward bias with <strong>67%</strong> confidence. Economic indicators and social sentiment suggest modest growth.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-warning me-2 rounded-pill">Stable</span>
+                                        <small class="text-muted">Confidence: 67%</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -68,70 +373,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Market Predictions -->
-    <div class="row mb-5">
-        <div class="col-lg-8">
-            <div class="card dashboard-card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Market Trend Predictions</h4>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="marketTrendsChart"></canvas>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="bi bi-info-circle-fill me-2"></i> These forecasts combine weather data, economic indicators, and social media sentiment to predict market trends with varying confidence levels.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Market Predictions</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Market</th>
-                                    <th>Trend</th>
-                                    <th>Confidence</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in data.market_predictions %}
-                                <tr>
-                                    <td>{{ item.market }}</td>
-                                    <td>
-                                        {% if item.trend == 'upward' %}
-                                        <span class="badge bg-success">Upward</span>
-                                        {% elif item.trend == 'downward' %}
-                                        <span class="badge bg-danger">Downward</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">Stable</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="small">
-                                            <div class="confidence-indicator">
-                                                <div class="indicator confidence-{% if item.confidence > 0.8 %}high{% elif item.confidence > 0.6 %}medium{% else %}low{% endif %}" style="width: {{ item.confidence * 100 }}%;"></div>
-                                            </div>
-                                            <span class="small text-muted">{{ (item.confidence * 100)|int }}% confidence</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Cross-Domain Correlations -->
     <div class="row mb-5">
         <div class="col-12">
@@ -274,15 +516,10 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-    // Chart.js initialization
     document.addEventListener('DOMContentLoaded', function() {
-        // Market Trends Chart
+        // Create market trends chart
         const marketCtx = document.getElementById('marketTrendsChart').getContext('2d');
         const marketChart = new Chart(marketCtx, {
             type: 'line',
@@ -329,6 +566,18 @@
             }
         });
         
+        // Time range selector functionality
+        const timeRangeSelect = document.getElementById('timeRangeSelect');
+        if (timeRangeSelect) {
+            timeRangeSelect.addEventListener('change', function() {
+                const selectedValue = this.value;
+                // Here you would fetch new data based on the selected time range
+                console.log('Selected time range:', selectedValue);
+                // For demo purposes, let's reload the page with the new time range
+                window.location.href = `/use-cases/financial-market/data?timeRange=${selectedValue}`;
+            });
+        }
+        
         // Scenario Chart
         const scenarioCtx = document.getElementById('scenarioChart').getContext('2d');
         const scenarioChart = new Chart(scenarioCtx, {
@@ -365,30 +614,6 @@
                     }
                 }
             }
-        });
-        
-        // Correlation Heatmap
-        const correlationMatrix = [
-            [1.0, 0.84, 0.42, 0.38],
-            [0.84, 1.0, 0.33, 0.42],
-            [0.42, 0.33, 1.0, 0.68],
-            [0.38, 0.42, 0.68, 1.0]
-        ];
-        
-        const labels = ['Weather Severity', 'Energy Prices', 'Social Media', 'Stock Performance'];
-        
-        Plotly.newPlot('correlationHeatmap', [{
-            z: correlationMatrix,
-            x: labels,
-            y: labels,
-            type: 'heatmap',
-            colorscale: 'Blues',
-            showscale: true,
-            zmin: 0,
-            zmax: 1
-        }], {
-            title: 'Cross-Domain Correlation Heatmap',
-            margin: { t: 50, r: 20, b: 80, l: 80 }
         });
         
         // What-If scenario form event handlers

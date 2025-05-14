@@ -103,11 +103,12 @@ class DataPipeline:
         
         return result
         
-    def submit_data(self, data: Dict[str, Any]) -> bool:
+    def submit_data(self, source: str, data: Dict[str, Any]) -> bool:
         """
         Submit data for processing.
         
         Args:
+            source: Source of the data (e.g., 'weather', 'economic')
             data: Data to process
             
         Returns:
@@ -118,8 +119,15 @@ class DataPipeline:
             return False
         
         try:
+            # Add source to the data
+            data_with_source = {
+                'source': source,
+                'payload': data,
+                'timestamp': time.time()
+            }
+            
             # Use non-blocking put to avoid hanging if queue is full
-            self.processing_queue.put(data, block=False)
+            self.processing_queue.put(data_with_source, block=False)
             return True
         except queue.Full:
             self.logger.warning("Processing queue is full, dropping data")
