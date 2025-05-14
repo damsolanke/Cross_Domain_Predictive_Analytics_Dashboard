@@ -119,6 +119,9 @@
 {% endblock %}
 
 {% block content %}
+<!-- Add Plotly.js for interactive visualizations -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 <div class="dashboard-container">
     <!-- Hero Section -->
     <div class="hero-section">
@@ -307,14 +310,7 @@
             <div class="card-body p-4">
                 <div class="row">
                     <div class="col-lg-8">
-                        <div id="correlationHeatmap" class="bg-light p-3 rounded border mb-3">
-                            <!-- Replace placeholder with actual heatmap visualization -->
-                            <div class="p-4 bg-light rounded d-flex flex-column align-items-center justify-content-center" style="height: 350px;">
-                                <i class="bi bi-grid-3x3-gap fs-1 text-secondary mb-3"></i>
-                                <h4 class="text-secondary">Interactive Correlation Heatmap</h4>
-                                <p class="text-center text-secondary mb-0">Visualizing relationships between cross-domain factors</p>
-                            </div>
-                        </div>
+                        <div id="correlationHeatmap" class="bg-light rounded border mb-3" style="height: 400px;"></div>
                         
                         <div id="correlationTable" class="mt-3" style="display: none;">
                             <div class="table-responsive">
@@ -1047,6 +1043,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Create interactive correlation heatmap
+        createCorrelationHeatmap();
+        
         // Toggle correlation view between heatmap and table
         const toggleButton = document.getElementById('toggleCorrelationView');
         const heatmapView = document.getElementById('correlationHeatmap');
@@ -1083,6 +1082,122 @@
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+        
+        // Function to create the interactive correlation heatmap
+        function createCorrelationHeatmap() {
+            const heatmapContainer = document.getElementById('correlationHeatmap');
+            if (!heatmapContainer || !window.Plotly) {
+                console.error('Heatmap container not found or Plotly not loaded');
+                return;
+            }
+            
+            // Sample data for the heatmap - in a real app, this would come from the backend
+            const domains = ['Weather', 'Economic', 'Transportation', 'Social Media'];
+            const correlationMatrix = [
+                [1.00, 0.87, 0.63, 0.41],  // Weather correlations
+                [0.87, 1.00, 0.76, 0.58],  // Economic correlations
+                [0.63, 0.76, 1.00, 0.52],  // Transportation correlations
+                [0.41, 0.58, 0.52, 1.00]   // Social Media correlations
+            ];
+            
+            // Create annotations for the heatmap cells
+            const annotations = [];
+            for (let i = 0; i < domains.length; i++) {
+                for (let j = 0; j < domains.length; j++) {
+                    annotations.push({
+                        x: domains[j],
+                        y: domains[i],
+                        text: correlationMatrix[i][j].toFixed(2),
+                        font: {
+                            color: correlationMatrix[i][j] > 0.7 ? 'white' : 'black',
+                            size: 12
+                        },
+                        showarrow: false
+                    });
+                }
+            }
+            
+            // Configure the heatmap
+            const data = [{
+                z: correlationMatrix,
+                x: domains,
+                y: domains,
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#c4463a'],      // Deep red for -1.0
+                    [0.25, '#F8696B'],   // Light red for -0.5
+                    [0.5, '#F5F5F5'],    // White for 0
+                    [0.75, '#63BE7B'],   // Light green for 0.5
+                    [1, '#277f2a']       // Deep green for 1.0
+                ],
+                zmin: 0,
+                zmax: 1,
+                showscale: true,
+                colorbar: {
+                    title: 'Correlation',
+                    titleside: 'right',
+                    titlefont: {
+                        size: 14,
+                        family: 'Arial, sans-serif'
+                    }
+                }
+            }];
+            
+            // Layout configuration
+            const layout = {
+                title: {
+                    text: 'Cross-Domain Correlation Matrix',
+                    font: {
+                        family: 'Arial, sans-serif',
+                        size: 18
+                    }
+                },
+                annotations: annotations,
+                xaxis: {
+                    title: 'Domains',
+                    ticks: '',
+                    side: 'bottom'
+                },
+                yaxis: {
+                    title: 'Domains',
+                    ticks: '',
+                    autorange: 'reversed'
+                },
+                margin: {
+                    l: 100,
+                    r: 50,
+                    b: 100,
+                    t: 75,
+                    pad: 4
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                hoverlabel: {
+                    bgcolor: '#FFF',
+                    font: {
+                        family: 'Arial, sans-serif'
+                    }
+                }
+            };
+            
+            // Create the plot
+            Plotly.newPlot(heatmapContainer, data, layout, {responsive: true});
+            
+            // Add click interaction
+            heatmapContainer.on('plotly_click', function(data) {
+                const point = data.points[0];
+                
+                // Show a notification with details about the selected correlation
+                const domain1 = point.x;
+                const domain2 = point.y;
+                const correlationValue = point.z;
+                
+                alert(`Selected correlation: ${domain1} ↔ ${domain2}\nCorrelation value: ${correlationValue.toFixed(2)}`);
+                
+                // In a real app, this would trigger additional visualizations or details
+                console.log(`User clicked on correlation between ${domain1} and ${domain2}`);
             });
         }
     });
