@@ -1,6 +1,10 @@
 from flask import Flask
 from flask_socketio import SocketIO
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize SocketIO without an app (will be attached in create_app)
 # Set logger to False and engineio_logger to False to avoid debug-related issues
@@ -17,7 +21,7 @@ def create_app():
     # Set up API keys for external services
     app.config['API_KEYS'] = {
         # Weather API (OpenWeatherMap)
-        'OPENWEATHER_API_KEY': os.environ.get('OPENWEATHER_API_KEY', 'demo_key'),
+        'OPENWEATHER_API_KEY': os.environ.get('WEATHER_API_KEY', 'demo_key'),
 
         # Economic data API (Alpha Vantage)
         'ECONOMIC_API_KEY': os.environ.get('ECONOMIC_API_KEY', 'demo_key'),
@@ -50,7 +54,15 @@ def create_app():
 
         # Then initialize system integration
         from app.system_integration.integration import init_system_integration
-        init_system_integration(app)
+        system_integrator = init_system_integration(app)
+        
+        # Initialize API connectors with real data sources
+        try:
+            from app.system_integration.api_connectors import init_api_connectors
+            init_api_connectors()
+            app.logger.info("API connectors initialized successfully.")
+        except Exception as e:
+            app.logger.warning(f"Failed to initialize API connectors: {e}. Using fallback mock data.")
     
     # Import and register blueprints
     from .visualizations import visualization_bp
@@ -72,6 +84,10 @@ def create_app():
     
     from app.nlq.routes import nlq_routes
     app.register_blueprint(nlq_routes)
+    
+    # Register analytics blueprint
+    from app.main.analytics_controller import analytics
+    app.register_blueprint(analytics)
     
     # Register demo-related blueprints
     try:

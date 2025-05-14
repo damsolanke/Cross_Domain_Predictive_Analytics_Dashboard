@@ -37,9 +37,29 @@ if __name__ == '__main__':
     from app.nlq.api import nlq_blueprint
     flask_app.register_blueprint(nlq_blueprint)
     
+    # Register API blueprint
+    from app.api import api
+    flask_app.register_blueprint(api, url_prefix='/api')
+    
+    # Register analytics blueprint
+    from app.main.analytics_controller import analytics
+    flask_app.register_blueprint(analytics)
+    
     # Register System Integration blueprint
     from app.system_integration import system_integration
     flask_app.register_blueprint(system_integration, url_prefix='/system')
+    
+    # Register visualization blueprint
+    from app.visualizations import visualization_bp
+    flask_app.register_blueprint(visualization_bp, url_prefix='/visualization')
+    
+    # Try to register demo blueprint
+    try:
+        from app.demo.correlation_demo import correlation_demo
+        flask_app.register_blueprint(correlation_demo)
+    except ImportError:
+        # This is fine if the demo is not available
+        pass
     
     # Socket.IO event handlers
     @socketio.on('connect')
