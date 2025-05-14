@@ -1,0 +1,14 @@
+# Add these lines to your ~/.zshrc file to ensure the correct Python is used
+
+# Update PATH to prefer the CommandLineTools Python
+export PATH="/Library/Developer/CommandLineTools/usr/bin:$PATH"
+
+# Create an alias for running the application
+alias run-analytics='cd /Users/adesolanke/Library/CloudStorage/OneDrive-Personal/Dropbox/IT\ TOUCH/USA/DBU/Python/Cross_Domain_Predictive_Analytics_Dashboard && ./run_app.sh'
+
+# Add aliases for the correct Python
+alias python3='/Library/Developer/CommandLineTools/usr/bin/python3'
+alias pip3='/Library/Developer/CommandLineTools/usr/bin/pip3'
+
+# Optional: Comment out any other Python path modifications if present
+# export PATH="$HOME/Library/Python/3.9/bin:$PATH"  # Comment this out if present 

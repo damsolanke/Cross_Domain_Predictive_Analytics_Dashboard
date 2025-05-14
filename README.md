@@ -1,8 +1,57 @@
-# Cross-Domain Predictive Analytics Dashboard
+# ✨ Cross-Domain Predictive Analytics Dashboard
 
-An advanced web-based data analytics platform that integrates multiple domain-specific data sources and applies machine learning models to deliver predictive analytics, cross-domain correlations, and actionable insights across different domains.
+A cutting-edge Flask application that delivers powerful predictive analytics across multiple domains including public health, urban infrastructure, financial markets, and supply chain optimization.
 
-![Cross-Domain Analytics Dashboard](https://i.ibb.co/4TyY9SZ/dashboard-preview.png)
+![Dashboard Overview](https://i.ibb.co/VqRCGKB/dashboard-overview-diagram.png)
+
+## 🚀 Getting Started
+
+This application requires Python 3.9.6 from the macOS CommandLineTools, which includes all necessary dependencies.
+
+Always use the included run script to ensure the correct Python interpreter is used:
+
+```bash
+# Start the application
+./run_app.sh
+
+# The dashboard will be available at:
+http://localhost:5000
+```
+
+## ⚠️ Important Notes
+
+1. **DO NOT use a different Python interpreter** - Use only the CommandLineTools Python 3.9.6
+2. **DO NOT create virtual environments** - They won't have access to system packages
+3. **Always use the bundled `run_app.sh` script** to run the application
+
+## 🌟 What's New - May 2024
+
+### UI Modernization Across All Use Case Pages
+
+We've completely revamped the UI for all use case pages with a modern, consistent design:
+
+- **Public Health Response Planning**: Modern dashboard with risk visualization, community health trends, and resource allocation recommendations
+- **Urban Infrastructure Management**: Sleek interface with infrastructure stress analysis, maintenance prioritization, and urban development metrics
+- **Financial Market Strategy**: Contemporary design with market trends, correlation analysis, and investment opportunity spotlights
+- **Supply Chain Optimization**: Served as the design inspiration with its modern card-based layout and interactive charts
+
+### Key UI Improvements
+
+- **Modern Hero Sections**: Added visually appealing hero sections with semi-transparent background images
+- **Card-Based Layouts**: Redesigned all content in consistent card components with subtle shadows and modern styling
+- **Improved Data Visualization**: Enhanced all charts with consistent styling and better readability
+- **Interactive Elements**: Added toggle functionality for alternate data views
+- **Time Range Selectors**: Implemented functional time range selectors for filtering data (30/90/180 days)
+- **Status Indicators**: Added color-coded status badges and indicators for better information hierarchy
+
+## 🚨 Troubleshooting
+
+If you encounter "ModuleNotFoundError" issues, ensure you're using the script:
+```
+./run_app.sh
+```
+
+Don't run the application directly with `python3 run.py` as this may use a different Python installation that lacks the required packages.
 
 ## ✨ Key Features
 
@@ -25,8 +74,6 @@ An advanced web-based data analytics platform that integrates multiple domain-sp
 ## Project Overview
 
 The Cross-Domain Predictive Analytics Dashboard integrates data from various domains (weather forecasts, economic indicators, social media trends, transportation metrics) and applies advanced analytics to identify patterns and correlations across these seemingly unrelated datasets. The system provides predictive analytics, correlation mapping, and actionable insights to support proactive decision-making across multiple domains.
-
-![Dashboard Overview](https://i.ibb.co/VqRCGKB/dashboard-overview-diagram.png)
 
 ## Technology Stack
 
@@ -547,40 +594,32 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Recent Updates
 
-### May 2024 - Major Dashboard Enhancement
+### May 2024 - Complete UI Modernization
 
 ![Dashboard UI Improvements](https://i.ibb.co/j8xmS5r/dashboard-ui-updates.png)
 
-#### UI/UX Redesign
-- **Modern Interface Overhaul**: Completely redesigned dashboard with clean, modern aesthetics
+#### 🎨 UI/UX Redesign
+- **Modern Interface Overhaul**: Completely redesigned all use case pages with clean, consistent aesthetics
+- **Unified Design Language**: Implemented consistent styling across public health, urban infrastructure, and financial market pages
 - **Color-Coded Domain Sections**: Each data domain has unique visual identity for better usability
-- **Improved Card Components**: Enhanced card design with subtle shadows and rounded corners
+- **Improved Card Components**: Enhanced card design with subtle shadows, rounded corners and hover effects
 - **Responsive Layout**: Optimized for all device sizes from mobile to large desktop displays
-- **Interactive Elements**: Added hover effects and visual feedback for all interactive components
-- **Typography Improvements**: Implemented Inter font family for better readability
+- **Interactive Elements**: Added hover effects, toggle views, and visual feedback for all interactive components
+- **Typography Improvements**: Implemented consistent font hierarchy for better readability
 
-#### Data Visualization Enhancements
-- **Weather Visualizations**: Added dynamic weather icons that change based on conditions
-- **Temperature Gauges**: Implemented color-gradient temperature scales for intuitive reading
-- **Economic Indicators**: Enhanced economic data displays with trend indicators and color coding
-- **Improved Charts**: Better designed time-series and bar charts with consistent styling
-- **Loading States**: Added informative loading indicators with progress feedback
+#### 📊 Data Visualization Enhancements 
+- **Interactive Charts**: Implemented Chart.js for consistent, interactive data visualizations
+- **Toggle Views**: Added functionality to switch between different visualization formats
+- **Time Range Controls**: Functional time range selectors (30/90/180 days) with dynamic data updates
+- **Risk & Performance Indicators**: Color-coded visual indicators showing status and performance metrics
+- **Modern Gauges and Meters**: Implemented intuitive visual representations of key metrics
 
-#### Reliability Improvements
-- **Robust Error Handling**: Enhanced error detection and recovery for all API interactions
-- **Graceful Degradation**: Implemented fallbacks to ensure dashboard always displays useful data
-- **Multi-Tier Caching**: Improved caching architecture with domain-specific expiration policies
-- **API Format Adaptability**: Added support for handling different API response formats
-- **Error Notification System**: Better error messages with actionable information
-
-![Dashboard Components](https://i.ibb.co/B4wQ9JG/dashboard-components.png)
-
-#### Dashboard Component Architecture
-- **Modular Component Design**: Each data domain now uses a unified component architecture for better consistency
-- **Flexible Layout System**: Grid-based layout system that adapts to different screen sizes
-- **Design System Implementation**: Comprehensive CSS variable system for consistent styling
-- **Themeable Components**: All UI elements support light/dark mode through CSS variable swapping
-- **Optimized Rendering**: Improved DOM manipulation for smoother updates and transitions
+#### 🛠️ Functionality Improvements
+- **View Toggles**: Fixed and enhanced toggle view functionality across all pages
+- **Time Selectors**: Implemented working time range selection with data updates
+- **Consistent Navigation**: Unified navigation elements across all pages
+- **Data Structure**: Reorganized data presentation for better information hierarchy
+- **Interactive Elements**: All buttons, controls, and interactive elements now function properly
 
 ### API Integration (May 2024)
 - **Integrated Domain-Specific APIs**: All data connectors now properly integrate with public APIs:
