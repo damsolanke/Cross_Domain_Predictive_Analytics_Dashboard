@@ -2,136 +2,289 @@
 
 {% block title %}Supply Chain Optimization{% endblock %}
 
+{% block styles %}
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --secondary-color: #64748b;
+        --accent-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+        --success-color: #10b981;
+        --light-bg: #f8fafc;
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --transition: all 0.3s ease;
+    }
+    
+    .dashboard-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    .hero-section {
+        position: relative;
+        padding: 5rem 0 3rem;
+        background-color: var(--light-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("{{ url_for('static', filename='img/supply-chain-bg.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        z-index: 0;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.5px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        font-weight: 400;
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .card-modern {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .card-header-modern {
+        background-color: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .card-title-modern {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--primary-dark);
+    }
+    
+    .insights-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .time-selector {
+        background-color: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        min-width: 180px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-8 offset-md-2 text-center">
-            <h1 class="display-5 fw-bold mb-3">Supply Chain Optimization</h1>
-            <p class="lead mb-4">Predict inventory needs by combining weather forecasts, economic indicators, social media trends, and transportation metrics to proactively optimize your supply chain.</p>
+<div class="dashboard-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Supply Chain Optimization</h1>
+            <p class="hero-subtitle">Leverage cross-domain analytics to predict inventory needs by combining weather forecasts, economic indicators, social media trends, and transportation metrics for proactive supply chain optimization.</p>
+            <div class="d-flex justify-content-center align-items-center">
+                <select id="timeRangeSelect" class="time-selector">
+                    <option value="1d">Last 24 Hours</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="180d">Last 180 Days</option>
+                    <option value="365d">Last Year</option>
+                </select>
+            </div>
         </div>
     </div>
     
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <img src="{{ url_for('static', filename='img/supply-chain-bg.jpg') }}" alt="Supply Chain Optimization" class="img-fluid rounded shadow-lg">
+    <!-- Main Dashboard Content -->
+    <div class="row g-4">
+        <!-- Domain-specific Cards Section -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fs-3 fw-bold m-0">Cross-Domain Analytics</h2>
+                <span class="badge bg-primary rounded-pill px-3 py-2">Updated Just Now</span>
+            </div>
         </div>
-    </div>
-    
-    <!-- Cross-Domain Analytics Dashboard -->
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">Cross-Domain Analytics</h3>
+        
+        <!-- Weather Impact Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-cloud-sun me-2 text-info"></i>
+                        Weather Impact
+                    </h3>
+                    <span class="badge bg-info rounded-pill">Live</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Current Condition</span>
+                            <span class="d-block fs-3 fw-bold text-dark">{{ data.weather_forecast.condition }}</span>
+                        </div>
                         <div>
-                            <select id="timeRangeSelect" class="form-select form-select-sm">
-                                <option value="1d">Last 24 Hours</option>
-                                <option value="7d">Last 7 Days</option>
-                                <option value="30d">Last 30 Days</option>
-                                <option value="90d">Last 90 Days</option>
-                                <option value="180d">Last 180 Days</option>
-                                <option value="365d">Last Year</option>
-                            </select>
+                            <span class="d-block text-secondary small mb-1">Temperature</span>
+                            <span class="d-block fs-2 fw-bold text-info">{{ data.weather_forecast.temperature }}°F</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Weather Alert:</strong> Extreme conditions affecting refrigerated shipping routes.
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card domain-card h-100">
-                                <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0">Weather Impact</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <h6>Current Condition</h6>
-                                        <p class="display-6">{{ data.weather_forecast.condition }}</p>
-                                        <h6>Temperature</h6>
-                                        <p class="fs-3">{{ data.weather_forecast.temperature }}°F</p>
-                                    </div>
-                                    <div class="alert alert-warning mt-3">
-                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                        <strong>Weather Alert:</strong> Extreme heat conditions are affecting refrigerated shipping routes.
-                                    </div>
-                                </div>
-                            </div>
+            </div>
+        </div>
+        
+        <!-- Economic Indicators Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-graph-up me-2 text-success"></i>
+                        Economic Indicators
+                    </h3>
+                    <span class="badge bg-success rounded-pill">Trending</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Consumer Confidence</span>
+                            <span class="d-block fs-3 fw-bold text-dark">{{ data.economic_indicators.consumer_confidence }}</span>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card domain-card h-100">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0">Economic Indicators</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <h6>Consumer Confidence</h6>
-                                        <p class="display-6">{{ data.economic_indicators.consumer_confidence }}</p>
-                                        <h6>Market Trend</h6>
-                                        <p class="fs-3 text-success">
-                                            <i class="bi bi-graph-up-arrow me-2"></i>
-                                            {{ data.economic_indicators.trend|capitalize }}
-                                        </p>
-                                    </div>
-                                    <div class="alert alert-info mt-3">
-                                        <i class="bi bi-info-circle-fill me-2"></i>
-                                        <strong>Market Insight:</strong> Rising consumer confidence indicates higher demand for premium products.
-                                    </div>
-                                </div>
-                            </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Market Trend</span>
+                            <span class="d-block fs-4 fw-bold text-success">
+                                <i class="bi bi-graph-up-arrow me-1"></i>
+                                {{ data.economic_indicators.trend|capitalize }}
+                            </span>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card domain-card h-100">
-                                <div class="card-header bg-warning text-dark">
-                                    <h5 class="mb-0">Transportation Metrics</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <h6>Average Shipping Time</h6>
-                                        <p class="display-6">{{ data.logistics_data.average_shipping_time }} days</p>
-                                        <h6>Delay Impact</h6>
-                                        <div class="progress mt-2" style="height: 25px;">
-                                            <div class="progress-bar bg-warning" role="progressbar" 
-                                                 style="width: 45%;" 
-                                                 aria-valuenow="45" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100">
-                                                45% Affected Routes
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="alert alert-warning mt-3">
-                                        <i class="bi bi-truck me-2"></i>
-                                        <strong>Route Alert:</strong> North-South corridor experiencing 8.5 hour delays due to extreme weather.
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="alert alert-success mt-3 d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Market Insight:</strong> Higher demand for premium products expected.
                         </div>
-                        <div class="col-md-3">
-                            <div class="card domain-card h-100">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0">Social Media Trends</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <h6>Sentiment</h6>
-                                        <p class="display-6 text-capitalize">{{ data.social_media_trends.sentiment }}</p>
-                                        <h6>Buzz Factor</h6>
-                                        <div class="progress mt-2" style="height: 25px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" 
-                                                 style="width: {{ data.social_media_trends.buzz_factor }}%;" 
-                                                 aria-valuenow="{{ data.social_media_trends.buzz_factor }}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100">
-                                                {{ data.social_media_trends.buzz_factor }}%
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="alert alert-info mt-3">
-                                        <i class="bi bi-chat-quote-fill me-2"></i>
-                                        <strong>Trend Insight:</strong> Rising discussion about sustainable packaging options.
-                                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transportation Metrics Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-truck me-2 text-warning"></i>
+                        Transportation
+                    </h3>
+                    <span class="badge bg-warning rounded-pill">Delays</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Avg. Shipping Time</span>
+                            <span class="d-block fs-3 fw-bold text-dark">{{ data.logistics_data.average_shipping_time }} days</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Delay Impact</span>
+                            <div class="progress mt-2" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar bg-warning" role="progressbar" 
+                                     style="width: 45%;" 
+                                     aria-valuenow="45" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
                                 </div>
                             </div>
+                            <span class="small text-secondary mt-1 d-block">45% Affected Routes</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 d-flex align-items-center">
+                        <i class="bi bi-truck fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Route Alert:</strong> N-S corridor: 8.5h delays due to weather.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Social Media Trends Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card-modern">
+                <div class="card-header-modern d-flex justify-content-between align-items-center">
+                    <h3 class="card-title-modern">
+                        <i class="bi bi-chat-square-text me-2 text-primary"></i>
+                        Social Media
+                    </h3>
+                    <span class="badge bg-primary rounded-pill">Active</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-block text-secondary small mb-1">Sentiment</span>
+                            <span class="d-block fs-3 fw-bold text-dark text-capitalize">{{ data.social_media_trends.sentiment }}</span>
+                        </div>
+                        <div>
+                            <span class="d-block text-secondary small mb-1">Buzz Factor</span>
+                            <div class="progress mt-2" style="height: 10px; border-radius: 5px;">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     style="width: {{ data.social_media_trends.buzz_factor }}%;" 
+                                     aria-valuenow="{{ data.social_media_trends.buzz_factor }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <span class="small text-secondary mt-1 d-block">{{ data.social_media_trends.buzz_factor }}% Engagement</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-primary mt-3 d-flex align-items-center">
+                        <i class="bi bi-chat-quote-fill fs-5 me-2"></i>
+                        <div class="small">
+                            <strong>Trend:</strong> Rising interest in sustainable packaging.
                         </div>
                     </div>
                 </div>
@@ -139,128 +292,138 @@
         </div>
     </div>
     
-    <!-- Cross-Domain Correlations Visualization -->
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">Cross-Domain Correlations</h3>
-                        <div>
-                            <button type="button" class="btn btn-outline-light btn-sm" id="toggleCorrelationView" aria-label="Toggle between heatmap and table view">
-                                <i class="bi bi-grid-3x3"></i> Toggle View
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div id="correlationHeatmap" style="height: 380px;">
-                                <img src="https://via.placeholder.com/800x380?text=Correlation+Heatmap" class="img-fluid" alt="Correlation Heatmap">
+    <!-- Cross-Domain Correlations Section -->
+    <div class="col-12 mt-5">
+        <div class="card-modern">
+            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                <h3 class="card-title-modern">
+                    <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                    Cross-Domain Correlations
+                </h3>
+                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" id="toggleCorrelationView">
+                    <i class="bi bi-grid-3x3 me-1"></i> Toggle View
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div id="correlationHeatmap" class="bg-light p-3 rounded border mb-3">
+                            <!-- Replace placeholder with actual heatmap visualization -->
+                            <div class="p-4 bg-light rounded d-flex flex-column align-items-center justify-content-center" style="height: 350px;">
+                                <i class="bi bi-grid-3x3-gap fs-1 text-secondary mb-3"></i>
+                                <h4 class="text-secondary">Interactive Correlation Heatmap</h4>
+                                <p class="text-center text-secondary mb-0">Visualizing relationships between cross-domain factors</p>
                             </div>
-                            <div id="correlationTable" class="mt-3" style="display: none;">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Factor 1</th>
-                                                <th>Factor 2</th>
-                                                <th>Strength</th>
-                                                <th>Correlation</th>
-                                                <th>Confidence</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in data.correlations %}
-                                            <tr>
-                                                <td>{{ item.factor1 }}</td>
-                                                <td>{{ item.factor2 }}</td>
-                                                <td>{{ item.strength|capitalize }}</td>
-                                                <td>
-                                                    <div class="progress" style="height: 20px;">
+                        </div>
+                        
+                        <div id="correlationTable" class="mt-3" style="display: none;">
+                            <div class="table-responsive">
+                                <table class="table table-hover border-bottom">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="border-0">Factor 1</th>
+                                            <th class="border-0">Factor 2</th>
+                                            <th class="border-0">Strength</th>
+                                            <th class="border-0">Correlation</th>
+                                            <th class="border-0">Confidence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in data.correlations %}
+                                        <tr>
+                                            <td>{{ item.factor1 }}</td>
+                                            <td>{{ item.factor2 }}</td>
+                                            <td><span class="badge {% if item.strength == 'strong' %}bg-danger{% elif item.strength == 'moderate' %}bg-warning{% else %}bg-info{% endif %} rounded-pill">{{ item.strength|capitalize }}</span></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
                                                         <div class="progress-bar {% if item.correlation > 0.8 %}bg-danger{% elif item.correlation > 0.7 %}bg-warning{% else %}bg-info{% endif %}" role="progressbar" 
                                                             style="width: {{ item.correlation * 100 }}%;" 
                                                             aria-valuenow="{{ item.correlation * 100 }}" 
                                                             aria-valuemin="0" 
                                                             aria-valuemax="100">
-                                                            {{ (item.correlation * 100)|int }}%
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td>92%</td>
-                                            </tr>
-                                            {% endfor %}
-                                            <tr>
-                                                <td>Fuel Price Fluctuations</td>
-                                                <td>Shipping Costs</td>
-                                                <td>Strong</td>
-                                                <td>
-                                                    <div class="progress" style="height: 20px;">
+                                                    <span class="text-dark small">{{ (item.correlation * 100)|int }}%</span>
+                                                </div>
+                                            </td>
+                                            <td>92%</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <td>Fuel Price Fluctuations</td>
+                                            <td>Shipping Costs</td>
+                                            <td><span class="badge bg-warning rounded-pill">Strong</span></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
                                                         <div class="progress-bar bg-warning" role="progressbar" 
                                                             style="width: 76%;" 
                                                             aria-valuenow="76" 
                                                             aria-valuemin="0" 
                                                             aria-valuemax="100">
-                                                            76%
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td>88%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Social Media Sentiment</td>
-                                                <td>Consumer Demand Spikes</td>
-                                                <td>Moderate</td>
-                                                <td>
-                                                    <div class="progress" style="height: 20px;">
+                                                    <span class="text-dark small">76%</span>
+                                                </div>
+                                            </td>
+                                            <td>88%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Social Media Sentiment</td>
+                                            <td>Consumer Demand Spikes</td>
+                                            <td><span class="badge bg-info rounded-pill">Moderate</span></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
                                                         <div class="progress-bar bg-info" role="progressbar" 
                                                             style="width: 65%;" 
                                                             aria-valuenow="65" 
                                                             aria-valuemin="0" 
                                                             aria-valuemax="100">
-                                                            65%
                                                         </div>
                                                     </div>
-                                                </td>
-                                                <td>78%</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                    <span class="text-dark small">65%</span>
+                                                </div>
+                                            </td>
+                                            <td>78%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0">Key Insights</h5>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-header bg-primary text-white rounded-top">
+                                <h5 class="mb-0 fw-bold">Key Insights</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="p-3 mb-3 bg-white rounded-3 shadow-sm border-start border-5 border-danger">
+                                    <h5 class="fs-6 fw-bold">Weather Impact on Distribution</h5>
+                                    <p class="small mb-2">Extreme heat events show a <strong>87% correlation</strong> with increased cold storage demand, particularly affecting refrigerated goods distribution.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger me-2 rounded-pill">Strong Correlation</span>
+                                        <small class="text-muted">Confidence: 92%</small>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="correlation-insight mb-3 p-3 border-left border-primary rounded bg-light">
-                                        <h5 class="insight-title">Weather Impact on Distribution</h5>
-                                        <p>Extreme heat events show a <strong>87% correlation</strong> with increased cold storage demand, particularly affecting refrigerated goods distribution.</p>
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-danger me-2">Strong Correlation</span>
-                                            <small class="text-muted">Confidence: 92%</small>
-                                        </div>
+                                
+                                <div class="p-3 mb-3 bg-white rounded-3 shadow-sm border-start border-5 border-warning">
+                                    <h5 class="fs-6 fw-bold">Seasonal Events & Transportation</h5>
+                                    <p class="small mb-2">Seasonal flooding patterns correlate <strong>79% with transportation delays</strong>, suggesting the need for alternative routing during predicted weather events.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-warning me-2 rounded-pill">Strong Correlation</span>
+                                        <small class="text-muted">Confidence: 88%</small>
                                     </div>
-                                    
-                                    <div class="correlation-insight mb-3 p-3 border-left border-warning rounded bg-light">
-                                        <h5 class="insight-title">Seasonal Events & Transportation</h5>
-                                        <p>Seasonal flooding patterns correlate <strong>79% with transportation delays</strong>, suggesting the need for alternative routing during predicted weather events.</p>
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-warning me-2">Strong Correlation</span>
-                                            <small class="text-muted">Confidence: 88%</small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="correlation-insight p-3 border-left border-success rounded bg-light">
-                                        <h5 class="insight-title">Social Media & Demand Prediction</h5>
-                                        <p>Social media sentiment shows <strong>65% correlation</strong> with consumer demand spikes within 3-5 days, particularly for trending product categories.</p>
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-info me-2">Moderate Correlation</span>
-                                            <small class="text-muted">Confidence: 78%</small>
-                                        </div>
+                                </div>
+                                
+                                <div class="p-3 bg-white rounded-3 shadow-sm border-start border-5 border-info">
+                                    <h5 class="fs-6 fw-bold">Social Media & Demand Prediction</h5>
+                                    <p class="small mb-2">Social media sentiment shows <strong>65% correlation</strong> with consumer demand spikes within 3-5 days, particularly for trending product categories.</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-info me-2 rounded-pill">Moderate Correlation</span>
+                                        <small class="text-muted">Confidence: 78%</small>
                                     </div>
                                 </div>
                             </div>
@@ -272,285 +435,466 @@
     </div>
     
     <!-- AI-Powered Inventory Prediction -->
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Cross-Domain Inventory Prediction</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="alert alert-info">
-                                <i class="bi bi-graph-up-arrow me-2"></i>
-                                <strong>AI-Powered Prediction:</strong> Our system has analyzed data from weather forecasts, economic indicators, social media trends, and transportation metrics to generate the following inventory predictions.
-                            </div>
-                        </div>
+    <div class="col-12 mt-5">
+        <div class="card-modern">
+            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                <h3 class="card-title-modern">
+                    <i class="bi bi-robot me-2 text-primary"></i>
+                    AI-Powered Inventory Prediction
+                </h3>
+                <span class="badge bg-primary rounded-pill px-3 py-2">ML-Driven</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info d-flex align-items-start p-3 mb-4">
+                    <i class="bi bi-lightbulb-fill fs-4 me-3 mt-1"></i>
+                    <div>
+                        <strong class="d-block mb-1">Cross-Domain Intelligence:</strong>
+                        <span class="small">Our AI has analyzed weather forecasts, economic indicators, social media trends, and transportation metrics to generate these inventory predictions with high confidence.</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Current Stock</th>
-                                    <th>Predicted Demand (Next 7 Days)</th>
-                                    <th>Contributing Factors</th>
-                                    <th>Confidence</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in data.inventory_insights %}
-                                <tr>
-                                    <td>{{ item.product }}</td>
-                                    <td>{{ item.current_stock }}</td>
-                                    <td>{{ item.predicted_demand }}</td>
-                                    <td>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light text-secondary">
+                            <tr>
+                                <th class="border-0">Product</th>
+                                <th class="border-0 text-center">Current Stock</th>
+                                <th class="border-0 text-center">Predicted Demand</th>
+                                <th class="border-0">Contributing Factors</th>
+                                <th class="border-0 text-center">Confidence</th>
+                                <th class="border-0 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.inventory_insights %}
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">{{ item.product }}</div>
+                                    <div class="small text-secondary">
                                         {% if item.product == 'Refrigerated Food Storage Containers' %}
-                                            <span class="badge bg-info me-1">Extreme Heat</span>
-                                            <span class="badge bg-success me-1">Consumer Confidence</span>
+                                            Category: Temperature Control
                                         {% elif item.product == 'Industrial Packaging Materials' %}
-                                            <span class="badge bg-warning me-1">Holiday Season</span>
-                                            <span class="badge bg-success me-1">Economic Trend</span>
+                                            Category: Packaging
                                         {% elif item.product == 'Temperature-Controlled Shipping Units' %}
-                                            <span class="badge bg-info me-1">Weather Forecast</span>
-                                            <span class="badge bg-danger me-1">Shipping Delays</span>
+                                            Category: Shipping
                                         {% else %}
-                                            <span class="badge bg-secondary me-1">Regular Demand</span>
+                                            Category: General
                                         {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar {% if item.confidence > 0.8 %}bg-success{% elif item.confidence > 0.7 %}bg-info{% else %}bg-warning{% endif %}" role="progressbar" 
-                                                style="width: {{ item.confidence * 100 }}%;" 
-                                                aria-valuenow="{{ item.confidence * 100 }}" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
-                                                {{ (item.confidence * 100)|int }}%
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">{{ item.current_stock }}</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">{{ item.predicted_demand }}</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td>
+                                    {% if item.product == 'Refrigerated Food Storage Containers' %}
+                                        <span class="badge bg-info me-1 mb-1">Extreme Heat</span>
+                                        <span class="badge bg-success me-1 mb-1">Consumer Confidence</span>
+                                    {% elif item.product == 'Industrial Packaging Materials' %}
+                                        <span class="badge bg-warning me-1 mb-1">Holiday Season</span>
+                                        <span class="badge bg-success me-1 mb-1">Economic Trend</span>
+                                    {% elif item.product == 'Temperature-Controlled Shipping Units' %}
+                                        <span class="badge bg-info me-1 mb-1">Weather Forecast</span>
+                                        <span class="badge bg-danger me-1 mb-1">Shipping Delays</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary me-1 mb-1">Regular Demand</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <div class="position-relative">
+                                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                                    <span class="small fw-bold">{{ (item.confidence * 100)|int }}%</span>
+                                                </div>
+                                                <svg width="50" height="50" viewBox="0 0 36 36">
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="#E6E6E6"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="100, 100"/>
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="{% if item.confidence > 0.8 %}#10b981{% elif item.confidence > 0.7 %}#0ea5e9{% else %}#f59e0b{% endif %}"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="{{ item.confidence * 100 }}, 100"/>
+                                                </svg>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        {% if item.restock_recommendation > 0 %}
-                                            <span class="badge bg-warning">Restock: +{{ item.restock_recommendation }}</span>
-                                        {% else %}
-                                            <span class="badge bg-success">Optimal</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                <tr>
-                                    <td>Emergency Power Generators</td>
-                                    <td>120</td>
-                                    <td>210</td>
-                                    <td>
-                                        <span class="badge bg-danger me-1">Weather Alert</span>
-                                        <span class="badge bg-info me-1">Social Media Trends</span>
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" role="progressbar" 
-                                                style="width: 88%;" 
-                                                aria-valuenow="88" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
-                                                88%
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {% if item.restock_recommendation > 0 %}
+                                        <div class="d-grid">
+                                            <button class="btn btn-warning btn-sm rounded-pill px-3">
+                                                <i class="bi bi-box-seam me-1"></i>
+                                                Restock +{{ item.restock_recommendation }}
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-pill px-3 py-2">Optimal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">Emergency Power Generators</div>
+                                    <div class="small text-secondary">Category: Emergency</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">120</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">210</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger me-1 mb-1">Weather Alert</span>
+                                    <span class="badge bg-info me-1 mb-1">Social Media</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <div class="position-relative">
+                                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                                    <span class="small fw-bold">88%</span>
+                                                </div>
+                                                <svg width="50" height="50" viewBox="0 0 36 36">
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="#E6E6E6"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="100, 100"/>
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="#10b981"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="88, 100"/>
+                                                </svg>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning">Restock: +90</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Sustainable Packaging Solutions</td>
-                                    <td>3400</td>
-                                    <td>4200</td>
-                                    <td>
-                                        <span class="badge bg-primary me-1">Social Media Sentiment</span>
-                                        <span class="badge bg-success me-1">Consumer Trend</span>
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-info" role="progressbar" 
-                                                style="width: 76%;" 
-                                                aria-valuenow="76" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
-                                                76%
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-grid">
+                                        <button class="btn btn-warning btn-sm rounded-pill px-3">
+                                            <i class="bi bi-box-seam me-1"></i>
+                                            Restock +90
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">Sustainable Packaging Solutions</div>
+                                    <div class="small text-secondary">Category: Packaging</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">3400</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">4200</span>
+                                    <span class="text-secondary small d-block">units</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary me-1 mb-1">Social Media</span>
+                                    <span class="badge bg-success me-1 mb-1">Consumer Trend</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column align-items-center">
+                                        <div class="d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <div class="position-relative">
+                                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                                    <span class="small fw-bold">76%</span>
+                                                </div>
+                                                <svg width="50" height="50" viewBox="0 0 36 36">
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="#E6E6E6"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="100, 100"/>
+                                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                        fill="none"
+                                                        stroke="#0ea5e9"
+                                                        stroke-width="3"
+                                                        stroke-dasharray="76, 100"/>
+                                                </svg>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning">Restock: +800</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-grid">
+                                        <button class="btn btn-warning btn-sm rounded-pill px-3">
+                                            <i class="bi bi-box-seam me-1"></i>
+                                            Restock +800
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logistics & Transportation Impact -->
+    <div class="col-12 mt-5">
+        <div class="card-modern">
+            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                <h3 class="card-title-modern">
+                    <i class="bi bi-truck me-2 text-primary"></i>
+                    Logistics & Transportation Impact
+                </h3>
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    <i class="bi bi-map me-1"></i> View Route Map
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h4 class="fs-5 fw-bold mb-3">Current Shipping Delays</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light text-secondary">
+                                    <tr>
+                                        <th class="border-0">Route</th>
+                                        <th class="border-0 text-center">Delay</th>
+                                        <th class="border-0">Cause</th>
+                                        <th class="border-0">Products</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for delay in data.logistics_data.shipping_delays %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt text-secondary me-2"></i>
+                                                <span>{{ delay.route }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if delay.delay_hours >= 24 %}
+                                                <span class="badge bg-danger rounded-pill px-3 py-2">{{ delay.delay_hours }} hrs</span>
+                                            {% elif delay.delay_hours >= 8 %}
+                                                <span class="badge bg-warning rounded-pill px-3 py-2">{{ delay.delay_hours }} hrs</span>
+                                            {% else %}
+                                                <span class="badge bg-success rounded-pill px-3 py-2">{{ delay.delay_hours }} hrs</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="small">{{ delay.cause }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="small">{{ delay.affected_products }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <h4 class="fs-5 fw-bold mb-3">Cross-Domain Recommendations</h4>
+                        
+                        <div class="recommendation-card p-3 mb-3 rounded-3 shadow-sm bg-white border-start border-4 border-primary">
+                            <div class="d-flex">
+                                <div class="recommendation-icon me-3">
+                                    <i class="bi bi-lightning-charge-fill text-primary fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fs-6 fw-bold text-primary">Weather & Transportation</h5>
+                                    <p class="small mb-1">Reroute refrigerated shipments through alternative corridors to avoid extreme heat zones.</p>
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill mt-2">Apply Change</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-card p-3 mb-3 rounded-3 shadow-sm bg-white border-start border-4 border-success">
+                            <div class="d-flex">
+                                <div class="recommendation-icon me-3">
+                                    <i class="bi bi-graph-up text-success fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fs-6 fw-bold text-success">Economic & Inventory</h5>
+                                    <p class="small mb-1">Increase Industrial Packaging Materials allocation to Southern distribution centers based on rising consumer confidence.</p>
+                                    <button class="btn btn-sm btn-outline-success rounded-pill mt-2">Apply Change</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-card p-3 mb-3 rounded-3 shadow-sm bg-white border-start border-4 border-info">
+                            <div class="d-flex">
+                                <div class="recommendation-icon me-3">
+                                    <i class="bi bi-chat-square-quote text-info fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fs-6 fw-bold text-info">Social Media & Product Stocking</h5>
+                                    <p class="small mb-1">Increase sustainable packaging inventory by 20% based on social sentiment analysis.</p>
+                                    <button class="btn btn-sm btn-outline-info rounded-pill mt-2">Apply Change</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="recommendation-card p-3 rounded-3 shadow-sm bg-white border-start border-4 border-warning">
+                            <div class="d-flex">
+                                <div class="recommendation-icon me-3">
+                                    <i class="bi bi-truck text-warning fs-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fs-6 fw-bold text-warning">Weather & Route Planning</h5>
+                                    <p class="small mb-1">Schedule preventative maintenance for refrigeration units on the North-South corridor fleet.</p>
+                                    <button class="btn btn-sm btn-outline-warning rounded-pill mt-2">Apply Change</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Transportation Impact Analysis -->
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Logistics & Transportation Impact</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <h4 class="mb-3">Current Shipping Delays</h4>
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Route</th>
-                                            <th>Delay</th>
-                                            <th>Cause</th>
-                                            <th>Affected Products</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for delay in data.logistics_data.shipping_delays %}
-                                        <tr>
-                                            <td>{{ delay.route }}</td>
-                                            <td>
-                                                {% if delay.delay_hours >= 24 %}
-                                                    <span class="badge bg-danger">{{ delay.delay_hours }} hours</span>
-                                                {% elif delay.delay_hours >= 8 %}
-                                                    <span class="badge bg-warning">{{ delay.delay_hours }} hours</span>
-                                                {% else %}
-                                                    <span class="badge bg-success">{{ delay.delay_hours }} hours</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ delay.cause }}</td>
-                                            <td>{{ delay.affected_products }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <h4 class="mb-3">Cross-Domain Improvement Recommendations</h4>
-                            <div class="alert alert-primary mb-3">
-                                <i class="bi bi-lightning-charge-fill me-2"></i>
-                                <strong>Weather & Transportation:</strong> Reroute refrigerated shipments through alternative corridors to avoid extreme heat zones.
-                            </div>
-                            <div class="alert alert-success mb-3">
-                                <i class="bi bi-graph-up me-2"></i>
-                                <strong>Economic & Inventory:</strong> Increase Industrial Packaging Materials allocation to Southern distribution centers based on rising consumer confidence.
-                            </div>
-                            <div class="alert alert-info mb-3">
-                                <i class="bi bi-chat-square-quote me-2"></i>
-                                <strong>Social Media & Product Stocking:</strong> Increase sustainable packaging inventory by 20% based on social sentiment analysis.
-                            </div>
-                            <div class="alert alert-warning">
-                                <i class="bi bi-truck me-2"></i>
-                                <strong>Weather & Route Planning:</strong> Schedule preventative maintenance for refrigeration units on the North-South corridor fleet.
-                            </div>
-                        </div>
+    <!-- What-If Scenarios Analysis -->
+    <div class="col-12 mt-5 mb-5">
+        <div class="card-modern">
+            <div class="card-header-modern d-flex justify-content-between align-items-center">
+                <h3 class="card-title-modern">
+                    <i class="bi bi-lightbulb me-2 text-primary"></i>
+                    AI-Powered Scenario Analysis
+                </h3>
+                <button class="btn btn-sm btn-primary rounded-pill px-3">
+                    <i class="bi bi-plus-lg me-1"></i> Create Scenario
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info d-flex align-items-start p-3 mb-4">
+                    <i class="bi bi-info-circle-fill fs-4 me-3 mt-1"></i>
+                    <div>
+                        <strong class="d-block mb-1">What-If Scenario Testing:</strong>
+                        <span class="small">Explore the impact of various cross-domain variables on your supply chain operations to aid proactive decision-making.</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Future Projection & What-If Scenarios -->
-    <div class="row mb-5">
-        <div class="col-md-10 offset-md-1">
-            <div class="card dashboard-card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">AI-Powered Scenario Analysis</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="bi bi-lightbulb-fill me-2"></i>
-                                <strong>What-If Scenario Testing:</strong> Explore how changes in various factors could impact your supply chain operations.
+                
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-info text-white p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-bold">
+                                        <i class="bi bi-cloud-sun me-2"></i> Weather Scenario
+                                    </h5>
+                                    <button class="btn btn-sm btn-light rounded-circle p-1" data-bs-toggle="tooltip" title="Run simulation">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="scenario-condition p-3 bg-light rounded mb-4">
+                                    <h6 class="d-flex align-items-center border-bottom pb-2 mb-3">
+                                        <i class="bi bi-thermometer-sun me-2 text-info"></i>
+                                        <span>If temperatures increase by 10°F</span>
+                                    </h6>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Refrigeration Costs</span>
+                                            <span class="badge bg-danger rounded-pill">+18%</span>
+                                        </li>
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Cold Storage Demand</span>
+                                            <span class="badge bg-danger rounded-pill">+25%</span>
+                                        </li>
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Shipping Route Efficiency</span>
+                                            <span class="badge bg-warning rounded-pill">-12%</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-sm btn-outline-info w-100">View Detailed Analysis</button>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0">Weather Scenario</h5>
-                                </div>
-                                <div class="card-body">
-                                    <h6>If temperatures increase by 10°F</h6>
-                                    <ul class="list-group mt-3">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Refrigeration Costs
-                                            <span class="badge bg-danger rounded-pill">+18%</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Cold Storage Demand
-                                            <span class="badge bg-danger rounded-pill">+25%</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Shipping Route Efficiency
-                                            <span class="badge bg-warning rounded-pill">-12%</span>
-                                        </li>
-                                    </ul>
-                                    <button class="btn btn-outline-primary mt-3 w-100">Run Detailed Simulation</button>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-success text-white p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-bold">
+                                        <i class="bi bi-cash-coin me-2"></i> Economic Scenario
+                                    </h5>
+                                    <button class="btn btn-sm btn-light rounded-circle p-1" data-bs-toggle="tooltip" title="Run simulation">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0">Economic Scenario</h5>
-                                </div>
-                                <div class="card-body">
-                                    <h6>If consumer confidence rises 15 points</h6>
-                                    <ul class="list-group mt-3">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Premium Product Demand
-                                            <span class="badge bg-success rounded-pill">+22%</span>
+                            <div class="card-body p-3">
+                                <div class="scenario-condition p-3 bg-light rounded mb-4">
+                                    <h6 class="d-flex align-items-center border-bottom pb-2 mb-3">
+                                        <i class="bi bi-graph-up-arrow me-2 text-success"></i>
+                                        <span>If consumer confidence rises 15%</span>
+                                    </h6>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Premium Product Demand</span>
+                                            <span class="badge bg-success rounded-pill">+23%</span>
                                         </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Packaging Material Needs
-                                            <span class="badge bg-success rounded-pill">+15%</span>
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Average Order Value</span>
+                                            <span class="badge bg-success rounded-pill">+12%</span>
                                         </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Logistics Volume
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Warehouse Capacity Needed</span>
                                             <span class="badge bg-warning rounded-pill">+18%</span>
                                         </li>
                                     </ul>
-                                    <button class="btn btn-outline-primary mt-3 w-100">Run Detailed Simulation</button>
                                 </div>
+                                <button class="btn btn-sm btn-outline-success w-100">View Detailed Analysis</button>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0">Social Media Scenario</h5>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-primary text-white p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-bold">
+                                        <i class="bi bi-chat-text me-2"></i> Social Media Scenario
+                                    </h5>
+                                    <button class="btn btn-sm btn-light rounded-circle p-1" data-bs-toggle="tooltip" title="Run simulation">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
                                 </div>
-                                <div class="card-body">
-                                    <h6>If sustainability trends increase 30%</h6>
-                                    <ul class="list-group mt-3">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Eco-Friendly Packaging Demand
-                                            <span class="badge bg-success rounded-pill">+35%</span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="scenario-condition p-3 bg-light rounded mb-4">
+                                    <h6 class="d-flex align-items-center border-bottom pb-2 mb-3">
+                                        <i class="bi bi-chat-square-heart me-2 text-primary"></i>
+                                        <span>If sustainable packaging trends spike</span>
+                                    </h6>
+                                    <ul class="list-group">
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Eco-Friendly Packaging Demand</span>
+                                            <span class="badge bg-danger rounded-pill">+42%</span>
                                         </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Traditional Packaging Demand
-                                            <span class="badge bg-danger rounded-pill">-20%</span>
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Traditional Packaging Demand</span>
+                                            <span class="badge bg-info rounded-pill">-15%</span>
                                         </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Brand Sentiment
-                                            <span class="badge bg-success rounded-pill">+15%</span>
+                                        <li class="list-group-item border-0 bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                                            <span>Brand Reputation Score</span>
+                                            <span class="badge bg-success rounded-pill">+8%</span>
                                         </li>
                                     </ul>
-                                    <button class="btn btn-outline-primary mt-3 w-100">Run Detailed Simulation</button>
                                 </div>
+                                <button class="btn btn-sm btn-outline-primary w-100">View Detailed Analysis</button>
                             </div>
                         </div>
                     </div>
@@ -702,30 +1046,22 @@
 </div>
 
 <script>
-    // Wait for DOM to be fully loaded before attaching event listeners
     document.addEventListener('DOMContentLoaded', function() {
-        // Toggle between heatmap and table view
-        const toggleBtn = document.getElementById('toggleCorrelationView');
-        const heatmap = document.getElementById('correlationHeatmap');
-        const table = document.getElementById('correlationTable');
+        // Toggle correlation view between heatmap and table
+        const toggleButton = document.getElementById('toggleCorrelationView');
+        const heatmapView = document.getElementById('correlationHeatmap');
+        const tableView = document.getElementById('correlationTable');
         
-        // Only add event listeners if elements exist
-        if (toggleBtn && heatmap && table) {
-            toggleBtn.addEventListener('click', function() {
-                try {
-                    if (heatmap.style.display === 'none') {
-                        heatmap.style.display = 'block';
-                        table.style.display = 'none';
-                        this.innerHTML = '<i class="bi bi-grid-3x3"></i> Toggle View';
-                        this.setAttribute('aria-expanded', 'false');
-                    } else {
-                        heatmap.style.display = 'none';
-                        table.style.display = 'block';
-                        this.innerHTML = '<i class="bi bi-table"></i> Toggle View';
-                        this.setAttribute('aria-expanded', 'true');
-                    }
-                } catch (error) {
-                    console.error('Error toggling view:', error);
+        if (toggleButton && heatmapView && tableView) {
+            toggleButton.addEventListener('click', function() {
+                if (heatmapView.style.display === 'none') {
+                    heatmapView.style.display = 'block';
+                    tableView.style.display = 'none';
+                    toggleButton.innerHTML = '<i class="bi bi-table me-1"></i> Show Table';
+                } else {
+                    heatmapView.style.display = 'none';
+                    tableView.style.display = 'block';
+                    toggleButton.innerHTML = '<i class="bi bi-grid-3x3 me-1"></i> Show Heatmap';
                 }
             });
         }
@@ -734,326 +1070,20 @@
         const timeRangeSelect = document.getElementById('timeRangeSelect');
         if (timeRangeSelect) {
             timeRangeSelect.addEventListener('change', function() {
-                const timeRange = this.value;
-                const previousValue = this.dataset.previousValue || '1d';
-
-                // Store current value for potential rollback
-                this.dataset.previousValue = timeRange;
-
-                try {
-                    // Show loading state
-                    document.body.style.cursor = 'wait';
-                    timeRangeSelect.disabled = true;
-
-                    // Log for debugging
-                    console.log('Fetching data for time range:', timeRange);
-
-                    // Fetch updated data from the server based on the new timeframe
-                    fetch(`/use-cases/supply-chain/data?timeRange=${timeRange}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Server returned status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('New data received:', data);
-
-                            // Update page content with the new data
-                            updatePageContent(data);
-
-                            // Success state
-                            document.body.style.cursor = 'default';
-                            timeRangeSelect.disabled = false;
-
-                            // Show notification
-                            showNotification('Data updated successfully', `Time range changed to: ${timeRange}`);
-                        })
-                        .catch(error => {
-                            // Reset to previous value on error
-                            console.error('Error fetching new data:', error);
-                            timeRangeSelect.value = previousValue;
-                            document.body.style.cursor = 'default';
-                            timeRangeSelect.disabled = false;
-
-                            // Show error notification
-                            showNotification('Error updating data', 'Failed to load data for the selected time range', 'error');
-                        });
-                } catch (error) {
-                    // Reset to previous value on error
-                    console.error('Error updating time range:', error);
-                    timeRangeSelect.value = previousValue;
-                    document.body.style.cursor = 'default';
-                    timeRangeSelect.disabled = false;
-
-                    // Show error notification
-                    showNotification('Error updating data', 'Failed to load data for the selected time range', 'error');
-                }
+                const selectedValue = this.value;
+                // Here you would fetch new data based on the selected time range
+                console.log('Selected time range:', selectedValue);
+                // For demo purposes, let's reload the page with the new time range
+                window.location.href = `/use-cases/supply-chain/data?timeRange=${selectedValue}`;
             });
         }
         
-        // Initialize simulation buttons for what-if scenarios
-        const simulationButtons = document.querySelectorAll('.card button.btn-outline-primary');
-        simulationButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const scenarioType = this.closest('.card').querySelector('.card-header h5').textContent;
-                showNotification('Running Simulation', `Starting detailed simulation for ${scenarioType}`);
-                
-                // Disable button and show loading state
-                this.disabled = true;
-                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Running...';
-                
-                // Simulate running simulation
-                setTimeout(() => {
-                    this.disabled = false;
-                    this.innerHTML = 'Run Detailed Simulation';
-                    showNotification('Simulation Complete', `${scenarioType} simulation results are ready`);
-                }, 2500);
+        // Initialize tooltips
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-        });
-        
-        /**
-         * Updates the page content with new data
-         * @param {Object} data - The new data to display
-         */
-        function updatePageContent(data) {
-            console.log('Updating page content with new data');
-
-            // Update weather widget
-            if (data.weather_forecast) {
-                document.querySelector('.card-body .display-6').textContent = data.weather_forecast.condition;
-                document.querySelector('.card-body .fs-3').textContent = `${data.weather_forecast.temperature}°F`;
-            }
-
-            // Update economic indicators
-            if (data.economic_indicators) {
-                const economicElements = document.querySelectorAll('.card-header.bg-success + .card-body');
-                if (economicElements.length > 0) {
-                    const economicDisplay = economicElements[0].querySelector('.display-6');
-                    if (economicDisplay) {
-                        economicDisplay.textContent = data.economic_indicators.consumer_confidence;
-                    }
-
-                    const trendText = economicElements[0].querySelector('.fs-3.text-success');
-                    if (trendText) {
-                        trendText.innerHTML = `<i class="bi bi-graph-up-arrow me-2"></i>${data.economic_indicators.trend}`;
-                    }
-                }
-            }
-
-            // Update transportation metrics
-            if (data.logistics_data) {
-                const transportElement = document.querySelector('.card-header.bg-warning + .card-body .display-6');
-                if (transportElement) {
-                    transportElement.textContent = `${data.logistics_data.average_shipping_time} days`;
-                }
-
-                // Update shipping delays
-                if (data.logistics_data.shipping_delays) {
-                    const delaysTable = document.querySelector('h4.mb-3:contains("Current Shipping Delays") + .table-responsive table tbody');
-                    if (delaysTable) {
-                        let delaysHtml = '';
-                        data.logistics_data.shipping_delays.forEach(delay => {
-                            let badgeClass = 'bg-success';
-                            if (delay.delay_hours >= 24) badgeClass = 'bg-danger';
-                            else if (delay.delay_hours >= 8) badgeClass = 'bg-warning';
-
-                            delaysHtml += `
-                                <tr>
-                                    <td>${delay.route}</td>
-                                    <td><span class="badge ${badgeClass}">${delay.delay_hours} hours</span></td>
-                                    <td>${delay.cause}</td>
-                                    <td>${delay.affected_products}</td>
-                                </tr>
-                            `;
-                        });
-                        delaysTable.innerHTML = delaysHtml;
-                    }
-                }
-            }
-
-            // Update social media trends
-            if (data.social_media_trends) {
-                const socialElement = document.querySelector('.card-header.bg-primary + .card-body .display-6');
-                if (socialElement) {
-                    socialElement.textContent = data.social_media_trends.sentiment;
-                }
-
-                const buzzProgress = document.querySelector('.progress .progress-bar.bg-primary');
-                if (buzzProgress) {
-                    const buzzFactor = data.social_media_trends.buzz_factor;
-                    buzzProgress.style.width = `${buzzFactor}%`;
-                    buzzProgress.setAttribute('aria-valuenow', buzzFactor);
-                    buzzProgress.textContent = `${buzzFactor}%`;
-                }
-            }
-
-            // Update correlations
-            if (data.correlations) {
-                const correlationsTable = document.querySelector('#correlationTable .table-responsive table tbody');
-                if (correlationsTable) {
-                    let correlationsHtml = '';
-                    data.correlations.forEach(item => {
-                        correlationsHtml += `
-                            <tr>
-                                <td>${item.factor1}</td>
-                                <td>${item.factor2}</td>
-                                <td>${item.strength}</td>
-                                <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar ${item.correlation > 0.8 ? 'bg-danger' : item.correlation > 0.7 ? 'bg-warning' : 'bg-info'}" role="progressbar"
-                                            style="width: ${item.correlation * 100}%;"
-                                            aria-valuenow="${item.correlation * 100}"
-                                            aria-valuemin="0"
-                                            aria-valuemax="100">
-                                            ${(item.correlation * 100).toFixed(0)}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>92%</td>
-                            </tr>
-                        `;
-                    });
-                    correlationsTable.innerHTML = correlationsHtml;
-                }
-            }
-
-            // Update inventory insights
-            if (data.inventory_insights) {
-                const inventoryTable = document.querySelector('h3:contains("Cross-Domain Inventory Prediction") + .card-body .table-responsive table tbody');
-                if (inventoryTable) {
-                    let inventoryHtml = '';
-                    data.inventory_insights.forEach(item => {
-                        let confidenceClass = 'bg-warning';
-                        if (item.confidence > 0.8) confidenceClass = 'bg-success';
-                        else if (item.confidence > 0.7) confidenceClass = 'bg-info';
-
-                        inventoryHtml += `
-                            <tr>
-                                <td>${item.product}</td>
-                                <td>${item.current_stock}</td>
-                                <td>${item.predicted_demand}</td>
-                                <td>
-                                    ${getProductBadges(item.product)}
-                                </td>
-                                <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar ${confidenceClass}" role="progressbar"
-                                            style="width: ${item.confidence * 100}%;"
-                                            aria-valuenow="${item.confidence * 100}"
-                                            aria-valuemin="0"
-                                            aria-valuemax="100">
-                                            ${(item.confidence * 100).toFixed(0)}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    ${item.restock_recommendation > 0
-                                      ? `<span class="badge bg-warning">Restock: +${item.restock_recommendation}</span>`
-                                      : '<span class="badge bg-success">Optimal</span>'}
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    inventoryTable.innerHTML = inventoryHtml;
-                }
-            }
-        }
-
-        /**
-         * Helper function to get badges for product types
-         */
-        function getProductBadges(product) {
-            switch(product) {
-                case 'Refrigerated Food Storage Containers':
-                    return '<span class="badge bg-info me-1">Extreme Heat</span><span class="badge bg-success me-1">Consumer Confidence</span>';
-                case 'Industrial Packaging Materials':
-                    return '<span class="badge bg-warning me-1">Holiday Season</span><span class="badge bg-success me-1">Economic Trend</span>';
-                case 'Temperature-Controlled Shipping Units':
-                    return '<span class="badge bg-info me-1">Weather Forecast</span><span class="badge bg-danger me-1">Shipping Delays</span>';
-                case 'Emergency Power Generators':
-                    return '<span class="badge bg-danger me-1">Weather Alert</span><span class="badge bg-info me-1">Social Media Trends</span>';
-                case 'Sustainable Packaging Solutions':
-                    return '<span class="badge bg-primary me-1">Social Media Sentiment</span><span class="badge bg-success me-1">Consumer Trend</span>';
-                default:
-                    return '<span class="badge bg-secondary me-1">Regular Demand</span>';
-            }
-        }
-
-        /**
-         * Shows a notification to the user
-         * @param {string} title - The notification title
-         * @param {string} message - The notification message
-         * @param {string} type - The type of notification (success, error, warning)
-         */
-        function showNotification(title, message, type = 'success') {
-            // Try to use Bootstrap Toast if available
-            if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-                const toastEl = document.getElementById('dataUpdateToast');
-                if (toastEl) {
-                    // Update content
-                    toastEl.querySelector('.toast-header strong').textContent = title;
-                    toastEl.querySelector('.toast-body').textContent = message;
-                    
-                    // Update styling based on type
-                    toastEl.className = 'toast';
-                    if (type === 'error') {
-                        toastEl.classList.add('bg-danger', 'text-white');
-                    } else if (type === 'warning') {
-                        toastEl.classList.add('bg-warning');
-                    } else {
-                        toastEl.classList.add('bg-success', 'text-white');
-                    }
-                    
-                    // Show toast
-                    const toast = new bootstrap.Toast(toastEl);
-                    toast.show();
-                    
-                    // Auto-hide after 3 seconds
-                    setTimeout(() => {
-                        toast.hide();
-                    }, 3000);
-                }
-            } else {
-                // Fallback to alert if Bootstrap not available
-                console.log(`${title}: ${message}`);
-                if (type === 'error') {
-                    alert(`Error: ${message}`);
-                } else {
-                    // For success/warning, use a more subtle approach or skip in production
-                    const alertClass = type === 'warning' ? 'alert-warning' : 'alert-success';
-                    
-                    // Create a simple notification
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
-                    alertDiv.setAttribute('role', 'alert');
-                    alertDiv.style.position = 'fixed';
-                    alertDiv.style.bottom = '20px';
-                    alertDiv.style.right = '20px';
-                    alertDiv.style.zIndex = '9999';
-                    alertDiv.style.maxWidth = '300px';
-                    
-                    alertDiv.innerHTML = `
-                        <strong>${title}</strong><br>${message}
-                        <button type="button" class="btn-close" aria-label="Close"></button>
-                    `;
-                    
-                    document.body.appendChild(alertDiv);
-                    
-                    // Add close button functionality
-                    alertDiv.querySelector('.btn-close').addEventListener('click', function() {
-                        alertDiv.remove();
-                    });
-                    
-                    // Auto-remove after 3 seconds
-                    setTimeout(() => {
-                        if (document.body.contains(alertDiv)) {
-                            alertDiv.remove();
-                        }
-                    }, 3000);
-                }
-            }
         }
     });
 </script>
