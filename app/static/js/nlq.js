@@ -534,6 +534,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'scatter':
                     renderScatterPlot(element, viz);
                     break;
+                case 'prediction':
+                    renderPredictionChart(element, viz);
+                    break;
+                case 'anomaly':
+                    renderAnomalyChart(element, viz);
+                    break;
+                case 'multi_line':
+                    renderMultiLineChart(element, viz);
+                    break;
                 case 'network':
                     // Fallback for network visualizations (would use D3.js in production)
                     element.innerHTML = `
@@ -844,6 +853,410 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {
             console.error('Error creating scatter plot:', e);
             element.innerHTML = `<div class="p-3 bg-light">Scatter plot visualization (Chart.js error)</div>`;
+        }
+    }
+    
+    /**
+     * Render a prediction chart with confidence intervals
+     */
+    function renderPredictionChart(element, viz) {
+        // Create a canvas for the chart
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        element.appendChild(canvas);
+        
+        // Prepare data for Chart.js
+        const ctx = canvas.getContext('2d');
+        
+        // Get data from the viz object
+        const labels = viz.data.x || [];
+        const predictionStart = viz.data.prediction_start || 0;
+        
+        // Create datasets for historical, prediction, and confidence bounds
+        const datasets = [];
+        
+        // Historical data
+        if (viz.data.historical) {
+            datasets.push({
+                label: 'Historical Data',
+                data: viz.data.historical,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                borderWidth: 2,
+                pointRadius: 3,
+                tension: 0.4,
+                fill: false
+            });
+        }
+        
+        // Prediction line
+        if (viz.data.prediction) {
+            datasets.push({
+                label: 'Forecast',
+                data: viz.data.prediction,
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 2,
+                pointRadius: 3,
+                borderDash: [3, 3],
+                tension: 0.4,
+                fill: false
+            });
+        }
+        
+        // Upper bound (confidence interval)
+        if (viz.data.upper_bound) {
+            datasets.push({
+                label: 'Upper Bound (95% CI)',
+                data: viz.data.upper_bound,
+                borderColor: 'rgba(255, 99, 132, 0.5)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                borderWidth: 1,
+                pointRadius: 0,
+                borderDash: [2, 2],
+                tension: 0.4,
+                fill: '+1'  // Fill to the next dataset (lower bound)
+            });
+        }
+        
+        // Lower bound (confidence interval)
+        if (viz.data.lower_bound) {
+            datasets.push({
+                label: 'Lower Bound (95% CI)',
+                data: viz.data.lower_bound,
+                borderColor: 'rgba(255, 99, 132, 0.5)',
+                borderWidth: 1,
+                pointRadius: 0,
+                borderDash: [2, 2],
+                tension: 0.4,
+                fill: false
+            });
+        }
+        
+        // Add units if available
+        const yAxisTitle = viz.data.units ? `Value (${viz.data.units})` : 'Value';
+        
+        // Create annotation to indicate where prediction starts
+        const annotations = {
+            line1: {
+                type: 'line',
+                scaleID: 'x',
+                value: labels[predictionStart],
+                borderColor: 'rgba(100, 100, 100, 0.5)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                label: {
+                    content: 'Forecast Begins',
+                    enabled: true,
+                    position: 'start',
+                    backgroundColor: 'rgba(100, 100, 100, 0.7)'
+                }
+            }
+        };
+        
+        // Create the chart
+        try {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: yAxisTitle
+                            },
+                            beginAtZero: false
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            ticks: {
+                                maxTicksLimit: 10,
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        annotation: {
+                            annotations: annotations
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.raw !== null ? context.raw.toFixed(2) : 'N/A';
+                                    const units = viz.data.units || '';
+                                    return `${context.dataset.label}: ${value} ${units}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Add a note about the forecast
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'alert alert-info mt-3';
+            noteDiv.innerHTML = `
+                <small>
+                    <strong>Note:</strong> This forecast is based on historical data and statistical models. 
+                    The shaded area represents the 95% confidence interval - the range within which the actual values 
+                    are expected to fall with 95% probability.
+                </small>
+            `;
+            element.appendChild(noteDiv);
+            
+        } catch (e) {
+            console.error('Error creating prediction chart:', e);
+            element.innerHTML = `<div class="p-3 bg-light">Prediction chart visualization error: ${e.message}</div>`;
+        }
+    }
+    
+    /**
+     * Render an anomaly detection chart
+     */
+    function renderAnomalyChart(element, viz) {
+        // Create a canvas for the chart
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        element.appendChild(canvas);
+        
+        // Prepare data for Chart.js
+        const ctx = canvas.getContext('2d');
+        
+        // Get data from the viz object
+        const labels = viz.data.x || [];
+        const values = viz.data.y || [];
+        const anomalyIndices = viz.data.anomalies || [];
+        const upperBound = viz.data.upper_bound || [];
+        const lowerBound = viz.data.lower_bound || [];
+        const boundsLabel = viz.data.bounds_label || 'Threshold';
+        
+        // Create datasets
+        const datasets = [
+            {
+                label: 'Data',
+                data: values,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                borderWidth: 2,
+                pointRadius: 3,
+                tension: 0.4,
+                fill: false
+            }
+        ];
+        
+        // Add upper bound
+        if (upperBound.length > 0) {
+            datasets.push({
+                label: `Upper ${boundsLabel}`,
+                data: upperBound,
+                borderColor: 'rgba(255, 99, 132, 0.5)',
+                borderWidth: 1,
+                pointRadius: 0,
+                borderDash: [5, 5],
+                tension: 0,
+                fill: false
+            });
+        }
+        
+        // Add lower bound
+        if (lowerBound.length > 0) {
+            datasets.push({
+                label: `Lower ${boundsLabel}`,
+                data: lowerBound,
+                borderColor: 'rgba(255, 99, 132, 0.5)',
+                borderWidth: 1,
+                pointRadius: 0,
+                borderDash: [5, 5],
+                tension: 0,
+                fill: false
+            });
+        }
+        
+        // Prepare anomaly points
+        if (anomalyIndices.length > 0) {
+            const anomalyData = values.map((value, index) => 
+                anomalyIndices.includes(index) ? value : null
+            );
+            
+            datasets.push({
+                label: 'Anomalies',
+                data: anomalyData,
+                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                borderColor: 'rgb(255, 99, 132)',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointStyle: 'circle',
+                showLine: false
+            });
+        }
+        
+        // Add units if available
+        const yAxisTitle = viz.data.units ? `Value (${viz.data.units})` : 'Value';
+        
+        // Create the chart
+        try {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: yAxisTitle
+                            },
+                            beginAtZero: false
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            ticks: {
+                                maxTicksLimit: 10,
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label;
+                                },
+                                label: function(context) {
+                                    if (context.datasetIndex === datasets.length - 1 && anomalyIndices.length > 0) {
+                                        return `Anomaly: ${context.raw?.toFixed(2) || 'N/A'} ${viz.data.units || ''}`;
+                                    }
+                                    const value = context.raw !== null ? context.raw.toFixed(2) : 'N/A';
+                                    return `${context.dataset.label}: ${value} ${viz.data.units || ''}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Add a note about anomalies if any were detected
+            if (anomalyIndices.length > 0) {
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'alert alert-warning mt-3';
+                noteDiv.innerHTML = `
+                    <small>
+                        <strong>Note:</strong> ${anomalyIndices.length} anomalies detected in the data.
+                        These points exceed the normal range defined by statistical thresholds.
+                    </small>
+                `;
+                element.appendChild(noteDiv);
+            }
+            
+        } catch (e) {
+            console.error('Error creating anomaly chart:', e);
+            element.innerHTML = `<div class="p-3 bg-light">Anomaly chart visualization error: ${e.message}</div>`;
+        }
+    }
+    
+    /**
+     * Render a multi-line chart (for trend decomposition)
+     */
+    function renderMultiLineChart(element, viz) {
+        // Create a canvas for the chart
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        element.appendChild(canvas);
+        
+        // Prepare data for Chart.js
+        const ctx = canvas.getContext('2d');
+        
+        // Add units if available
+        const yAxisTitle = viz.data.units ? `Value (${viz.data.units})` : 'Value';
+        
+        // Create the chart
+        try {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: viz.data.x,
+                    datasets: viz.data.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: yAxisTitle
+                            },
+                            beginAtZero: false
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            ticks: {
+                                maxTicksLimit: 10,
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            onClick: function(e, legendItem, legend) {
+                                const index = legendItem.datasetIndex;
+                                const ci = legend.chart;
+                                
+                                // Toggle visibility
+                                ci.data.datasets[index].hidden = !ci.data.datasets[index].hidden;
+                                ci.update();
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+            
+        } catch (e) {
+            console.error('Error creating multi-line chart:', e);
+            element.innerHTML = `<div class="p-3 bg-light">Multi-line chart visualization error: ${e.message}</div>`;
         }
     }
     
