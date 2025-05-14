@@ -11,10 +11,11 @@ def system_status():
     return render_template('system_integration/system_status.html', title='System Status')
 
 @system_integration.route('/api/system-status')
+@system_integration.route('/system/api/system-status')  # Add the path that frontend is trying to use
 def api_system_status():
     """Get system status data."""
     components = {name: component.get_status() for name, component in system_integrator.components.items()}
-    
+
     # Add mock data if real data is not available
     if not components:
         components = {
@@ -33,7 +34,7 @@ def api_system_status():
                 "active_visualizations": 8
             }
         }
-    
+
     return jsonify({
         "status": "active",
         "uptime": __import__('time').time() - __import__('time').time() + 3600,  # Mock 1-hour uptime
