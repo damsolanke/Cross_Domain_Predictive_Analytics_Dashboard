@@ -248,7 +248,7 @@
         const isChartJsLoaded = typeof Chart !== 'undefined';
         if (!isChartJsLoaded) {
             console.error('Chart.js is not loaded. Charts will not be rendered.');
-            
+        
             // Add a fallback script tag to try loading Chart.js again
             const chartScript = document.createElement('script');
             chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
@@ -292,7 +292,7 @@
 
                 // Update the dashboard with the data
                 updateSystemStatus(data);
-                
+
                 // Also update the charts with new system data
                 updateCharts();
             } catch (error) {
@@ -326,7 +326,7 @@
         // Execute on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadSystemStatus();
-            
+        
             // Only create charts if Chart.js is available
             if (isChartJsLoaded) {
                 createCharts();
@@ -432,10 +432,10 @@
                             `;
                             
                             tableBody.appendChild(row);
-                        }
-                    }
                 }
-                
+                    }
+        }
+        
                 // Update events list with a new event
                 const eventsContainer = document.getElementById('system-events');
                 if (eventsContainer) {
@@ -460,7 +460,7 @@
                     if (events.length > 5) {
                         for (let i = 5; i < events.length; i++) {
                             events[i].remove();
-                        }
+                }
                     }
                 }
                 
@@ -572,8 +572,8 @@
                                 ticks: {
                                     font: {
                                         size: 10
-                                    }
-                                }
+                    }
+                }
                             },
                             x: {
                                 grid: {
