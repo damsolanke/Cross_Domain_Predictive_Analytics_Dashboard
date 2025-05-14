@@ -1,3 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-fill" viewBox="0 0 16 16">
-  <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Chart Icon</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#FFFFFF" x="0" y="0" width="24" height="24"></rect>
+        <path d="M5,6 L19,6 C19.5522847,6 20,6.44771525 20,7 L20,17 C20,17.5522847 19.5522847,18 19,18 L5,18 C4.44771525,18 4,17.5522847 4,17 L4,7 C4,6.44771525 4.44771525,6 5,6 Z M5,8 L5,16 L19,16 L19,8 L5,8 Z" fill="#4361EE" fill-rule="nonzero"></path>
+        <path d="M7,14 L9,14 L9,10 L7,10 L7,14 Z M11,14 L13,14 L13,8 L11,8 L11,14 Z M15,14 L17,14 L17,12 L15,12 L15,14 Z" fill="#4361EE" fill-rule="nonzero"></path>
+    </g>
 </svg>

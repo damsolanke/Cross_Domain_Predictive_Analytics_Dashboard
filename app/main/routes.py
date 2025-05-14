@@ -6,6 +6,7 @@ from app.main.analytics_controller import analytics
 from app.system_integration.cross_domain_correlation import CrossDomainCorrelator
 from app.system_integration.cross_domain_prediction import CrossDomainPredictor
 import time
+import random
 
 # Cache for dashboard data
 dashboard_data_cache = {}
@@ -64,6 +65,65 @@ def nlq():
 def correlation():
     """Cross-domain correlation analysis page"""
     return render_template('correlation.html', title='Cross-Domain Correlation Analysis')
+
+@main.route('/api/correlation/analyze', methods=['POST'])
+def analyze_correlation():
+    """API endpoint for correlation analysis"""
+    from app.system_integration.routes import generate_correlation, generate_matrix, generate_scatter, generate_network
+    import time
+    
+    # Check if request is JSON
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+    
+    data = request.json
+    required_fields = ['domain1', 'field1', 'domain2', 'field2', 'time_range']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    # Extract parameters
+    domain1 = data['domain1']
+    field1 = data['field1']
+    domain2 = data['domain2']
+    field2 = data['field2']
+    time_range = data['time_range']
+    
+    # Try to get the correlator
+    correlator = system_integrator.get_component('correlator')
+    
+    # Generate correlation data
+    try:
+        # Generate a correlation value based on the inputs
+        correlation_value = generate_correlation(domain1, field1, domain2, field2, time_range)
+        
+        # Generate matrix data for heatmap
+        matrix, labels = generate_matrix(domain1, field1, domain2, field2)
+        
+        # Generate scatter data
+        scatter_data = generate_scatter(correlation_value)
+        
+        # Generate network data
+        network = generate_network(domain1, domain2)
+        
+        # Build the response
+        response = {
+            'domain1': domain1,
+            'field1': field1,
+            'domain2': domain2,
+            'field2': field2,
+            'time_range': time_range,
+            'correlation_value': correlation_value,
+            'matrix': matrix,
+            'labels': labels,
+            'scatter_data': scatter_data,
+            'network': network,
+            'analysis_timestamp': time.time()
+        }
+        
+        return jsonify(response)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @main.route('/use-cases/supply-chain')
 def supply_chain():
@@ -360,6 +420,123 @@ def dashboard_data():
     dashboard_data_cache[cache_key] = (time.time(), result)
     
     return jsonify(result)
+
+@main.route('/api/correlations')
+def correlations_data():
+    """API endpoint for cross-domain correlations"""
+    try:
+        # Get time range from query parameters
+        time_range = request.args.get('timeRange', '1d')
+        resolution = request.args.get('resolution', 'daily')
+        lag_window = int(request.args.get('lagWindow', 3))
+        
+        # Get correlator from system integrator
+        correlator = system_integrator.get_component('correlator')
+        
+        # Generate some realistic correlation data
+        correlations = []
+        
+        # Domain pairs to generate correlations for
+        domain_pairs = [
+            ('weather', 'temperature', 'economic', 'market_index', 0.68, 'moderate'),
+            ('weather', 'temperature', 'transportation', 'congestion_level', 0.72, 'strong'),
+            ('weather', 'precipitation', 'transportation', 'accident_count', 0.81, 'strong'),
+            ('economic', 'market_index', 'social-media', 'sentiment', 0.65, 'moderate'),
+            ('economic', 'consumer_confidence', 'social-media', 'engagement_rate', 0.58, 'moderate'),
+            ('transportation', 'congestion_level', 'economic', 'retail_sales', -0.52, 'moderate'),
+            ('social-media', 'sentiment', 'economic', 'market_volatility', 0.46, 'moderate'),
+            ('social-media', 'mentions', 'economic', 'market_volatility', 0.53, 'moderate'),
+            ('weather', 'wind_speed', 'transportation', 'accident_count', 0.47, 'moderate'),
+            ('weather', 'temperature', 'social-media', 'sentiment', 0.32, 'weak')
+        ]
+        
+        # Add some randomization based on time range for realistic data
+        for pair in domain_pairs:
+            domain1, metric1, domain2, metric2, base_correlation, strength = pair
+            
+            # Adjust correlation based on time range (longer ranges show stronger patterns)
+            time_factor = 1.0
+            if time_range == '7d':
+                time_factor = 0.9
+            elif time_range == '90d':
+                time_factor = 1.1
+            elif time_range == '1y':
+                time_factor = 1.15
+            
+            # Add some random noise
+            correlation = base_correlation * time_factor
+            correlation += (random.random() - 0.5) * 0.1  # Add ±5% noise
+            
+            # Cap to valid range
+            correlation = max(-1.0, min(1.0, correlation))
+            
+            # Adjust strength classification based on correlation value
+            abs_corr = abs(correlation)
+            if abs_corr > 0.7:
+                strength = 'strong'
+            elif abs_corr > 0.4:
+                strength = 'moderate'
+            else:
+                strength = 'weak'
+            
+            # Calculate a confidence value (higher for strong correlations)
+            confidence = 0.6 + (abs_corr * 0.3) + (random.random() * 0.1)
+            
+            # Generate lag value (0-3 days typically)
+            lag = 0
+            if random.random() < 0.4:  # 40% chance of lag
+                lag = random.randint(1, lag_window)
+            
+            correlations.append({
+                'domain1': domain1,
+                'metric1': metric1,
+                'domain2': domain2,
+                'metric2': metric2,
+                'correlation': correlation,
+                'strength': strength,
+                'confidence': confidence,
+                'lag': lag
+            })
+        
+        # Create summary data
+        # Find strongest correlation (by absolute value)
+        strongest = max(correlations, key=lambda c: abs(c['correlation']))
+        
+        # Find strongest negative correlation
+        negatives = [c for c in correlations if c['correlation'] < 0]
+        negative = min(negatives, key=lambda c: c['correlation']) if negatives else None
+        
+        # Create trending insight (correlation that's supposedly changing)
+        trending = {
+            'domain1': 'social-media',
+            'metric1': 'sentiment',
+            'domain2': 'economic',
+            'metric2': 'market_index',
+            'correlation_change': 0.15
+        }
+        
+        summary = {
+            'strongest': strongest,
+            'negative': negative,
+            'trending': trending,
+            'timeRange': time_range
+        }
+        
+        return jsonify({
+            'correlations': correlations,
+            'summary': summary,
+            'timeRange': time_range,
+            'resolution': resolution,
+            'lagWindow': lag_window
+        })
+    except Exception as e:
+        print(f"Error in correlations API: {e}")
+        return jsonify({
+            'error': str(e),
+            'correlations': [],
+            'summary': {},
+            'timeRange': time_range
+        }), 500
 
 @main.route('/api/dashboard-data')
 def dashboard_data_new():

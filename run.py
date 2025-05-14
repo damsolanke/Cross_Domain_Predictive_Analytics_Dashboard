@@ -5,6 +5,7 @@ Run script for the Cross-Domain Predictive Analytics Dashboard
 import sys
 import os
 from flask import Flask
+from flask_socketio import SocketIO
 
 # Add current directory to path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -22,6 +23,9 @@ if __name__ == '__main__':
     flask_app.config['SECRET_KEY'] = 'REDACTED'
     flask_app.config['DEBUG'] = False
     
+    # Initialize Socket.IO
+    socketio = SocketIO(flask_app, cors_allowed_origins="*")
+    
     # Register blueprints
     from app.main.routes import main
     flask_app.register_blueprint(main)
@@ -37,5 +41,29 @@ if __name__ == '__main__':
     from app.system_integration import system_integration
     flask_app.register_blueprint(system_integration, url_prefix='/system')
     
-    # Run the application
-    flask_app.run(host='0.0.0.0', port=5000, debug=False)
+    # Socket.IO event handlers
+    @socketio.on('connect')
+    def handle_connect():
+        print('Client connected')
+    
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        print('Client disconnected')
+    
+    @socketio.on('request_update')
+    def handle_request_update(data):
+        # When a client requests an update, emit data to that client
+        # In a real app, this would fetch real data
+        from app.main.routes import dashboard_data_new
+        import json
+        from flask import jsonify
+        
+        # Get dashboard data
+        response = dashboard_data_new()
+        data = json.loads(response.get_data(as_text=True))
+        
+        # Emit the data as an event
+        socketio.emit('dashboard_update', data)
+    
+    # Run the application with Socket.IO
+    socketio.run(flask_app, host='0.0.0.0', port=5000, debug=False)

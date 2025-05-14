@@ -1,6 +1,40 @@
 /* Cross-Domain Predictive Analytics Dashboard Main Styles */
 
+/* Global Styles */
+:root {
+    --primary-color: #4361ee;
+    --primary-dark: #3a0ca3;
+    --primary-light: #4cc9f0;
+    --secondary-color: #7209b7;
+    --accent-color: #f72585;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --info-color: #4895ef;
+    --text-color: #333333;
+    --text-muted: #6c757d;
+    --bg-light: #f5f7fa;
+    --bg-dark: #212529;
+    --bg-gradient: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    
+    --card-border-radius: 12px;
+    --btn-border-radius: 8px;
+    --input-border-radius: 8px;
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
 body {
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -12,31 +46,44 @@ main {
 
 /* Enhanced Navbar Styles */
 .navbar {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to right, #1a237e, #283593, #303f9f) !important;
+    background: var(--bg-gradient);
+    box-shadow: var(--shadow-md);
     padding: 0.8rem 1rem;
 }
 
 .navbar-brand {
+    font-weight: 700;
     font-size: 1.4rem;
-    font-weight: 600;
+    letter-spacing: -0.5px;
     color: white !important;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .navbar .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
     font-weight: 500;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    position: relative;
     transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.9) !important;
 }
 
-.navbar .nav-link:hover, 
+.navbar .nav-link:hover {
+    opacity: 0.9;
+}
+
 .navbar .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white !important;
-    transform: translateY(-2px);
+    font-weight: 600;
+}
+
+.navbar .nav-link.active:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px 3px 0 0;
 }
 
 .navbar .dropdown-menu {
@@ -56,61 +103,295 @@ main {
 }
 
 /* Card styles */
-.dashboard-card {
+.card {
+    border: none;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Button Styling */
+.btn {
+    font-weight: 500;
+    border-radius: var(--btn-border-radius);
+    padding: 0.6rem 1.25rem;
     transition: all 0.3s ease;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+/* Form Control Styling */
+.form-control, .form-select {
+    border-radius: var(--input-border-radius);
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+/* Badge Styling */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+}
+
+/* Progress Bar Styling */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.05);
+    margin: 0.5rem 0;
+}
+
+/* Domain Cards */
+.domain-card {
+    border-radius: var(--card-border-radius);
+    transition: all 0.3s ease;
     height: 100%;
 }
 
-.dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+.domain-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
 }
 
-.dashboard-card .card-header {
-    border-radius: 10px 10px 0 0;
-    font-weight: 600;
+.domain-card .display-4 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+    background: var(--bg-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Correlation visualization styles */
-.correlation-heatmap {
-    min-height: 400px;
+/* Chart Container */
+.chart-container {
+    height: 300px;
+    margin-bottom: 1.5rem;
+    background-color: white;
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    padding: 1rem;
 }
 
-.correlation-network {
-    min-height: 500px;
+/* Alert Styling */
+.alert {
+    border-radius: var(--card-border-radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: none;
+    box-shadow: var(--shadow-sm);
 }
 
-/* Alert styles */
-.alert-badge {
-    animation: pulse 2s infinite;
+.alert-primary {
+    background-color: rgba(67, 97, 238, 0.1);
+    color: var(--primary-color);
 }
 
+.alert-success {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--success-color);
+}
+
+.alert-warning {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+}
+
+.alert-danger {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--danger-color);
+}
+
+.alert-info {
+    background-color: rgba(72, 149, 239, 0.1);
+    color: var(--info-color);
+}
+
+/* Loading Indicator */
+#loadingIndicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+/* Pulse Animation */
 @keyframes pulse {
     0% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.6; }
     100% { opacity: 1; }
 }
 
-/* Chart container styles */
-.chart-container {
-    position: relative;
-    height: 300px;
-    margin-bottom: 20px;
+.pulse {
+    animation: pulse 2s infinite;
 }
 
-/* Natural Language Query styles */
-.nlq-input {
-    border-radius: 20px;
-    padding: 10px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* Spinner Animation */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25rem;
+    color: var(--primary-color);
 }
 
-.nlq-results {
-    margin-top: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Color Coding for Different Domains */
+.weather-accent {
+    color: #4cc9f0;
+}
+
+.economic-accent {
+    color: #f72585;
+}
+
+.transportation-accent {
+    color: #4361ee;
+}
+
+.social-accent {
+    color: #7209b7;
+}
+
+/* Modern Tabs Styling */
+.nav-tabs {
+    border-bottom: none;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 0.5rem;
+    border-radius: var(--card-border-radius);
+    margin-bottom: 1rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--btn-border-radius);
+    margin-right: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--text-color);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: rgba(67, 97, 238, 0.1);
+    font-weight: 600;
+}
+
+/* System Status Cards */
+.status-card {
+    transition: all 0.3s ease;
+    border-radius: var(--card-border-radius);
+    overflow: hidden;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-indicator.active {
+    background-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+}
+
+.status-indicator.warning {
+    background-color: var(--warning-color);
+    box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+}
+
+.status-indicator.error {
+    background-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
 }
 
 /* Use case specific styles */
@@ -166,32 +447,41 @@ main {
     background-color: #dc3545;
 }
 
-/* Loading indicator */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .chart-container {
         height: 250px;
     }
     
-    .correlation-heatmap,
-    .correlation-network {
-        min-height: 300px;
+    .domain-card .display-4 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 200px;
     }
     
-    .use-case-header {
-        padding: 40px 0;
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .chart-container {
+        height: 180px;
+    }
+    
+    .domain-card .display-4 {
+        font-size: 1.8rem;
+    }
+    
+    .navbar .nav-link {
+        padding: 0.4rem 0.75rem;
     }
 } 

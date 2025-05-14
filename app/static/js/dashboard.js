@@ -2323,98 +2323,217 @@ function setupRefreshInterval() {
 }
 
 /**
- * Set up SocketIO connections for real-time updates
+ * Set up socket connections for real-time updates
  */
 function setupSocketConnections() {
-    // Check if SocketIO is available
-    if (typeof io !== 'undefined') {
-        console.log('Setting up Socket.IO connections...');
+    console.log('Setting up socket connections...');
+    
+    // Check if Socket.IO is available
+    if (typeof io === 'undefined') {
+        console.warn('Socket.IO is not available. Real-time updates will be disabled.');
         
-        // Use a short timeout to defer socket connection until after initial page load
-        setTimeout(() => {
-            // Connect to system-updates namespace with options
-            const socket = io('/system-updates', {
-                reconnectionAttempts: 5,        // Only try to reconnect 5 times
-                reconnectionDelay: 1000,        // Start with 1 second delay
-                reconnectionDelayMax: 10000,    // Maximum 10 second delay
-                timeout: 20000,                 // Connection timeout
-                autoConnect: true,              // Auto connect on initialization
-                transports: ['websocket', 'polling'] // Prefer WebSocket
-            });
-            
-            socket.on('connect', () => {
-                console.log('Connected to system-updates socket');
-                
-                // Update connection status indicator
-                const connectionStatus = document.getElementById('connectionStatus');
-                if (connectionStatus) {
-                    connectionStatus.className = 'badge bg-success me-2';
-                    connectionStatus.textContent = 'Connected';
-                }
-                
-                // Subscribe to various update types
-                socket.emit('subscribe_to_updates', { update_type: 'all' });
-            });
-            
-            socket.on('disconnect', () => {
-                console.log('Disconnected from system-updates socket');
-                
-                // Update connection status indicator
-                const connectionStatus = document.getElementById('connectionStatus');
-                if (connectionStatus) {
-                    connectionStatus.className = 'badge bg-danger me-2';
-                    connectionStatus.textContent = 'Disconnected';
-                }
-            });
-            
-            socket.on('reconnect_attempt', (attemptNumber) => {
-                console.log(`Attempting to reconnect (${attemptNumber})...`);
-                
-                // Update connection status indicator
-                const connectionStatus = document.getElementById('connectionStatus');
-                if (connectionStatus) {
-                    connectionStatus.className = 'badge bg-warning me-2';
-                    connectionStatus.textContent = 'Reconnecting...';
-                }
-            });
-            
-            // Listen for real-time updates
-            socket.on('processed_data', (data) => {
-                console.log('Received real-time data update');
-                // Update relevant components without full page refresh
-                updateComponentsWithRealtimeData(data);
-            });
-            
-            socket.on('correlation_data', (data) => {
-                console.log('Received correlation update');
-                if (data.status === 'success') {
-                    updateCorrelationInsights(data.data);
-                }
-            });
-            
-            socket.on('system_metrics', (data) => {
-                console.log('Received system metrics update');
-                updateSystemHealth(data);
-            });
-            
-            socket.on('connect_error', (error) => {
-                console.error('Socket connection error:', error);
-                
-                // Update connection status indicator
-                const connectionStatus = document.getElementById('connectionStatus');
-                if (connectionStatus) {
-                    connectionStatus.className = 'badge bg-danger me-2';
-                    connectionStatus.textContent = 'Connection Error';
-                }
-            });
-            
-            // Store socket reference in dashboardState
-            dashboardState.socket = socket;
-        }, 1000); // 1-second delay before establishing socket connection
+        // Change connection status indicator
+        const connectionStatus = document.getElementById('connectionStatus');
+        if (connectionStatus) {
+            connectionStatus.className = 'badge bg-warning me-2';
+            connectionStatus.textContent = 'Offline Mode';
+        }
         
-    } else {
-        console.log('Socket.IO not available, real-time updates disabled');
+        return;
     }
+    
+    try {
+        // Connect to the Socket.IO server
+        const socket = io.connect(window.location.origin, {
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000
+        });
+        
+        // Connection established
+        socket.on('connect', function() {
+            console.log('Connected to Socket.IO server');
+            
+            // Update connection status
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (connectionStatus) {
+                connectionStatus.className = 'badge bg-success me-2';
+                connectionStatus.textContent = 'Connected';
+            }
+            
+            // Request initial data
+            socket.emit('request_update', { timeRange: dashboardState.settings.timeRange });
+        });
+        
+        // Connection lost
+        socket.on('disconnect', function() {
+            console.warn('Disconnected from Socket.IO server');
+            
+            // Update connection status
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (connectionStatus) {
+                connectionStatus.className = 'badge bg-danger me-2';
+                connectionStatus.textContent = 'Disconnected';
+                
+                // Try to reconnect after a delay
+                setTimeout(function() {
+                    socket.connect();
+                }, 5000);
+            }
+        });
+        
+        // Connection error
+        socket.on('connect_error', function(error) {
+            console.error('Socket.IO connection error:', error);
+            
+            // Update connection status
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (connectionStatus) {
+                connectionStatus.className = 'badge bg-danger me-2';
+                connectionStatus.textContent = 'Connection Error';
+            }
+            
+            // Show a user-friendly message
+            showErrorMessage('Unable to establish real-time connection. Using cached data.');
+        });
+        
+        // Handle dashboard updates
+        socket.on('dashboard_update', function(data) {
+            console.log('Received real-time dashboard update:', data);
+            
+            // Update the dashboard with the received data
+            updateDashboardComponents(data);
+            
+            // Update last updated timestamp
+            dashboardState.lastUpdated = new Date().getTime();
+            updateLastUpdatedDisplay();
+            
+            // Flash the status to indicate data refresh
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (connectionStatus) {
+                const originalClass = connectionStatus.className;
+                connectionStatus.className = 'badge bg-info me-2';
+                
+                setTimeout(function() {
+                    connectionStatus.className = originalClass;
+                }, 500);
+            }
+        });
+        
+        // Handle alerts
+        socket.on('alert', function(alertData) {
+            console.log('Received alert:', alertData);
+            
+            // Only show notifications if enabled in settings
+            if (dashboardState.settings.notificationsEnabled) {
+                // Create a notification if the browser supports it
+                if ('Notification' in window) {
+                    // Check if we already have permission
+                    if (Notification.permission === 'granted') {
+                        createNotification(alertData);
+                    } else if (Notification.permission !== 'denied') {
+                        // Request permission if not denied
+                        Notification.requestPermission().then(function(permission) {
+                            if (permission === 'granted') {
+                                createNotification(alertData);
+                            }
+                        });
+                    }
+                }
+                
+                // Also update the alerts container on the page
+                updateAlertsContainer(alertData);
+            }
+        });
+        
+        // Set up periodic data requests if auto-refresh is enabled
+        setInterval(function() {
+            if (socket.connected && dashboardState.settings.autoRefresh) {
+                socket.emit('request_update', { timeRange: dashboardState.settings.timeRange });
+            }
+        }, config.refreshInterval);
+        
+    } catch (error) {
+        console.error('Error setting up Socket.IO connection:', error);
+        
+        // Update connection status
+        const connectionStatus = document.getElementById('connectionStatus');
+        if (connectionStatus) {
+            connectionStatus.className = 'badge bg-danger me-2';
+            connectionStatus.textContent = 'Connection Failed';
+        }
+        
+        // Show an error message
+        showErrorMessage('Failed to establish real-time connection. Using cached data.');
+    }
+}
+
+/**
+ * Create a notification
+ */
+function createNotification(alertData) {
+    const notification = new Notification(alertData.title || 'Dashboard Alert', {
+        body: alertData.message || 'No additional information available',
+        icon: '/static/img/notification-icon.png'
+    });
+    
+    notification.onclick = function() {
+        window.focus();
+        
+        // Navigate to the relevant tab if specified
+        if (alertData.tabId) {
+            const tabLink = document.querySelector(`[data-tab-target="#${alertData.tabId}"]`);
+            if (tabLink) {
+                tabLink.click();
+            }
+        }
+        
+        this.close();
+    };
+}
+
+/**
+ * Update alerts container
+ */
+function updateAlertsContainer(alertData) {
+    const alertsContainer = document.getElementById('alertsContainer');
+    if (!alertsContainer) return;
+    
+    // Create a new alert element
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert alert-${alertData.type || 'info'} alert-dismissible fade show`;
+    alertElement.innerHTML = `
+        <strong>${alertData.title || 'Alert'}</strong> ${alertData.message || ''}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Add to the alerts container
+    alertsContainer.prepend(alertElement);
+    
+    // Update alert count badge
+    const alertCount = document.getElementById('alertCount');
+    if (alertCount) {
+        const currentCount = parseInt(alertCount.textContent) || 0;
+        alertCount.textContent = currentCount + 1;
+    }
+    
+    // Auto-remove after 60 seconds
+    setTimeout(function() {
+        if (alertElement.parentNode) {
+            alertElement.classList.remove('show');
+            setTimeout(() => alertElement.remove(), 500);
+            
+            // Update alert count badge
+            if (alertCount) {
+                const newCount = parseInt(alertCount.textContent) || 0;
+                if (newCount > 0) {
+                    alertCount.textContent = newCount - 1;
+                }
+            }
+        }
+    }, 60000);
 }
 
 /**
