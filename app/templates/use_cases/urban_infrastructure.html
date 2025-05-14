@@ -417,7 +417,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Create interactive stress chart using radar type
         const stressCtx = document.getElementById('stressChart').getContext('2d');
-        const stressChart = new Chart(stressCtx, {
+        let stressChart = new Chart(stressCtx, {
             type: 'radar',
             data: {
                 labels: ['Power Grid', 'Transportation', 'Water Systems', 'Telecom', 'Bridges'],
@@ -455,15 +455,170 @@
             }
         });
         
+        // Toggle view functionality
+        let currentView = 'radar';
+        const toggleStressView = document.getElementById('toggleStressView');
+        if (toggleStressView) {
+            toggleStressView.addEventListener('click', function() {
+                // Destroy current chart
+                stressChart.destroy();
+                
+                // Switch chart type
+                if (currentView === 'radar') {
+                    currentView = 'bar';
+                    
+                    // Create bar chart
+                    stressChart = new Chart(stressCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Power Grid', 'Transportation', 'Water Systems', 'Telecom', 'Bridges'],
+                            datasets: [
+                                {
+                                    label: 'Current Stress',
+                                    data: [85, 65, 45, 55, 80],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Normal Range',
+                                    data: [50, 50, 50, 50, 50],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Stress Level (0-100)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    currentView = 'radar';
+                    
+                    // Recreate original radar chart
+                    stressChart = new Chart(stressCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Power Grid', 'Transportation', 'Water Systems', 'Telecom', 'Bridges'],
+                            datasets: [
+                                {
+                                    label: 'Current Stress',
+                                    data: [85, 65, 45, 55, 80],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                },
+                                {
+                                    label: 'Normal Range',
+                                    data: [50, 50, 50, 50, 50],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    angleLines: {
+                                        display: true
+                                    },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
         // Time range selector functionality
         const timeRangeSelect = document.getElementById('timeRangeSelect');
         if (timeRangeSelect) {
             timeRangeSelect.addEventListener('change', function() {
                 const selectedValue = this.value;
-                // Here you would fetch new data based on the selected time range
                 console.log('Selected time range:', selectedValue);
-                // For demo purposes, let's reload the page with the new time range
-                window.location.href = `/use-cases/urban-infrastructure/data?timeRange=${selectedValue}`;
+                
+                // Instead of reloading the page, simulate data update
+                let updatedStressData;
+                
+                // Simulate different data for different time ranges
+                switch(selectedValue) {
+                    case '1d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [80, 60, 40, 50, 75] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                    case '7d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [85, 65, 45, 55, 80] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                    case '30d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [90, 70, 50, 60, 85] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                    case '90d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [95, 75, 55, 65, 90] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                    case '180d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [92, 72, 58, 68, 88] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                    case '365d':
+                        updatedStressData = {
+                            datasets: [
+                                { ...stressChart.data.datasets[0], data: [88, 70, 60, 70, 85] },
+                                { ...stressChart.data.datasets[1], data: [50, 50, 50, 50, 50] }
+                            ]
+                        };
+                        break;
+                }
+                
+                // Update chart data
+                stressChart.data.datasets[0].data = updatedStressData.datasets[0].data;
+                stressChart.data.datasets[1].data = updatedStressData.datasets[1].data;
+                stressChart.update();
+                
+                // Update card information
+                document.querySelector('.badge.bg-danger').textContent = selectedValue === '90d' || selectedValue === '180d' ? 'Critical' : 'High Risk';
+                document.querySelector('.badge.bg-warning').textContent = selectedValue === '365d' ? 'Moderate' : 'Alert';
             });
         }
     });

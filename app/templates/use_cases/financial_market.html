@@ -399,7 +399,7 @@
                                         <span class="badge bg-primary rounded-pill">{{ item.correlation }}</span>
                                     </div>
                                     <div class="progress mt-1" style="height: 4px;">
-                                        <div class="progress-bar" style="width: {{ item.correlation * 100 }}%"></div>
+                                        <div class="progress-bar correlation-progress-{{ loop.index }}" style="width: 75%"></div>
                                     </div>
                                 </li>
                                 {% endfor %}
@@ -502,7 +502,7 @@
                     <p><strong>Confidence:</strong> {{ (opportunity.confidence * 100)|int }}%</p>
                     <p><strong>Analysis:</strong> {{ opportunity.reasoning }}</p>
                     <div class="progress" style="height: 5px;">
-                        <div class="progress-bar {% if opportunity.signal == 'buy' %}bg-success{% elif opportunity.signal == 'sell' %}bg-danger{% else %}bg-secondary{% endif %}" role="progressbar" style="width: {{ opportunity.confidence * 100 }}%"></div>
+                        <div class="progress-bar {% if opportunity.signal == 'buy' %}bg-success{% elif opportunity.signal == 'sell' %}bg-danger{% else %}bg-secondary{% endif %} opportunity-progress-{{ loop.index }}" role="progressbar" style="width: 70%"></div>
                     </div>
                 </div>
                 {% endfor %}
@@ -521,7 +521,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Create market trends chart
         const marketCtx = document.getElementById('marketTrendsChart').getContext('2d');
-        const marketChart = new Chart(marketCtx, {
+        let marketChart = new Chart(marketCtx, {
             type: 'line',
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -566,15 +566,189 @@
             }
         });
         
+        // Toggle view functionality
+        let currentView = 'line';
+        const toggleMarketView = document.getElementById('toggleMarketView');
+        if (toggleMarketView) {
+            toggleMarketView.addEventListener('click', function() {
+                // Destroy current chart
+                marketChart.destroy();
+                
+                // Switch chart type
+                if (currentView === 'line') {
+                    currentView = 'bar';
+                    
+                    // Create bar chart
+                    marketChart = new Chart(marketCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            datasets: [
+                                {
+                                    label: 'Technology Sector',
+                                    data: [100, 105, 110, 108, 112, 118, 122, 126, 130, 135, 140, 145],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Energy Commodities',
+                                    data: [100, 98, 95, 92, 90, 88, 85, 82, 80, 78, 75, 72],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Consumer Goods',
+                                    data: [100, 101, 102, 101, 102, 103, 104, 103, 102, 103, 104, 105],
+                                    backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                                    borderColor: 'rgba(255, 206, 86, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Index (Baseline = 100)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    currentView = 'line';
+                    
+                    // Recreate original line chart
+                    marketChart = new Chart(marketCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                            datasets: [
+                                {
+                                    label: 'Technology Sector',
+                                    data: [100, 105, 110, 108, 112, 118, 122, 126, 130, 135, 140, 145],
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Energy Commodities',
+                                    data: [100, 98, 95, 92, 90, 88, 85, 82, 80, 78, 75, 72],
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                },
+                                {
+                                    label: 'Consumer Goods',
+                                    data: [100, 101, 102, 101, 102, 103, 104, 103, 102, 103, 104, 105],
+                                    borderColor: 'rgba(255, 206, 86, 1)',
+                                    backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Index (Baseline = 100)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
         // Time range selector functionality
         const timeRangeSelect = document.getElementById('timeRangeSelect');
         if (timeRangeSelect) {
             timeRangeSelect.addEventListener('change', function() {
                 const selectedValue = this.value;
-                // Here you would fetch new data based on the selected time range
                 console.log('Selected time range:', selectedValue);
-                // For demo purposes, let's reload the page with the new time range
-                window.location.href = `/use-cases/financial-market/data?timeRange=${selectedValue}`;
+                
+                // Instead of reloading the page, simulate data update
+                let updatedMarketData;
+                
+                // Simulate different data for different time ranges
+                switch(selectedValue) {
+                    case '1d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 101, 102, 101, 100, 101, 102, 103, 104, 105, 106, 107] },
+                                { ...marketChart.data.datasets[1], data: [100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89] },
+                                { ...marketChart.data.datasets[2], data: [100, 100, 101, 100, 100, 100, 101, 100, 100, 101, 100, 100] }
+                            ]
+                        };
+                        break;
+                    case '7d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 105, 110, 108, 112, 118, 122, 126, 130, 135, 140, 145] },
+                                { ...marketChart.data.datasets[1], data: [100, 98, 95, 92, 90, 88, 85, 82, 80, 78, 75, 72] },
+                                { ...marketChart.data.datasets[2], data: [100, 101, 102, 101, 102, 103, 104, 103, 102, 103, 104, 105] }
+                            ]
+                        };
+                        break;
+                    case '30d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 110, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165] },
+                                { ...marketChart.data.datasets[1], data: [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45] },
+                                { ...marketChart.data.datasets[2], data: [100, 102, 104, 103, 105, 107, 109, 108, 107, 109, 110, 112] }
+                            ]
+                        };
+                        break;
+                    case '90d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 115, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220] },
+                                { ...marketChart.data.datasets[1], data: [100, 90, 80, 70, 65, 60, 55, 50, 45, 40, 35, 30] },
+                                { ...marketChart.data.datasets[2], data: [100, 105, 110, 108, 112, 115, 118, 116, 115, 118, 120, 122] }
+                            ]
+                        };
+                        break;
+                    case '180d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 120, 140, 155, 170, 185, 200, 215, 230, 245, 260, 275] },
+                                { ...marketChart.data.datasets[1], data: [100, 85, 70, 60, 50, 45, 40, 35, 30, 25, 20, 15] },
+                                { ...marketChart.data.datasets[2], data: [100, 108, 116, 112, 118, 124, 130, 126, 124, 130, 136, 142] }
+                            ]
+                        };
+                        break;
+                    case '365d':
+                        updatedMarketData = {
+                            datasets: [
+                                { ...marketChart.data.datasets[0], data: [100, 125, 150, 170, 190, 210, 230, 250, 270, 290, 310, 330] },
+                                { ...marketChart.data.datasets[1], data: [100, 80, 65, 55, 45, 40, 35, 30, 25, 20, 15, 10] },
+                                { ...marketChart.data.datasets[2], data: [100, 110, 120, 115, 125, 135, 145, 140, 135, 145, 155, 165] }
+                            ]
+                        };
+                        break;
+                }
+                
+                // Update chart data
+                marketChart.data.datasets.forEach((dataset, index) => {
+                    dataset.data = updatedMarketData.datasets[index].data;
+                });
+                marketChart.update();
+                
+                // Update badge information
+                document.querySelector('.badge.bg-success').textContent = selectedValue === '180d' || selectedValue === '365d' ? 'Very Positive' : 'Positive';
+                document.querySelector('.badge.bg-primary').textContent = selectedValue === '1d' ? 'Stable' : 'Rising';
             });
         }
         

@@ -452,7 +452,7 @@
         };
         
         const riskCtx = document.getElementById('riskChart').getContext('2d');
-        const riskChart = new Chart(riskCtx, {
+        let riskChart = new Chart(riskCtx, {
             type: 'bar',
             data: riskData,
             options: {
@@ -471,15 +471,153 @@
             }
         });
         
+        // Toggle view functionality
+        let currentView = 'bar';
+        const toggleRiskView = document.getElementById('toggleRiskView');
+        if (toggleRiskView) {
+            toggleRiskView.addEventListener('click', function() {
+                // Destroy current chart
+                riskChart.destroy();
+                
+                // Switch chart type
+                if (currentView === 'bar') {
+                    currentView = 'radar';
+                    
+                    // Create radar chart
+                    riskChart = new Chart(riskCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['North County', 'East District', 'West Side', 'South Region'],
+                            datasets: [
+                                {
+                                    label: 'Risk Score',
+                                    data: [85, 65, 35, 60],
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                },
+                                {
+                                    label: 'Confidence',
+                                    data: [88, 76, 91, 82],
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    angleLines: {
+                                        display: true
+                                    },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    currentView = 'bar';
+                    
+                    // Recreate original bar chart
+                    riskChart = new Chart(riskCtx, {
+                        type: 'bar',
+                        data: riskData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Score (0-100)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
         // Time range selector functionality
         const timeRangeSelect = document.getElementById('timeRangeSelect');
         if (timeRangeSelect) {
             timeRangeSelect.addEventListener('change', function() {
                 const selectedValue = this.value;
-                // Here you would fetch new data based on the selected time range
                 console.log('Selected time range:', selectedValue);
-                // For demo purposes, let's reload the page with the new time range
-                window.location.href = `/use-cases/public-health/data?timeRange=${selectedValue}`;
+                
+                // Instead of reloading the page, simulate data update
+                let updatedRiskData;
+                
+                // Simulate different data for different time ranges
+                switch(selectedValue) {
+                    case '1d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [82, 60, 30, 55] },
+                                { ...riskChart.data.datasets[1], data: [85, 73, 89, 80] }
+                            ]
+                        };
+                        break;
+                    case '7d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [85, 65, 35, 60] },
+                                { ...riskChart.data.datasets[1], data: [88, 76, 91, 82] }
+                            ]
+                        };
+                        break;
+                    case '30d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [88, 70, 40, 65] },
+                                { ...riskChart.data.datasets[1], data: [90, 80, 88, 85] }
+                            ]
+                        };
+                        break;
+                    case '90d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [90, 75, 45, 70] },
+                                { ...riskChart.data.datasets[1], data: [92, 85, 86, 88] }
+                            ]
+                        };
+                        break;
+                    case '180d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [92, 80, 50, 75] },
+                                { ...riskChart.data.datasets[1], data: [93, 88, 85, 90] }
+                            ]
+                        };
+                        break;
+                    case '365d':
+                        updatedRiskData = {
+                            datasets: [
+                                { ...riskChart.data.datasets[0], data: [95, 85, 55, 80] },
+                                { ...riskChart.data.datasets[1], data: [95, 90, 83, 92] }
+                            ]
+                        };
+                        break;
+                }
+                
+                // Update chart data
+                riskChart.data.datasets[0].data = updatedRiskData.datasets[0].data;
+                riskChart.data.datasets[1].data = updatedRiskData.datasets[1].data;
+                riskChart.update();
+                
+                // Update alert information
+                document.querySelectorAll('.insights-badge').forEach(badge => {
+                    badge.textContent = `${selectedValue} Data`;
+                });
             });
         }
     });
