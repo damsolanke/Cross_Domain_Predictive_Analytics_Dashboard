@@ -75,13 +75,15 @@
 
 {% block scripts %}
 {{ super() }}
+<!-- Add Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="{{ url_for('static', filename='js/nlq.js') }}"></script>
 <script>
     // Set up example query clicks
     document.addEventListener('DOMContentLoaded', function() {
         const exampleQueries = document.querySelectorAll('.query-example');
         const nlqInput = document.getElementById('nlq-input');
-        
+
         exampleQueries.forEach(example => {
             example.addEventListener('click', function() {
                 nlqInput.value = this.textContent;
@@ -89,15 +91,15 @@
                 document.getElementById('nlq-submit').click();
             });
         });
-        
+
         // Load query history
         loadQueryHistory();
     });
-    
+
     function loadQueryHistory() {
         const historyContainer = document.getElementById('query-history');
         if (!historyContainer) return;
-        
+
         fetch('/api/nlq/history')
             .then(response => response.json())
             .then(data => {
@@ -105,26 +107,26 @@
                     historyContainer.innerHTML = '<p>No query history yet.</p>';
                     return;
                 }
-                
+
                 const historyList = document.createElement('ul');
                 historyList.classList.add('list-group');
-                
+
                 data.forEach(item => {
                     const listItem = document.createElement('li');
                     listItem.classList.add('list-group-item', 'list-group-item-action', 'query-example');
                     listItem.textContent = item.query;
-                    
+
                     const timestamp = document.createElement('small');
                     timestamp.classList.add('text-muted', 'd-block');
-                    
+
                     // Format timestamp
                     const date = new Date(item.timestamp);
                     timestamp.textContent = date.toLocaleString();
-                    
+
                     listItem.appendChild(timestamp);
                     historyList.appendChild(listItem);
                 });
-                
+
                 historyContainer.innerHTML = '';
                 historyContainer.appendChild(historyList);
             })
