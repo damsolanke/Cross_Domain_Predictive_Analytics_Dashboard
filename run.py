@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 if __name__ == '__main__':
     print("Starting Cross-Domain Predictive Analytics Dashboard...")
-    print("Server running at http://localhost:5002")
+    print("Server running at http://localhost:5000")
     
     # Create a simple Flask app without using the module-level app
     flask_app = Flask(__name__, 
@@ -38,4 +38,4 @@ if __name__ == '__main__':
     flask_app.register_blueprint(system_integration, url_prefix='/system')
     
     # Run the application
-    flask_app.run(host='0.0.0.0', port=5002, debug=False)
+    flask_app.run(host='0.0.0.0', port=5000, debug=False)
