@@ -14,7 +14,8 @@ def create_app():
     app = Flask(__name__)
 
     # Configure the app
-    app.config['SECRET_KEY'] = 'REDACTED'
+    import secrets
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
     app.config['TESTING'] = os.environ.get('TESTING', 'False') == 'True'
     app.config['DEBUG'] = False  # Explicitly set debug to False
 
