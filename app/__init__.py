@@ -99,6 +99,6 @@ def create_app():
         pass
     
     # Import SocketIO event handlers
-    import app.system_integration.socket_events
-    
+    from app.system_integration import socket_events  # noqa: F401
+
     return app
