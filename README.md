@@ -6,41 +6,9 @@ Real-time predictive analytics platform that correlates data across four public 
 
 ## Architecture
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1565C0', 'lineColor': '#555', 'secondaryColor': '#FFF3E0', 'tertiaryColor': '#F3E5F5', 'fontSize': '14px'}}}%%
-flowchart LR
-    subgraph SRC["Data Sources"]
-        W[OpenWeatherMap]
-        E[Alpha Vantage]
-        N[News API]
-        T[TomTom Traffic]
-    end
-
-    subgraph PROC["Processing Layer"]
-        CL[Data Cleaning<br/>& Validation]
-        TR[Normalization<br/>& Transformation]
-        CA[Domain-Aware<br/>Caching]
-    end
-
-    subgraph CORE["Analytics Core"]
-        CO[Correlation<br/>Engine]
-        PR[Prediction<br/>Engine]
-        NL[Natural Language<br/>Query Processor]
-    end
-
-    subgraph UI["Dashboard · Flask + Socket.IO"]
-        DA[Interactive<br/>Dashboards]
-        VZ[Visualization<br/>Suite]
-        RT[Real-Time<br/>Updates]
-    end
-
-    W & E & N & T --> CL --> TR --> CA --> CO & PR & NL --> DA & VZ & RT
-
-    style SRC fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
-    style PROC fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
-    style CORE fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#0D47A1
-    style UI fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
-```
+<p align="center">
+  <img src="docs/images/architecture.png" alt="System Architecture" width="100%">
+</p>
 
 ### Data Domains
 
@@ -53,33 +21,9 @@ flowchart LR
 
 ### Data Flow
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant API as Domain APIs
-    participant CON as API Connectors
-    participant PIPE as Processing Pipeline
-    participant CACHE as Cache Layer
-    participant ML as Analytics Engine
-    participant WS as Socket.IO
-    participant UI as Dashboard
-
-    API->>CON: Raw domain data
-    CON->>PIPE: Validated payloads
-    PIPE->>CACHE: Cleaned & normalized
-
-    alt Cache Hit
-        CACHE-->>ML: Cached data (within TTL)
-    else Cache Miss
-        CON->>API: Refresh from source
-    end
-
-    ML->>ML: Cross-domain correlation
-    ML->>ML: Trend prediction
-    ML->>WS: Updated insights
-    WS->>UI: Real-time push
-    UI-->>API: User-triggered refresh
-```
+<p align="center">
+  <img src="docs/images/data-flow.png" alt="Data Flow" width="100%">
+</p>
 
 ## Key Capabilities
 
@@ -139,6 +83,7 @@ The system works without API keys — it falls back to generated demo data with 
 ├── tests/                        #   Integration tests
 ├── app/tests/                    #   Unit tests (NLP, API, correlation)
 ├── docs/                         #   Architecture + API configuration guides
+├── scripts/                      #   Diagram generation
 ├── .github/workflows/ci.yml      #   CI pipeline
 ├── run.py                        #   Entry point (calls create_app factory)
 ├── requirements.txt              #   Python dependencies
