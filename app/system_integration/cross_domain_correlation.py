@@ -46,7 +46,7 @@ class CrossDomainCorrelator:
         Returns:
             Pearson correlation coefficient or None if computation fails
         """
-        cache_key = f"{domain1}.{field1}_{domain2}.{field2}"
+        cache_key = f"{domain1}.{field1}|{domain2}.{field2}"
         
         # Check cache first
         if cache_key in self.correlation_cache:
@@ -114,7 +114,7 @@ class CrossDomainCorrelator:
                             
                         correlation = self.compute_correlation(domain1, field1, domain2, field2)
                         if correlation is not None:
-                            key = f"{domain1}.{field1}_{domain2}.{field2}"
+                            key = f"{domain1}.{field1}|{domain2}.{field2}"
                             result[key] = correlation
         
         # Update cache timestamp
@@ -164,9 +164,12 @@ class CrossDomainCorrelator:
         # Format results
         result = []
         for key, value in sorted_correlations[:limit]:
-            domain1_field, domain2_field = key.split('_')
-            domain1, field1 = domain1_field.split('.')
-            domain2, field2 = domain2_field.split('.')
+            # Key format: "domain1.field1|domain2.field2"
+            halves = key.split('|')
+            if len(halves) != 2:
+                continue
+            domain1, field1 = halves[0].split('.', 1)
+            domain2, field2 = halves[1].split('.', 1)
             
             result.append({
                 'correlation': value,
