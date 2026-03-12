@@ -63,4 +63,9 @@ coverage.xml
 .flaskenv 
 
 # GitHub CLI installer
-gh.msi 
+gh.msi
+
+# Removed artifacts
+get-pip.py
+.cursor/
+server.pid
