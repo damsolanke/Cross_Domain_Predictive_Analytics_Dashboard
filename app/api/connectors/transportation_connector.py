@@ -946,8 +946,8 @@ class TransportationConnector(BaseConnector):
     
     def _generate_traffic_hotspots(self, city: str) -> List[Dict[str, Any]]:
         """Generate simulated traffic hotspots for a city"""
-        # Number of hotspots depends on city
-        hotspot_count = self._get_city_size_factor(city)
+        # Number of hotspots depends on city (size factor is a float; range() needs an int)
+        hotspot_count = max(1, int(round(self._get_city_size_factor(city) * 3)))
         
         hotspots = []
         for i in range(hotspot_count):
