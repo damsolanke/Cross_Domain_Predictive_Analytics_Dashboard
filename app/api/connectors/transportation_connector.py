@@ -9,7 +9,7 @@ import random
 import math
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
 
 class TransportationConnector(BaseConnector):
     """Connector for transportation data APIs"""
@@ -82,8 +82,9 @@ class TransportationConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Transportation API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Transportation API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -117,8 +118,8 @@ class TransportationConnector(BaseConnector):
         import time
         from datetime import datetime, timedelta
 
-        # TomTom API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else 'yk3KWKAtLm8GlXXdqbQjF0Tg0MqCmGpP'  # Sample key, may be expired
+        # Requires a configured TomTom API key; without one, fall back to simulated data
+        api_key = self._require_api_key('TomTom')
 
         # Map cities to coordinates (latitude, longitude)
         city_coordinates = {

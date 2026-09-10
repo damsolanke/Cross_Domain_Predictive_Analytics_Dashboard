@@ -8,7 +8,7 @@ import hashlib
 import random
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
 
 class SocialMediaConnector(BaseConnector):
     """Connector for social media trend data"""
@@ -92,8 +92,9 @@ class SocialMediaConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Social media API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Social media API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -126,8 +127,8 @@ class SocialMediaConnector(BaseConnector):
         import requests
         from datetime import datetime, timedelta
 
-        # News API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else '20ce415fb7e84e18a9ee5c340f6b8f0b'  # Sample key, limited usage
+        # Requires a configured News API key; without one, fall back to simulated data
+        api_key = self._require_api_key('News API')
 
         # Calculate date range based on timeframe
         end_date = datetime.now()
@@ -259,8 +260,8 @@ class SocialMediaConnector(BaseConnector):
         import requests
         from datetime import datetime, timedelta
 
-        # News API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else '20ce415fb7e84e18a9ee5c340f6b8f0b'  # Sample key, limited usage
+        # Requires a configured News API key; without one, fall back to simulated data
+        api_key = self._require_api_key('News API')
 
         # Set up default topic if none provided
         query = topic if topic else "technology OR business OR politics OR sports OR entertainment"
