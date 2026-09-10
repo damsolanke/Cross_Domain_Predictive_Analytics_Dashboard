@@ -1,7 +1,6 @@
 """
 Transportation data API connector
 """
-import os
 import time
 import json
 import hashlib
@@ -10,6 +9,7 @@ import math
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class TransportationConnector(BaseConnector):
     """Connector for transportation data APIs"""
@@ -22,7 +22,7 @@ class TransportationConnector(BaseConnector):
             cache_ttl=600  # 10 minutes cache
         )
         # API configuration
-        self.api_key = os.environ.get('TRANSPORTATION_API_KEY', 'demo_key')
+        self.api_key = get_api_key('transportation')  # None -> simulated data
         self.base_url = "https://api.transportdata.io"  # Placeholder URL
         
         # Default city if none provided

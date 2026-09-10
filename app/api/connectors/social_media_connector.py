@@ -1,7 +1,6 @@
 """
 Social Media data API connector
 """
-import os
 import time
 import json
 import hashlib
@@ -9,6 +8,7 @@ import random
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class SocialMediaConnector(BaseConnector):
     """Connector for social media trend data"""
@@ -21,7 +21,7 @@ class SocialMediaConnector(BaseConnector):
             cache_ttl=900  # 15 minutes cache (trends change quickly)
         )
         # API configuration
-        self.api_key = os.environ.get('SOCIAL_MEDIA_API_KEY', 'demo_key')
+        self.api_key = get_api_key('social_media')  # None -> simulated data
         self.base_url = "https://api.socialmediatrends.com"  # Placeholder URL
         
         # Default platform if none provided

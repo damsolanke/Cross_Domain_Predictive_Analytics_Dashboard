@@ -96,7 +96,7 @@ class BaseConnector(ABC):
         takes the simulated-data path instead of sending a request with no credentials.
         """
         api_key = getattr(self, 'api_key', None)
-        if not api_key or api_key == 'demo_key':
+        if not api_key:
             raise MissingAPIKeyError(f"{service} API key not configured; using simulated data")
         return api_key
 
