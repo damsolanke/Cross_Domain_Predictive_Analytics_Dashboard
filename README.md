@@ -15,7 +15,7 @@ Names and roles are taken from [CONTRIBUTING.md](CONTRIBUTING.md) and [team_cont
 | Member | Role | Area in this repo |
 |---|---|---|
 | **Ade (Ademola Solanke)** — repo owner | System Integration & Real-Time Analytics | `app/system_integration/`: `pipeline.py` (data pipeline), `alert_system.py` (threshold alerts), `integration.py` (component registry), `events.py` + `socket_events.py` (Socket.IO events), `routes.py` (system status and correlation endpoints), and its tests in [`tests/test_system_integration.py`](tests/test_system_integration.py). Design notes in [`docs/system_architecture.md`](docs/system_architecture.md) and [`docs/ade_system_integration_readme.md`](docs/ade_system_integration_readme.md). Two files in the same package, `cross_domain_correlation.py` and `cross_domain_prediction.py`, are Chao's (per `team_contributions.md`). |
-| **Rujeko** | Frontend Development | `app/templates/`, `app/static/css/`, `app/static/js/`; her implementation plan and standalone prototypes are in `Rujeko_Files/` |
+| **Rujeko** | Frontend Development | `app/templates/`, `app/static/css/`, `app/static/js/`; the implementation plan and standalone prototypes are in `Rujeko_Files/` |
 | **Emmanuel** | Data Visualization | `app/visualizations/` (formatter registry, base formatter, confidence scoring) and `app/templates/visualization.html` |
 | **Julie** | API Integration & Data Processing | `app/api/connectors/` (base connector plus the weather, economic, social media and transportation connectors), `app/storage/`, `app/api/routes.py` |
 | **Chao** | Machine Learning & Predictive Modeling | `lstm_model.py`, `app/models/`, `app/system_integration/cross_domain_correlation.py`, `app/system_integration/cross_domain_prediction.py` |
