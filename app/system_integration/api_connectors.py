@@ -2,24 +2,22 @@
 API connector implementations for external data sources.
 """
 
-import os
 import logging
 from datetime import datetime
-from dotenv import load_dotenv
+from app.config import get_api_key
 from app.system_integration.data_integration import APIDataSource, DataIntegrator
 from app.system_integration.integration import system_integrator
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Get API keys from environment variables
-WEATHER_API_KEY = os.getenv('WEATHER_API_KEY')
-ECONOMIC_API_KEY = os.getenv('ECONOMIC_API_KEY')
-SOCIAL_MEDIA_API_KEY = os.getenv('SOCIAL_MEDIA_API_KEY')
-TRANSPORTATION_API_KEY = os.getenv('TRANSPORTATION_API_KEY')
+# API keys resolved through app.config (canonical names with legacy aliases).
+# None means the key is not configured; app.config logs that once and the live
+# source below is skipped in favour of the simulated data path.
+WEATHER_API_KEY = get_api_key('weather')
+ECONOMIC_API_KEY = get_api_key('economic')
+SOCIAL_MEDIA_API_KEY = get_api_key('social_media')
+TRANSPORTATION_API_KEY = get_api_key('transportation')
 
 # Create data integrator
 data_integrator = DataIntegrator()
@@ -46,7 +44,7 @@ def init_api_connectors():
 def init_weather_connector():
     """Initialize weather data connector using OpenWeatherMap API."""
     if not WEATHER_API_KEY:
-        logger.warning("Weather API key not found. Using fallback mock data.")
+        logger.info("Weather API key not configured; skipping live OpenWeatherMap source.")
         return None
     
     try:
@@ -107,7 +105,7 @@ def init_weather_connector():
 def init_economic_connector():
     """Initialize economic data connector using Alpha Vantage API."""
     if not ECONOMIC_API_KEY:
-        logger.warning("Economic API key not found. Using fallback mock data.")
+        logger.info("Economic API key not configured; skipping live Alpha Vantage source.")
         return None
     
     try:
@@ -163,7 +161,7 @@ def init_economic_connector():
 def init_social_media_connector():
     """Initialize social media data connector using News API."""
     if not SOCIAL_MEDIA_API_KEY:
-        logger.warning("Social Media API key not found. Using fallback mock data.")
+        logger.info("Social media API key not configured; skipping live News API source.")
         return None
     
     try:
@@ -264,7 +262,7 @@ def init_social_media_connector():
 def init_transportation_connector():
     """Initialize transportation data connector using TomTom API."""
     if not TRANSPORTATION_API_KEY:
-        logger.warning("Transportation API key not found. Using fallback mock data.")
+        logger.info("Transportation API key not configured; skipping live TomTom source.")
         return None
     
     try:

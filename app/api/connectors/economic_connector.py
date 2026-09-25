@@ -1,7 +1,6 @@
 """
 Economic data API connector
 """
-import os
 import time
 import json
 import hashlib
@@ -9,7 +8,8 @@ import random
 import math
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class EconomicConnector(BaseConnector):
     """Connector for economic data APIs"""
@@ -22,7 +22,7 @@ class EconomicConnector(BaseConnector):
             cache_ttl=3600  # 1 hour cache
         )
         # API configuration
-        self.api_key = os.environ.get('ECONOMIC_API_KEY', 'demo_key')
+        self.api_key = get_api_key('economic')  # None -> simulated data
         self.base_url = "https://api.economicdata.org"  # Placeholder URL
         
         # Default country if none provided
@@ -88,8 +88,9 @@ class EconomicConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Economic API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Economic API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -149,9 +150,11 @@ class EconomicConnector(BaseConnector):
         # Get appropriate interval
         interval = interval_mappings.get(timeframe, 'DAILY')
 
+        # Requires a configured Alpha Vantage key; without one, fall back to simulated data
+        api_key = self._require_api_key('Alpha Vantage')
+
         try:
             # Make request to Alpha Vantage API - it's free but has usage limits
-            api_key = self.api_key if self.api_key != 'demo_key' else 'demo'
             api_url = "https://www.alphavantage.co/query"
 
             response = requests.get(api_url, params={
@@ -242,9 +245,11 @@ class EconomicConnector(BaseConnector):
         from_currency = currency_mappings.get(country, 'USD')
         to_currency = 'USD' if from_currency != 'USD' else 'EUR'  # If FROM is USD, use EUR as TO
 
+        # Requires a configured Alpha Vantage key; without one, fall back to simulated data
+        api_key = self._require_api_key('Alpha Vantage')
+
         try:
             # Make request to Alpha Vantage FX API
-            api_key = self.api_key if self.api_key != 'demo_key' else 'demo'
             api_url = "https://www.alphavantage.co/query"
 
             response = requests.get(api_url, params={

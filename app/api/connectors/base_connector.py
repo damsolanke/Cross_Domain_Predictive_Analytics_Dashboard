@@ -10,6 +10,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+class MissingAPIKeyError(RuntimeError):
+    """Raised when a connector needs an external API key that is not configured."""
+
+
 class BaseConnector(ABC):
     """
     Abstract base class for all API connectors.
@@ -83,6 +88,18 @@ class BaseConnector(ABC):
             'cache_ttl': self.cache_ttl
         }
     
+    def _require_api_key(self, service: str) -> str:
+        """
+        Return the configured API key for this connector or raise MissingAPIKeyError.
+
+        Connectors call this before contacting a keyed API so that a missing key
+        takes the simulated-data path instead of sending a request with no credentials.
+        """
+        api_key = getattr(self, 'api_key', None)
+        if not api_key:
+            raise MissingAPIKeyError(f"{service} API key not configured; using simulated data")
+        return api_key
+
     def _update_status(self, status: str, error: Optional[Exception] = None) -> None:
         """
         Update connector status

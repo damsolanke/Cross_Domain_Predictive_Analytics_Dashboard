@@ -3,6 +3,8 @@ from flask_socketio import SocketIO
 import os
 from dotenv import load_dotenv
 
+from app.config import get_all_api_keys
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -19,19 +21,22 @@ def create_app():
     app.config['TESTING'] = os.environ.get('TESTING', 'False') == 'True'
     app.config['DEBUG'] = False  # Explicitly set debug to False
 
-    # Set up API keys for external services
+    # External API keys, resolved once through app.config (see that module for
+    # the canonical variable names and their legacy aliases). None means the key
+    # is not configured and the connector serves simulated data.
+    api_keys = get_all_api_keys()
     app.config['API_KEYS'] = {
         # Weather API (OpenWeatherMap)
-        'OPENWEATHER_API_KEY': os.environ.get('WEATHER_API_KEY', 'demo_key'),
+        'OPENWEATHER_API_KEY': api_keys['weather'],
 
         # Economic data API (Alpha Vantage)
-        'ECONOMIC_API_KEY': os.environ.get('ECONOMIC_API_KEY', 'demo_key'),
+        'ECONOMIC_API_KEY': api_keys['economic'],
 
         # Social media / news API (News API)
-        'SOCIAL_MEDIA_API_KEY': os.environ.get('SOCIAL_MEDIA_API_KEY', 'demo_key'),
+        'SOCIAL_MEDIA_API_KEY': api_keys['social_media'],
 
         # Transportation API (TomTom, TransitLand)
-        'TRANSPORTATION_API_KEY': os.environ.get('TRANSPORTATION_API_KEY', 'demo_key'),
+        'TRANSPORTATION_API_KEY': api_keys['transportation'],
     }
 
     # Set default API endpoint settings

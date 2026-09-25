@@ -30,3 +30,14 @@ jobs:
           TESTING: "True"
         run: |
           python -m pytest tests/ app/tests/ -v --ignore=app/tests/test_browser.py -x
+
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

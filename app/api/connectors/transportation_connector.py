@@ -1,7 +1,6 @@
 """
 Transportation data API connector
 """
-import os
 import time
 import json
 import hashlib
@@ -9,7 +8,8 @@ import random
 import math
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class TransportationConnector(BaseConnector):
     """Connector for transportation data APIs"""
@@ -22,7 +22,7 @@ class TransportationConnector(BaseConnector):
             cache_ttl=600  # 10 minutes cache
         )
         # API configuration
-        self.api_key = os.environ.get('TRANSPORTATION_API_KEY', 'demo_key')
+        self.api_key = get_api_key('transportation')  # None -> simulated data
         self.base_url = "https://api.transportdata.io"  # Placeholder URL
         
         # Default city if none provided
@@ -82,8 +82,9 @@ class TransportationConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Transportation API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Transportation API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -117,8 +118,8 @@ class TransportationConnector(BaseConnector):
         import time
         from datetime import datetime, timedelta
 
-        # TomTom API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else 'REMOVED'  # Sample key, may be expired
+        # Requires a configured TomTom API key; without one, fall back to simulated data
+        api_key = self._require_api_key('TomTom')
 
         # Map cities to coordinates (latitude, longitude)
         city_coordinates = {
@@ -945,8 +946,8 @@ class TransportationConnector(BaseConnector):
     
     def _generate_traffic_hotspots(self, city: str) -> List[Dict[str, Any]]:
         """Generate simulated traffic hotspots for a city"""
-        # Number of hotspots depends on city
-        hotspot_count = self._get_city_size_factor(city)
+        # Number of hotspots depends on city (size factor is a float; range() needs an int)
+        hotspot_count = max(1, int(round(self._get_city_size_factor(city) * 3)))
         
         hotspots = []
         for i in range(hotspot_count):

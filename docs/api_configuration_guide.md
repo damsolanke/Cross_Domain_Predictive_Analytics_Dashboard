@@ -92,20 +92,22 @@ There are two ways to configure API keys in the system:
 
 ### 1. Environment Variables (Recommended)
 
-Set the following environment variables:
+Set the following environment variables. All keys are read in one place,
+`app/config.py`; each has a canonical name and a legacy alias (the generic name
+the code used originally). The canonical name takes precedence when both are set.
 
 ```bash
-# For OpenWeatherMap API
-export WEATHER_API_KEY=your_openweathermap_api_key
+# For OpenWeatherMap API (legacy alias: WEATHER_API_KEY)
+export OPENWEATHER_API_KEY=your_openweathermap_api_key
 
-# For Alpha Vantage API
-export ECONOMIC_API_KEY=your_alphavantage_api_key
+# For Alpha Vantage API (legacy alias: ECONOMIC_API_KEY)
+export ALPHAVANTAGE_API_KEY=your_alphavantage_api_key
 
-# For News API (used for social media trends)
-export SOCIAL_MEDIA_API_KEY=your_newsapi_key
+# For News API, used for social media trends (legacy alias: SOCIAL_MEDIA_API_KEY)
+export NEWSAPI_KEY=your_newsapi_key
 
-# For TomTom API
-export TRANSPORTATION_API_KEY=your_tomtom_api_key
+# For TomTom API (legacy alias: TRANSPORTATION_API_KEY)
+export TOMTOM_API_KEY=your_tomtom_api_key
 ```
 
 For permanent configuration:
@@ -114,17 +116,17 @@ For permanent configuration:
 
 ### 2. Configuration File (Alternative)
 
-Create a `.env` file in the project root with the following content:
+Copy `.env.example` to `.env` (which is git-ignored) and fill in the keys you have:
 
 ```
-WEATHER_API_KEY=your_openweathermap_api_key
-ECONOMIC_API_KEY=your_alphavantage_api_key
-SOCIAL_MEDIA_API_KEY=your_newsapi_key
-TRANSPORTATION_API_KEY=your_tomtom_api_key
+OPENWEATHER_API_KEY=your_openweathermap_api_key
+ALPHAVANTAGE_API_KEY=your_alphavantage_api_key
+NEWSAPI_KEY=your_newsapi_key
+TOMTOM_API_KEY=your_tomtom_api_key
 ```
 
 ### Fallback Mechanism
 
-If API keys are not provided, the system will use simulated data to demonstrate functionality. In logs or UI, you'll see an indication that fallback data is being used instead of real API data.
+If an API key is not provided (or is blank), the system logs a single warning for that service at startup and uses simulated data to demonstrate functionality. No request is sent to the external API without a key. In logs or the UI, you'll see an indication that fallback data is being used instead of real API data.
 
 When using real API keys, the dashboard will automatically switch to using real data from the external services.

@@ -1,13 +1,13 @@
 """
 Weather API connector
 """
-import os
 import time
 import json
 import hashlib
 from typing import Dict, Any, Optional
 from datetime import datetime
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class WeatherConnector(BaseConnector):
     """Connector for weather data APIs"""
@@ -20,7 +20,7 @@ class WeatherConnector(BaseConnector):
             cache_ttl=1800  # 30 minutes cache
         )
         # API configuration
-        self.api_key = os.environ.get('OPENWEATHER_API_KEY', 'demo_key')
+        self.api_key = get_api_key('weather')  # None -> simulated data
         self.base_url = "https://api.openweathermap.org/data/2.5"
         
         # Default location if none provided
@@ -84,8 +84,9 @@ class WeatherConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Weather API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Weather API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -115,12 +116,15 @@ class WeatherConnector(BaseConnector):
         """Get real current weather data from OpenWeatherMap API"""
         import requests
 
+        # Requires a configured OpenWeatherMap key; without one, fall back to simulated data
+        api_key = self._require_api_key('OpenWeatherMap')
+
         try:
             # Make the API request using the free OpenWeatherMap API
             response = requests.get(api_url, params={
                 'q': location,
                 'units': units,
-                'appid': self.api_key
+                'appid': api_key
             }, timeout=5)
 
             # Check if the request was successful
@@ -159,12 +163,15 @@ class WeatherConnector(BaseConnector):
         """Get real forecast data from OpenWeatherMap API"""
         import requests
 
+        # Requires a configured OpenWeatherMap key; without one, fall back to simulated data
+        api_key = self._require_api_key('OpenWeatherMap')
+
         try:
             # Make the API request using the free OpenWeatherMap API
             response = requests.get(api_url, params={
                 'q': location,
                 'units': units,
-                'appid': self.api_key
+                'appid': api_key
             }, timeout=5)
 
             # Check if the request was successful
