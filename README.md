@@ -2,19 +2,19 @@
 
 [![CI](https://github.com/damsolanke/Cross_Domain_Predictive_Analytics_Dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/damsolanke/Cross_Domain_Predictive_Analytics_Dashboard/actions/workflows/ci.yml)
 
-A Flask + Flask-SocketIO dashboard that pulls four public data domains — weather (OpenWeatherMap), economic indicators (Alpha Vantage), news headlines standing in for social media (News API) and road traffic (TomTom) — and looks for correlations between them. Every connector has a simulated-data fallback, so the whole app runs on a laptop with no API keys.
+A Flask + Flask-SocketIO dashboard that pulls four public data domains: weather (OpenWeatherMap), economic indicators (Alpha Vantage), news headlines standing in for social media (News API) and road traffic (TomTom), and looks for correlations between them. Every connector has a simulated-data fallback, so the whole app runs on a laptop with no API keys.
 
 ## Status
 
-**Archived.** This was a five-person university course project built in April–May 2025. Since then the owner has only made maintenance changes (dependency pins, removal of committed credentials, this README). No further development is planned. The app still starts and the CI test suite passes, but read [What the code actually does](#what-the-code-actually-does) and [Known limitations](#known-limitations) before taking any number on the dashboard seriously.
+**Archived.** This was a five-person university course project built in April to May 2025. Since then the owner has made only maintenance changes: fixing the test suite and a correlation-key bug (March 2026), dependency pins, removal of committed credentials and this README. No further development is planned. The app still starts and the CI test suite passes, but read [What the code actually does](#what-the-code-actually-does) and [Known limitations](#known-limitations) before taking any number on the dashboard seriously.
 
 ## Team
 
-Names and roles are taken from [CONTRIBUTING.md](CONTRIBUTING.md) and [team_contributions.md](team_contributions.md), which agree on both. The last column lists only paths that exist in this tree; `team_contributions.md` also credits Emmanuel with `app/static/js/visualization.js`, which was never committed.
+Names, roles and assigned areas are taken from [CONTRIBUTING.md](CONTRIBUTING.md) and [team_contributions.md](team_contributions.md), which agree on names and roles. The last column lists the assignment, limited to paths that exist in this tree (`team_contributions.md` also credits Emmanuel with `app/static/js/visualization.js`, which was never committed). It is not a record of commit authorship: the git history shows most of the code under `app/`, including `app/templates/`, `app/static/`, `app/nlq/` and `app/api/connectors/`, committed by Ade as integrator, and Julie's commit `2681511` adding `app/api_clients/`, `app/data_processing/` and `app/storage/`.
 
-| Member | Role | Area in this repo |
+| Member | Role | Assigned area |
 |---|---|---|
-| **Ade (Ademola Solanke)** — repo owner | System Integration & Real-Time Analytics | `app/system_integration/`: `pipeline.py` (data pipeline), `alert_system.py` (threshold alerts), `integration.py` (component registry), `events.py` + `socket_events.py` (Socket.IO events), `routes.py` (system status and correlation endpoints), and its tests in [`tests/test_system_integration.py`](tests/test_system_integration.py). Design notes in [`docs/system_architecture.md`](docs/system_architecture.md) and [`docs/ade_system_integration_readme.md`](docs/ade_system_integration_readme.md). Two files in the same package, `cross_domain_correlation.py` and `cross_domain_prediction.py`, are Chao's (per `team_contributions.md`). |
+| **Ade (Ademola Solanke)**, repo owner | System Integration & Real-Time Analytics | `app/system_integration/`: `pipeline.py` (data pipeline), `alert_system.py` (threshold alerts), `integration.py` (component registry), `events.py` + `socket_events.py` (Socket.IO events), `routes.py` (system status and correlation endpoints), and its tests in [`tests/test_system_integration.py`](tests/test_system_integration.py). Design notes in [`docs/system_architecture.md`](docs/system_architecture.md) and [`docs/ade_system_integration_readme.md`](docs/ade_system_integration_readme.md). Two files in the same package, `cross_domain_correlation.py` and `cross_domain_prediction.py`, are Chao's (per `team_contributions.md`). |
 | **Rujeko** | Frontend Development | `app/templates/`, `app/static/css/`, `app/static/js/`; the implementation plan and standalone prototypes are in `Rujeko_Files/` |
 | **Emmanuel** | Data Visualization | `app/visualizations/` (formatter registry, base formatter, confidence scoring) and `app/templates/visualization.html` |
 | **Julie** | API Integration & Data Processing | `app/api/connectors/` (base connector plus the weather, economic, social media and transportation connectors), `app/storage/`, `app/api/routes.py` |
@@ -84,8 +84,8 @@ All keys are read in one place, `app/config.py`. Each has a canonical name and a
 | `ALPHAVANTAGE_API_KEY` | `ECONOMIC_API_KEY` | Alpha Vantage index and FX series | simulated markets |
 | `NEWSAPI_KEY` | `SOCIAL_MEDIA_API_KEY` | News API headlines (the "social media" source) | simulated trends and sentiment |
 | `TOMTOM_API_KEY` | `TRANSPORTATION_API_KEY` | TomTom traffic flow | simulated traffic |
-| `SECRET_KEY` | — | Flask session secret | random value per start |
-| `TESTING` | — | Flask testing mode (`True`/`False`) | off |
+| `SECRET_KEY` | none | Flask session secret | random value per start |
+| `TESTING` | none | Flask testing mode (`True`/`False`) | off |
 
 Free-tier limits and sign-up links are in [`docs/api_configuration_guide.md`](docs/api_configuration_guide.md). `.env` is git-ignored.
 
@@ -136,4 +136,4 @@ run.py                        starts the Socket.IO server on port 5000
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
