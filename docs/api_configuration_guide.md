@@ -127,6 +127,6 @@ TOMTOM_API_KEY=your_tomtom_api_key
 
 ### Fallback Mechanism
 
-If an API key is not provided (or is blank), the system logs a single warning for that service at startup and uses simulated data to demonstrate functionality. No request is sent to the external API without a key. In logs or the UI, you'll see an indication that fallback data is being used instead of real API data.
+If an API key is not provided (or is blank), the system logs a single warning for that service at startup and uses simulated data to demonstrate functionality. No request is sent to a keyed API (OpenWeatherMap, Alpha Vantage, News API, TomTom traffic) without its key. The transportation connector's `transit` and `infrastructure` data types are the exception: they call public endpoints that need no key (TransitLand and the OpenStreetMap Overpass API) regardless of `TOMTOM_API_KEY`, and fall back to simulated data only when that request fails. In logs or the UI, you'll see an indication that fallback data is being used instead of real API data.
 
 When using real API keys, the dashboard will automatically switch to using real data from the external services.

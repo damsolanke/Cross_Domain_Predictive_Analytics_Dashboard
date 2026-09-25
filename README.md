@@ -33,7 +33,7 @@ Names, roles and assigned areas are taken from [CONTRIBUTING.md](CONTRIBUTING.md
 | News / "social" | News API top headlines and `everything` search | 15 min | generated trending topics, keyword sentiment, engagement |
 | Transportation | TomTom traffic flow segment (current vs free-flow speed) | 10 min | rush-hour congestion curve, incidents, hotspots |
 
-Each connector goes **cache → live API (only if its key is set) → simulated data**. A missing key is logged once at startup and never contacted; see `app/config.py`.
+Each keyed source goes **cache → live API (only if its key is set) → simulated data**; a missing key is logged once at startup and that API is never contacted (see `app/config.py`). Two transportation paths are not key-gated because their endpoints are public: `data_type=transit` queries TransitLand and `data_type=infrastructure` queries the OpenStreetMap Overpass API regardless of `TOMTOM_API_KEY`, falling back to simulated data only if the request fails.
 
 <p align="center">
   <img src="docs/images/data-flow.png" alt="Data flow" width="100%">
