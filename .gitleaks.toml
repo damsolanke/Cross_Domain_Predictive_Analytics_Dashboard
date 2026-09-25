@@ -1,0 +1,8 @@
+# Default gitleaks rules, plus one allowlisted string: the user guide's
+# curl example uses the placeholder "your_api_key", not a credential.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documentation placeholder"
+regexes = ['''^your_api_key$''']
