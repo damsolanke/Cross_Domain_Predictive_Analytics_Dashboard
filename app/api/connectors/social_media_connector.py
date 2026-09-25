@@ -1,14 +1,14 @@
 """
 Social Media data API connector
 """
-import os
 import time
 import json
 import hashlib
 import random
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from app.api.connectors.base_connector import BaseConnector
+from app.api.connectors.base_connector import BaseConnector, MissingAPIKeyError
+from app.config import get_api_key
 
 class SocialMediaConnector(BaseConnector):
     """Connector for social media trend data"""
@@ -21,7 +21,7 @@ class SocialMediaConnector(BaseConnector):
             cache_ttl=900  # 15 minutes cache (trends change quickly)
         )
         # API configuration
-        self.api_key = os.environ.get('SOCIAL_MEDIA_API_KEY', 'demo_key')
+        self.api_key = get_api_key('social_media')  # None -> simulated data
         self.base_url = "https://api.socialmediatrends.com"  # Placeholder URL
         
         # Default platform if none provided
@@ -92,8 +92,9 @@ class SocialMediaConnector(BaseConnector):
             return data
 
         except Exception as e:
-            self._update_status("error", e)
-            print(f"Social media API error: {str(e)}")
+            if not isinstance(e, MissingAPIKeyError):
+                self._update_status("error", e)
+                print(f"Social media API error: {str(e)}")
 
             # Fallback to simulated data
             try:
@@ -126,8 +127,8 @@ class SocialMediaConnector(BaseConnector):
         import requests
         from datetime import datetime, timedelta
 
-        # News API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else 'REMOVED'  # Sample key, limited usage
+        # Requires a configured News API key; without one, fall back to simulated data
+        api_key = self._require_api_key('News API')
 
         # Calculate date range based on timeframe
         end_date = datetime.now()
@@ -259,8 +260,8 @@ class SocialMediaConnector(BaseConnector):
         import requests
         from datetime import datetime, timedelta
 
-        # News API key - use demo if not set
-        api_key = self.api_key if self.api_key != 'demo_key' else 'REMOVED'  # Sample key, limited usage
+        # Requires a configured News API key; without one, fall back to simulated data
+        api_key = self._require_api_key('News API')
 
         # Set up default topic if none provided
         query = topic if topic else "technology OR business OR politics OR sports OR entertainment"
